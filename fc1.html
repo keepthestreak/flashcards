@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard Vocabulary</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        td[contenteditable="true"]:focus {
+            outline: 2px solid #4CAF50;
+            background-color: #f0fff0;
+        }
+
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #6dd5ed, #2193b0);
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #fff;
+            margin-top: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .controls label {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        select,
+        button,
+        input {
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        select,
+        input {
+            border: 1px solid #ddd;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .flashcard {
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .flashcard p {
+            font-size: 1.5rem;
+            margin: 10px 0;
+        }
+
+        #word {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #feedback {
+            font-size: 1.2rem;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        #counter,
+        #lastShown {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        #wordList {
+            display: none;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #fff;
+            margin: 20px 0;
+        }
+
+        .reset-btn {
+            background-color: #ffa500;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .reset-btn:hover {
+            background-color: #ff8c00;
+        }
+
+        .completed-list {
+            background-color: #ffcccc;
+            font-style: italic;
+        }
+
+        .button-delete {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .button-reset {
+            background-color: #ffa500;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .button-edit {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .button-export {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            /* Hidden by default */
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            padding: 10px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            /* Show the dropdown on hover */
+        }
+
+        .dropdown-content label,
+        .dropdown-content input,
+        .dropdown-content button {
+            display: block;
+            margin: 5px 0;
+        }
+
+        #settingsButton {
+            margin-left: 10px;
+            /* Add some space between the button and the dropdown */
+        }
+
+        .gear-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ccc;
+            position: relative;
+        }
+
+        .gear-icon::before,
+        .gear-icon::after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+
+        .gear-icon::before {
+            top: 15px;
+            left: 15px;
+            transform: rotate(45deg);
+        }
+
+        .gear-icon::after {
+            top: 15px;
+            right: 15px;
+            transform: rotate(-45deg);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the button */
+            left: 50%;
+            margin-left: -60px; /* Center the tooltip */
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.3s; /* Fade effect */
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1; /* Show the tooltip */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Flashcard Vocabulary</h1>
+    <div class="container">
+        <div class="controls">
+            <label for="listSelector">Choose a list:</label>
+            <select id="listSelector"></select>
+            <div class="tooltip">
+                            <button id="createListButton" class="icon-button">✚
+                    <i class="fas fa-plus"></i>
+                </button>
+                <span class="tooltiptext">Create New List</span>
+            </div>
+            <div class="tooltip">
+                <button id="deleteListButton" class="icon-button">✖
+                    <i class="fas fa-plus"></i>
+                </button>
+                <span class="tooltiptext">Delete Current List</span>
+            </div>
+            <div class="dropdown">
+                <button id="settingsButton" class="gear-icon">
+                    <i class="fas fa-cog" style="font-size: 24px; color: #4CAF50;"></i>
+                </button>
+                <div id="settingsDropdown" class="dropdown-content">
+                    <label for="maxStreakLength">Max Streak Length:</label>
+                    <input type="number" id="maxStreakLength" min="1" />
+                    <button id="setMaxStreakButton">Set</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flashcard" id="flashcard">
+            <p id="word">Loading...</p>
+            <input type="text" id="userTranslation" placeholder="Type the translation">
+            <p id="feedback"></p>
+            <button id="checkButton">Check</button>
+            <p id="counter">Streak: 0</p>
+            <p id="lastShown">Last Shown: N/A</p>
+        </div>
+
+        <div class="controls">
+            <button id="toggleListButton">Show/Hide All Words</button>
+        </div>
+
+        <div id="wordList"></div>
+    </div>
+
+    <div class="footer">
+        <p>Flashcard App © 2024. Made with 💙 for learning.</p>
+    </div>
+
+    <script>
+        const storageKey = 'vocabLists';
+        const streakKey = 'wordStreaks';
+        const lastShownKey = 'lastShownTimes';
+        const statsKey = 'wordStats';
+        const currentListKey = 'currentList';
+        const MAX_STREAK_LENGTH_KEY = 'maxStreakLength';
+        let MAX_STREAK_LENGTH = localStorage.getItem(MAX_STREAK_LENGTH_KEY) ? parseInt(localStorage.getItem(MAX_STREAK_LENGTH_KEY)) : 20; // Default to 20
+
+        const AppState = {
+            vocabLists: JSON.parse(localStorage.getItem(storageKey)) || { "default": [] },
+            streaks: JSON.parse(localStorage.getItem(streakKey)) || {},
+            lastShownTimes: JSON.parse(localStorage.getItem(lastShownKey)) || {},
+            currentListName: localStorage.getItem(currentListKey),
+            words: [],
+            currentWord: null,
+            isTableVisible: false,
+            sortColumn: 'streak',
+            sortDirection: -1
+        };
+
+        let wordStats = JSON.parse(localStorage.getItem(statsKey)) || {};
+
+        if (!AppState.currentListName || !AppState.vocabLists[AppState.currentListName]) {
+            AppState.currentListName = Object.keys(AppState.vocabLists)[0];
+            localStorage.setItem(currentListKey, AppState.currentListName);
+        }
+        AppState.words = AppState.vocabLists[AppState.currentListName];
+        AppState.currentWord = null;
+        sortTable('streak');
+
+        document.getElementById('userTranslation').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                checkTranslation();
+                document.getElementById('userTranslation').focus();
+            }
+        });
+
+
+        function saveLists() {
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(AppState.vocabLists));
+                localStorage.setItem(streakKey, JSON.stringify(AppState.streaks));
+                localStorage.setItem(lastShownKey, JSON.stringify(AppState.lastShownTimes));
+                localStorage.setItem(statsKey, JSON.stringify(wordStats));
+            } catch (error) {
+                console.error('Failed to save to localStorage:', error);
+                alert('Failed to save data. Storage might be full.');
+            }
+        }
+
+        function updateListSelector() {
+            const selector = document.getElementById('listSelector');
+            selector.innerHTML = '';
+            Object.keys(AppState.vocabLists).forEach(listName => {
+                const option = document.createElement('option');
+                option.value = listName;
+                option.text = listName;
+
+                const words = AppState.vocabLists[listName];
+                const isCompleted = words.length > 0 &&
+                    words.every(word => (AppState.streaks[word.word] || 0) >= MAX_STREAK_LENGTH);
+
+                if (isCompleted) {
+                    option.classList.add('completed-list');
+                    option.text += ' (Completed)';
+                }
+
+                selector.appendChild(option);
+            });
+            selector.value = AppState.currentListName;
+        }
+
+        function switchList() {
+            AppState.currentListName = document.getElementById('listSelector').value;
+            localStorage.setItem(currentListKey, AppState.currentListName);
+            AppState.words = AppState.vocabLists[AppState.currentListName];
+
+            if (AppState.isTableVisible) {
+                toggleWordList(); // Hide current table
+                toggleWordList(); // Show new table
+            }
+
+            showNextWord(); // Show the next word in the new list
+
+            // Set focus back to the translation input box
+            document.getElementById('userTranslation').focus();
+        }
+
+        function showNextWord() {
+            const incompleteWords = AppState.words.filter(entry => (AppState.streaks[entry.word] || 0) < MAX_STREAK_LENGTH);
+
+            if (incompleteWords.length === 0) {
+                if (AppState.words.length === 0) {
+                    document.getElementById('word').innerText = 'List is empty!';
+                } else {
+                    document.getElementById('word').innerText = 'All words completed!';
+                }
+                document.getElementById('feedback').innerText = '';
+                document.getElementById('userTranslation').value = '';
+                document.getElementById('counter').innerText = '';
+                document.getElementById('lastShown').innerText = '';
+                AppState.currentWord = null;
+                return;
+            }
+
+            AppState.currentWord = incompleteWords[Math.floor(Math.random() * incompleteWords.length)];
+            if (AppState.currentWord) {
+                const now = new Date();
+                AppState.lastShownTimes[AppState.currentWord.word] = now.toLocaleString();
+                saveLists();
+
+                document.getElementById('word').innerText = AppState.currentWord.word;
+                document.getElementById('feedback').innerText = '';
+                document.getElementById('userTranslation').value = '';
+                document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0}`;
+                document.getElementById('lastShown').innerText = `Last Shown: ${AppState.lastShownTimes[AppState.currentWord.word] || 'N/A'}`;
+            }
+        }
+
+        function checkTranslation() {
+            const userInput = document.getElementById('userTranslation').value.trim();
+
+            const feedback = document.getElementById('feedback');
+
+            if (!AppState.currentWord || !userInput) {
+                return;
+            }
+
+            if (!wordStats[AppState.currentWord.word]) {
+                wordStats[AppState.currentWord.word] = { correct: 0, total: 0 };
+            }
+            wordStats[AppState.currentWord.word].total++;
+
+            if (userInput === AppState.currentWord.translation) {
+                wordStats[AppState.currentWord.word].correct++;
+                AppState.streaks[AppState.currentWord.word] = (AppState.streaks[AppState.currentWord.word] || 0) + 1;
+                updateFeedback(true, 'Correct!');
+                document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word]}`;
+                if (AppState.streaks[AppState.currentWord.word] >= MAX_STREAK_LENGTH) {
+                    alert(`You've mastered "${AppState.currentWord.word}". Consider deleting it.`);
+                }
+                saveLists();
+                updateListSelector();
+                showNextWord();
+                refreshTable();
+            } else {
+                AppState.streaks[AppState.currentWord.word] = 0;
+                updateFeedback(false, `Incorrect! The correct translation is: ${AppState.currentWord.translation}`);
+                document.getElementById('counter').innerText = 'Streak: 0';
+                saveLists();
+                updateListSelector();
+                refreshTable();
+            }
+        }
+
+        function toggleWordList() {
+            const wordListDiv = document.getElementById('wordList');
+
+            if (!AppState.isTableVisible) {
+                const tableContent = createTableContent();
+                wordListDiv.innerHTML = tableContent;
+                wordListDiv.style.display = 'block';
+                AppState.isTableVisible = true;
+            } else {
+                wordListDiv.style.display = 'none';
+                AppState.isTableVisible = false;
+            }
+        }
+
+        function createTableContent() {
+            const totalWords = AppState.words.length;
+            const completedWords = AppState.words.filter(word => (AppState.streaks[word.word] || 0) >= MAX_STREAK_LENGTH).length;
+
+            return `
+        <div style="margin-bottom: 15px;">
+            ${createSummaryHTML(totalWords, completedWords)}
+        </div>
+        <div style="margin-bottom: 10px;">
+            ${createButtonHTML()}
+        </div>
+        ${createTableHTML()}
+        ${createAddWordFormHTML()}
+    `;
+        }
+
+        function createSummaryHTML(totalWords, completedWords) {
+            return `
+        <p><strong>Total Words:</strong> ${totalWords}</p>
+        <p><strong>Completed Words:</strong> ${completedWords}</p>
+    `;
+        }
+
+        function createTableHTML() {
+            const tableHeader = createTableHeaderHTML();
+            const tableRows = AppState.words.map((entry, index) => createTableRowHTML(entry, index)).join('');
+
+            return `
+        <table>
+            <thead>${tableHeader}</thead>
+            <tbody>${tableRows}</tbody>
+        </table>
+    `;
+        }
+
+        function createTableHeaderHTML() {
+            const columns = [
+                { name: 'Word', key: 'word' },
+                { name: 'Translation', key: 'translation' },
+                { name: 'Streak', key: 'streak' },
+                { name: 'Stats', key: 'stats' },
+                { name: 'Last Shown', key: 'lastShown' }
+            ];
+
+            return `
+        <tr>
+            <th><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes()"></th>
+            ${columns.map(column => createSortableColumnHeader(column)).join('')}
+        </tr>
+    `;
+        }
+
+        function createSortableColumnHeader({ name, key }) {
+            const isSorted = AppState.sortColumn === key;
+            const direction = isSorted ? (AppState.sortDirection === 1 ? '▲' : '▼') : '';
+
+            return `
+        <th onclick="sortTable('${key}')" style="cursor: pointer;">
+            ${name} <span style="font-size: 0.8em; color: #666;">${direction}</span>
+        </th>
+    `;
+        }
+
+        function createTableRowHTML(entry, index) {
+            const streak = AppState.streaks[entry.word] || 0;
+            const lastShown = AppState.lastShownTimes[entry.word] || 'Never';
+            const stats = wordStats[entry.word] || { correct: 0, total: 0 };
+            const rowStyle = streak >= MAX_STREAK_LENGTH ? 'style="background-color: #ffcccc;"' : '';
+
+            return `
+        <tr ${rowStyle}>
+            <td><input type="checkbox" class="word-checkbox" data-index="${index}"></td>
+            <td contenteditable="true" onblur="updateWord(${index}, 'word', this.innerText)">${entry.word}</td>
+            <td contenteditable="true" onblur="updateWord(${index}, 'translation', this.innerText)">${entry.translation}</td>
+            <td>${streak} ${streak >= MAX_STREAK_LENGTH ? '<span style="color: red;">(Completed)</span>' : ''}</td>
+            <td>${stats.correct}(${stats.total})</td>
+            <td>${lastShown}</td>
+        </tr>
+    `;
+        }
+
+        function createAddWordFormHTML() {
+            return `
+        <div style="margin-top: 15px;">
+            <input type="text" id="newWord" placeholder="New Word" style="padding: 5px; width: 40%; margin-right: 10px;">
+            <input type="text" id="newTranslation" placeholder="Translation" style="padding: 5px; width: 40%; margin-right: 10px;">
+            <button onclick="addWordToList()" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Add Word</button>
+        </div>
+    `;
+        }
+
+
+        function addWordToList() {
+            const newWord = document.getElementById('newWord').value.trim();
+            const newTranslation = document.getElementById('newTranslation').value.trim();
+
+            if (validateNewWord(newWord, newTranslation)) {
+                // Check for duplicates
+                if (isDuplicateWord(newWord)) {
+                    alert(`The word "${newWord}" already exists.`);
+                    document.getElementById('newWord').focus(); // Set focus back to new word input
+                    return;
+                }
+
+                // Update the word list
+                AppState.words.push({ word: newWord, translation: newTranslation });
+                AppState.streaks[newWord] = 0; // Initialize streak to 0
+                AppState.lastShownTimes[newWord] = 'Never'; // Initialize last shown time
+                wordStats[newWord] = { correct: 0, total: 0 }; // Initialize stats
+                AppState.vocabLists[AppState.currentListName] = AppState.words;
+
+                // Save to localStorage
+                saveLists();
+
+                // Update the dropdown and refresh the table
+                updateListSelector(); // Update dropdown to reflect changes
+                alert(`Added: ${newWord} = ${newTranslation}`);
+
+                // Clear input fields
+                clearInputFields(); // Call to clear the input fields
+
+                // Refresh the word list display
+                AppState.isTableVisible = false; // Reset the state
+                toggleWordList(); // Show the updated table
+
+                // Show the next word in the flashcard
+                showNextWord(); // Call to refresh the flashcard with the new word
+
+                // Set focus back to the new word input box
+                document.getElementById('newWord').focus(); // Focus on the new word input
+            } else {
+                // If validation fails, set focus back to the new word input
+                document.getElementById('newWord').focus(); // Set focus back to new word input
+            }
+        }
+
+        function isDuplicateWord(word) {
+            return AppState.words.some(entry => entry.word.toLowerCase() === word.toLowerCase());
+        }
+
+        function deleteWord(index) {
+            const confirmDelete = confirm(`Are you sure you want to delete "${AppState.words[index].word}"?`);
+            if (confirmDelete) {
+                const wordToDelete = AppState.words[index].word;
+                delete AppState.streaks[wordToDelete]; // Remove streak data
+                delete AppState.lastShownTimes[wordToDelete]; // Remove last shown time
+                AppState.words.splice(index, 1); // Remove the word from the list
+                AppState.vocabLists[AppState.currentListName] = AppState.words;
+                saveLists();
+                alert("Word deleted successfully!");
+                toggleWordList(); // Refresh the table
+            }
+        }
+
+        function updateWord(index, field, value) {
+            if (field === 'word') {
+                AppState.words[index].word = value.trim();
+            } else if (field === 'translation') {
+                AppState.words[index].translation = value.trim();
+            }
+            AppState.vocabLists[AppState.currentListName] = AppState.words;
+            saveLists();
+        }
+
+        function editList() {
+            let newContent = prompt("Edit the list. Use 'word=translation;word2=translation2' format:",
+                AppState.words.map(word => `${word.word}=${word.translation}`).join(';'));
+            if (newContent) {
+                const newWords = newContent.split(';').map(pair => {
+                    const [word, translation] = pair.split('=').map(item => item.trim());
+                    return { word, translation };
+                }).filter(entry => entry.word && entry.translation);
+                AppState.vocabLists[AppState.currentListName] = newWords;
+                AppState.words = AppState.vocabLists[AppState.currentListName];
+                saveLists();
+                alert("List updated successfully!");
+
+                // Refresh table if visible
+                if (AppState.isTableVisible) {
+                    AppState.isTableVisible = false; // Reset the state
+                    toggleWordList(); // Show the updated table
+                }
+
+                showNextWord();
+            }
+        }
+
+        document.getElementById('checkButton').addEventListener('click', () => {
+            checkTranslation();
+            document.getElementById('userTranslation').focus();
+        });
+
+        document.getElementById('listSelector').addEventListener('change', switchList);
+        document.getElementById('toggleListButton').addEventListener('click', toggleWordList);
+        document.getElementById('createListButton').addEventListener('click', () => {
+            const listName = prompt("Enter a name for the new list:").trim();
+            if (listName && !AppState.vocabLists[listName]) {
+                AppState.vocabLists[listName] = [];
+                updateListAndUI(listName);
+                document.getElementById('listSelector').value = AppState.currentListName;
+            } else {
+                alert("List name already exists or is invalid.");
+            }
+        });
+        document.getElementById('deleteListButton').addEventListener('click', () => {
+            if (Object.keys(AppState.vocabLists).length === 1) {
+                alert("You cannot delete the last remaining list.");
+                return;
+            }
+            if (confirm(`Are you sure you want to delete the list: ${AppState.currentListName}?`)) {
+                delete AppState.vocabLists[AppState.currentListName];
+                updateListAndUI(Object.keys(AppState.vocabLists)[0]);
+            }
+        });
+        function exportToCSV() {
+            const header = ['Word', 'Translation', 'Streak', 'Last Shown'];
+            const rows = AppState.words.map(entry => {
+                const streak = AppState.streaks[entry.word] || 0;
+                const lastShown = AppState.lastShownTimes[entry.word] || 'Never';
+                return [entry.word, entry.translation, streak, lastShown];
+            });
+
+            // Combine headers and rows into CSV format
+            const csvContent = [header, ...rows]
+                .map(row => row.map(value => `"${value}"`).join(","))
+                .join("\n");
+
+            // Create a blob and trigger download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${AppState.currentListName}_vocabulary.csv`;
+            link.click();
+        }
+        function resetStreak(index) {
+            const word = AppState.words[index].word;
+            if (confirm(`Are you sure you want to reset the streak for "${word}"?`)) {
+                AppState.streaks[word] = 0;
+                saveLists();
+                alert(`Streak for "${word}" has been reset.`);
+                toggleWordList(); // Refresh the table to reflect changes
+            }
+        }
+
+
+
+        updateListSelector();
+        showNextWord();
+
+        function toggleAllCheckboxes() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.getElementsByClassName('word-checkbox');
+
+            Array.from(checkboxes).forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+        }
+
+        function getSelectedIndices() {
+            const checkboxes = document.getElementsByClassName('word-checkbox');
+            const selectedIndices = [];
+
+            Array.from(checkboxes).forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedIndices.push(parseInt(checkbox.getAttribute('data-index')));
+                }
+            });
+
+            return selectedIndices;
+        }
+
+        function deleteSelectedWords() {
+            const selectedIndices = getSelectedIndices();
+
+            if (selectedIndices.length === 0) {
+                alert("Please select words to delete");
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete ${selectedIndices.length} selected word(s)?`)) {
+                selectedIndices.sort((a, b) => b - a);
+
+                selectedIndices.forEach(index => {
+                    const wordToDelete = AppState.words[index].word;
+                    delete AppState.streaks[wordToDelete];
+                    delete AppState.lastShownTimes[wordToDelete];
+                    delete wordStats[wordToDelete];
+                    AppState.words.splice(index, 1);
+                });
+
+                AppState.vocabLists[AppState.currentListName] = AppState.words;
+                saveLists();
+                updateListSelector();
+                alert("Selected words deleted successfully!");
+                refreshTable();
+                showNextWord();
+            }
+        }
+
+        function resetSelectedWords() {
+            const selectedIndices = getSelectedIndices();
+
+            if (selectedIndices.length === 0) {
+                alert("Please select words to reset");
+                return;
+            }
+
+            if (confirm(`Are you sure you want to reset the streak and stats for ${selectedIndices.length} selected word(s)?`)) {
+                selectedIndices.forEach(index => {
+                    const word = AppState.words[index].word;
+                    AppState.streaks[word] = 0;
+                    wordStats[word] = { correct: 0, total: 0 };
+                });
+
+                saveLists();
+                updateListSelector();
+                alert("Selected words have been reset!");
+                refreshTable();
+                showNextWord();
+            }
+        }
+
+        function sortTable(column) {
+            if (AppState.sortColumn === column) {
+                AppState.sortDirection *= -1;
+            } else {
+                AppState.sortColumn = column;
+                AppState.sortDirection = column === 'streak' ? -1 : 1;
+            }
+
+            AppState.words.sort((a, b) => {
+                let valueA, valueB;
+
+                switch (column) {
+                    case 'word':
+                        valueA = a.word.toLowerCase();
+                        valueB = b.word.toLowerCase();
+                        break;
+                    case 'translation':
+                        valueA = a.translation.toLowerCase();
+                        valueB = b.translation.toLowerCase();
+                        break;
+                    case 'streak':
+                        valueA = AppState.streaks[a.word] || 0;
+                        valueB = AppState.streaks[b.word] || 0;
+                        break;
+                    case 'stats':
+                        const statsA = wordStats[a.word] || { correct: 0, total: 0 };
+                        const statsB = wordStats[b.word] || { correct: 0, total: 0 };
+                        valueA = statsA.correct / (statsA.total || 1);
+                        valueB = statsB.correct / (statsB.total || 1);
+                        break;
+                    case 'lastShown':
+                        valueA = AppState.lastShownTimes[a.word] || 'Never';
+                        valueB = AppState.lastShownTimes[b.word] || 'Never';
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (valueA < valueB) return -1 * AppState.sortDirection;
+                if (valueA > valueB) return 1 * AppState.sortDirection;
+                return 0;
+            });
+
+            AppState.vocabLists[AppState.currentListName] = AppState.words;
+            saveLists();
+
+            // Refresh table while preserving visibility
+            AppState.isTableVisible = false;
+            toggleWordList();
+        }
+
+        function refreshTable() {
+            if (AppState.isTableVisible) {
+                AppState.isTableVisible = false;
+                toggleWordList();
+            }
+        }
+
+        function updateListAndUI(newListName) {
+            AppState.currentListName = newListName;
+            localStorage.setItem(currentListKey, AppState.currentListName);
+            AppState.words = AppState.vocabLists[AppState.currentListName];
+            saveLists();
+            updateListSelector();
+            refreshTable();
+            showNextWord();
+        }
+
+        function createButton(text, className, onClick) {
+            const button = document.createElement('button');
+            button.className = className;
+            button.innerText = text;
+            button.onclick = onClick;
+            return button;
+        }
+
+        function updateFeedback(isCorrect, message) {
+            const feedback = document.getElementById('feedback');
+            feedback.innerText = message;
+            feedback.style.color = isCorrect ? 'green' : 'red';
+        }
+
+        // Function to create button HTML
+        function createButtonHTML() {
+            return `
+                <button class="button-delete" onclick="deleteSelectedWords()">Delete Selected Words</button>
+                <button class="button-reset" onclick="resetSelectedWords()">Reset Selected Words</button>
+                <button class="button-edit" onclick="editList()">Edit List</button>
+                <button class="button-export" onclick="exportToCSV()">Export to CSV</button>
+            `;
+        }
+
+        function validateNewWord(newWord, newTranslation) {
+            // Check if the word is empty
+            if (!newWord) {
+                alert("Please enter a word.");
+                return false;
+            }
+
+            // Check for duplicates
+            if (isDuplicateWord(newWord)) {
+                alert(`The word "${newWord}" already exists.`);
+                return false;
+            }
+
+            return true; // Validation passed
+        }
+
+        function clearInputFields() {
+            document.getElementById('newWord').value = ''; // Clear the new word input field
+            document.getElementById('newTranslation').value = ''; // Clear the translation input field
+        }
+
+        // Function to update MAX_STREAK_LENGTH and save to local storage
+        function setMaxStreakLength(newLength) {
+            MAX_STREAK_LENGTH = newLength;
+            localStorage.setItem(MAX_STREAK_LENGTH_KEY, MAX_STREAK_LENGTH);
+        }
+
+        // Event listener for the set max streak length button
+        document.getElementById('setMaxStreakButton').addEventListener('click', () => {
+            const newLength = parseInt(document.getElementById('maxStreakLength').value);
+            if (!isNaN(newLength) && newLength > 0) {
+                setMaxStreakLength(newLength); // Update and save to local storage
+                alert(`Maximum streak length set to ${MAX_STREAK_LENGTH}`);
+            } else {
+                alert("Please enter a valid positive number.");
+            }
+        });
+
+        // Show/hide dropdown on settings button click
+        document.getElementById('settingsButton').addEventListener('click', (event) => {
+            const dropdown = document.getElementById('settingsDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            event.stopPropagation(); // Prevent the click event from bubbling up
+        });
+
+        // Close dropdown if clicked outside
+        window.onclick = function (event) {
+            const dropdown = document.getElementById('settingsDropdown');
+            if (!event.target.matches('#settingsButton') && !dropdown.contains(event.target)) {
+                dropdown.style.display = "none"; // Close the dropdown if clicking outside
+            }
+        };
+
+        function validateInput(userInput) {
+            if (userInput.length > MAX_STREAK_LENGTH) {
+                alert(`Translation exceeds maximum length of ${MAX_STREAK_LENGTH} characters.`);
+                return false;
+            }
+            return true;
+        }
+
+        // Set the initial value of the max streak length input field
+        document.getElementById('maxStreakLength').value = MAX_STREAK_LENGTH;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set focus to the translation input box when the page loads
+            document.getElementById('userTranslation').focus();
+        });
+    </script>
+</body>
+
+</html>
