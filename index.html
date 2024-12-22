@@ -292,16 +292,21 @@
             padding: 5px;
             position: absolute;
             z-index: 1;
-            bottom: 125%; /* Position above the button */
+            bottom: 125%;
+            /* Position above the button */
             left: 50%;
-            margin-left: -60px; /* Center the tooltip */
-            opacity: 0; /* Hidden by default */
-            transition: opacity 0.3s; /* Fade effect */
+            margin-left: -60px;
+            /* Center the tooltip */
+            opacity: 0;
+            /* Hidden by default */
+            transition: opacity 0.3s;
+            /* Fade effect */
         }
 
         .tooltip:hover .tooltiptext {
             visibility: visible;
-            opacity: 1; /* Show the tooltip */
+            opacity: 1;
+            /* Show the tooltip */
         }
     </style>
 </head>
@@ -313,7 +318,7 @@
             <label for="listSelector">Choose a list:</label>
             <select id="listSelector"></select>
             <div class="tooltip">
-                            <button id="createListButton" class="icon-button">✚
+                <button id="createListButton" class="icon-button">✚
                     <i class="fas fa-plus"></i>
                 </button>
                 <span class="tooltiptext">Create New List</span>
@@ -445,6 +450,25 @@
             document.getElementById('userTranslation').focus();
         }
 
+        function timeElapsed(date) {
+            const now = new Date();
+            const inputDate = new Date(date);
+            const diffInSeconds = Math.floor((now - inputDate) / 1000);
+            if (diffInSeconds < 60) {
+                return `${diffInSeconds} second${diffInSeconds !== 1 ? 's' : ''} ago`;
+            }
+            const diffInMinutes = Math.floor(diffInSeconds / 60);
+            if (diffInMinutes < 60) {
+                return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+            }
+            const diffInHours = Math.floor(diffInMinutes / 60);
+            if (diffInHours < 24) {
+                return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+            }
+            const diffInDays = Math.floor(diffInHours / 24);
+            return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+        }
+
         function showNextWord() {
             const incompleteWords = AppState.words.filter(entry => (AppState.streaks[entry.word] || 0) < MAX_STREAK_LENGTH);
 
@@ -464,15 +488,19 @@
 
             AppState.currentWord = incompleteWords[Math.floor(Math.random() * incompleteWords.length)];
             if (AppState.currentWord) {
-                const now = new Date();
-                AppState.lastShownTimes[AppState.currentWord.word] = now.toLocaleString();
-                saveLists();
-
                 document.getElementById('word').innerText = AppState.currentWord.word;
                 document.getElementById('feedback').innerText = '';
                 document.getElementById('userTranslation').value = '';
                 document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0}`;
-                document.getElementById('lastShown').innerText = `Last Shown: ${AppState.lastShownTimes[AppState.currentWord.word] || 'N/A'}`;
+                
+                const lastShown = AppState.lastShownTimes[AppState.currentWord.word] ? 
+                    timeElapsed(AppState.lastShownTimes[AppState.currentWord.word]) : 'Never';
+                document.getElementById('lastShown').innerText = lastShown;
+
+                // Update the last shown time after displaying it
+                const now = new Date();
+                AppState.lastShownTimes[AppState.currentWord.word] = now.toISOString();
+                saveLists();
             }
         }
 
@@ -591,7 +619,7 @@
 
         function createTableRowHTML(entry, index) {
             const streak = AppState.streaks[entry.word] || 0;
-            const lastShown = AppState.lastShownTimes[entry.word] || 'Never';
+            const lastShown = AppState.lastShownTimes[entry.word] ? timeElapsed(AppState.lastShownTimes[entry.word]) : 'Never';
             const stats = wordStats[entry.word] || { correct: 0, total: 0 };
             const rowStyle = streak >= MAX_STREAK_LENGTH ? 'style="background-color: #ffcccc;"' : '';
 
