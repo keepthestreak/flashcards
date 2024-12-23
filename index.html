@@ -308,6 +308,123 @@
             opacity: 1;
             /* Show the tooltip */
         }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            color: #e0e0e0;
+        }
+
+        .dark-mode .container {
+            background-color: #333333;
+            color: #e0e0e0;
+            box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+        }
+
+        .dark-mode table,
+        .dark-mode th,
+        .dark-mode td {
+            border: 1px solid #444;
+        }
+
+        .dark-mode th {
+            background-color: #555;
+        }
+
+        .dark-mode tr:nth-child(even) {
+            background-color: #444;
+        }
+
+        .dark-mode tr:hover {
+            background-color: #555;
+        }
+
+        .dark-mode td[contenteditable="true"]:focus {
+            outline: 2px solid #4CAF50;
+            background-color: #334d33;
+        }
+
+        .dark-mode h1 {
+            color: #f0f0f0;
+        }
+
+        .dark-mode select,
+        .dark-mode button,
+        .dark-mode input {
+            background-color: #444;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+        }
+
+        .dark-mode button {
+            background-color: #666;
+            color: #fff;
+        }
+
+        .dark-mode button:hover {
+            background-color: #555;
+        }
+
+        .dark-mode .flashcard {
+            background: #444;
+            border: 1px solid #555;
+            color: #e0e0e0;
+        }
+
+        .dark-mode #word {
+            color: #f0f0f0;
+        }
+
+        .dark-mode #feedback {
+            color: #ff7675;
+        }
+
+        .dark-mode #counter,
+        .dark-mode #lastShown {
+            color: #bdbdbd;
+        }
+
+        .dark-mode #wordList {
+            background: #333;
+            border: 1px solid #555;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .completed-list {
+            background-color: #ff7675;
+        }
+
+        .dark-mode .button-delete {
+            background-color: #b33939;
+        }
+
+        .dark-mode .button-reset {
+            background-color: #d35400;
+        }
+
+        .dark-mode .button-edit {
+            background-color: #27ae60;
+        }
+
+        .dark-mode .button-export {
+            background-color: #2980b9;
+        }
+
+        .dark-mode .dropdown-content {
+            background-color: #333;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .tooltip .tooltiptext {
+            background-color: #333;
+            color: #e0e0e0;
+        }
+
+        .dark-mode {
+            background-color: #121212; /* Dark background */
+            color: #ffffff; /* Light text color */
+        }
     </style>
 </head>
 
@@ -328,6 +445,10 @@
                     <i class="fas fa-plus"></i>
                 </button>
                 <span class="tooltiptext">Delete Current List</span>
+            </div>
+            <div class="tooltip">
+                <button id="theme-toggle">🌞</button>
+                <span class="tooltiptext">Toggle Dark Mode</span>
             </div>
             <div class="dropdown">
                 <button id="settingsButton" class="gear-icon">
@@ -500,8 +621,8 @@
                 document.getElementById('feedback').innerText = '';
                 document.getElementById('userTranslation').value = '';
                 document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0}`;
-                
-                const lastShown = AppState.lastShownTimes[AppState.currentWord.word] ? 
+
+                const lastShown = AppState.lastShownTimes[AppState.currentWord.word] ?
                     timeElapsed(AppState.lastShownTimes[AppState.currentWord.word]) : 'Never';
                 document.getElementById('lastShown').innerText = lastShown;
 
@@ -629,7 +750,7 @@
             const streak = AppState.streaks[entry.word] || 0;
             const lastShown = AppState.lastShownTimes[entry.word] ? timeElapsed(AppState.lastShownTimes[entry.word]) : 'Never';
             const stats = wordStats[entry.word] || { correct: 0, total: 0 };
-            const rowStyle = streak >= MAX_STREAK_LENGTH ? 'style="background-color: #ffcccc;"' : '';
+            const rowStyle = streak >= MAX_STREAK_LENGTH ? 'style="background-color: #7a7a7a;"' : '';
 
             return `
         <tr ${rowStyle}>
@@ -1044,6 +1165,47 @@
             // Set focus to the translation input box when the page loads
             document.getElementById('userTranslation').focus();
         });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+        document.getElementById('theme-toggle').addEventListener('click', toggleDarkMode);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTheme();
+            document.getElementById('userTranslation').focus();
+        });
+
+        function initializeTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const savedTheme = localStorage.getItem('theme') || 'light'; // Default to light if not set
+            console.log("savedTheme =", savedTheme)
+            
+            // Set initial theme
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            // Call toggleDarkMode only if savedTheme is dark
+            if (savedTheme === 'dark') {
+                toggleDarkMode();
+            }
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+        }
+
+        function updateThemeIcon(theme) {
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) { // Check if themeToggle is not null
+                themeToggle.textContent = theme === 'dark' ? '🌜' : '🌞';
+            }
+        }
     </script>
 </body>
 
