@@ -486,7 +486,15 @@
                 return;
             }
 
-            AppState.currentWord = incompleteWords[Math.floor(Math.random() * incompleteWords.length)];
+            if (incompleteWords.length === 1) {
+                AppState.currentWord = incompleteWords[0];
+            } else {
+                const availableWords = incompleteWords.filter(
+                    word => !AppState.currentWord || word.word !== AppState.currentWord.word
+                );
+                AppState.currentWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+            }
+
             if (AppState.currentWord) {
                 document.getElementById('word').innerText = AppState.currentWord.word;
                 document.getElementById('feedback').innerText = '';
