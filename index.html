@@ -422,8 +422,10 @@
         }
 
         .dark-mode {
-            background-color: #121212; /* Dark background */
-            color: #ffffff; /* Light text color */
+            background-color: #121212;
+            /* Dark background */
+            color: #ffffff;
+            /* Light text color */
         }
     </style>
 </head>
@@ -1122,6 +1124,10 @@
         function setMaxStreakLength(newLength) {
             MAX_STREAK_LENGTH = newLength;
             localStorage.setItem(MAX_STREAK_LENGTH_KEY, MAX_STREAK_LENGTH);
+
+            updateListSelector();
+            showNextWord();
+            refreshTable();
         }
 
         // Event listener for the set max streak length button
@@ -1179,12 +1185,11 @@
         function initializeTheme() {
             const themeToggle = document.getElementById('theme-toggle');
             const savedTheme = localStorage.getItem('theme') || 'light'; // Default to light if not set
-            console.log("savedTheme =", savedTheme)
-            
+
             // Set initial theme
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
-            
+
             // Call toggleDarkMode only if savedTheme is dark
             if (savedTheme === 'dark') {
                 toggleDarkMode();
