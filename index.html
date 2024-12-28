@@ -596,16 +596,7 @@
             const incompleteWords = AppState.words.filter(entry => (AppState.streaks[entry.word] || 0) < MAX_STREAK_LENGTH);
 
             if (incompleteWords.length === 0) {
-                if (AppState.words.length === 0) {
-                    document.getElementById('word').innerText = 'List is empty!';
-                } else {
-                    document.getElementById('word').innerText = 'All words completed!';
-                }
-                document.getElementById('feedback').innerText = '';
-                document.getElementById('userTranslation').value = '';
-                document.getElementById('counter').innerText = '';
-                document.getElementById('lastShown').innerText = '';
-                AppState.currentWord = null;
+                handleEmptyWordList();
                 return;
             }
 
@@ -619,7 +610,7 @@
             }
 
             if (AppState.currentWord) {
-                document.getElementById('word').innerText = AppState.currentWord.word;
+                document.getElementById('word').innerHTML = generateSearchLink(AppState.currentWord.word);
                 document.getElementById('feedback').innerText = '';
                 document.getElementById('userTranslation').value = '';
                 document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0}`;
@@ -723,6 +714,7 @@
         function createTableHeaderHTML() {
             const columns = [
                 { name: 'Word', key: 'word' },
+                { name: '', key: 'search' },
                 { name: 'Translation', key: 'translation' },
                 { name: 'Streak', key: 'streak' },
                 { name: 'Stats', key: 'stats' },
@@ -757,7 +749,8 @@
             return `
         <tr ${rowStyle}>
             <td><input type="checkbox" class="word-checkbox" data-index="${index}"></td>
-            <td contenteditable="true" onblur="updateWord(${index}, 'word', this.innerText)">${entry.word}</td>
+            <td style="border-right: none" contenteditable="true" onblur="updateWord(${index}, 'word', this.innerHTML)">${entry.word}</td>
+            <td style="border-left: none">${generateSearchLink(entry.word, true)}</td>
             <td contenteditable="true" onblur="updateWord(${index}, 'translation', this.innerText)">${entry.translation}</td>
             <td>${streak} ${streak >= MAX_STREAK_LENGTH ? '<span style="color: red;">(Completed)</span>' : ''}</td>
             <td>${stats.correct}(${stats.total})</td>
@@ -1211,6 +1204,54 @@
                 themeToggle.textContent = theme === 'dark' ? '🌜' : '🌞';
             }
         }
+
+        function handleEmptyWordList() {
+            const wordElement = document.getElementById('word');
+            const feedbackElement = document.getElementById('feedback');
+            const userTranslationElement = document.getElementById('userTranslation');
+            const counterElement = document.getElementById('counter');
+            const lastShownElement = document.getElementById('lastShown');
+
+            // Check the state of AppState.words and update the UI accordingly
+            if (AppState.words.length === 0) {
+                wordElement.innerText = 'List is empty!';
+            } else {
+                wordElement.innerText = 'All words completed!';
+            }
+
+            // Clear other UI elements
+            feedbackElement.innerText = '';
+            userTranslationElement.value = '';
+            counterElement.innerText = '';
+            lastShownElement.innerText = '';
+
+            // Reset the current word
+            AppState.currentWord = null;
+        }
+
+        function generateSearchLink(word, icon) {
+            // Convert non-string inputs to a string
+            const stringWord = String(word);
+
+            // Encode the word to ensure it's URL-safe
+            const encodedWord = encodeURIComponent(stringWord);
+
+            // Escape HTML special characters in the word
+            const safeWord = stringWord.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+//
+            if (icon) {
+                text = '🔍';
+            } else {
+                text = safeWord;
+            }
+            // Return a link to Google search for the word definition
+            return `<a href="https://www.google.com/search?q=translate+${encodedWord}" target="_blank">${text}</a>`;
+        }
+
     </script>
 </body>
 
