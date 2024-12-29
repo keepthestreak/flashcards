@@ -471,6 +471,7 @@
         <div class="flashcard" id="flashcard">
             <p id="word">Loading...</p>
             <input type="text" id="userTranslation" placeholder="Type the translation">
+            <div id="example" style="margin-top: 10px; font-style: italic;"></div>
             <p id="feedback"></p>
             <button id="checkButton">Check</button>
             <p id="counter">Streak: 0</p>
@@ -631,6 +632,7 @@
             if (AppState.currentWord) {
                 document.getElementById('word').innerHTML = generateSearchLink(AppState.currentWord.word);
                 document.getElementById('feedback').innerText = '';
+                document.getElementById('example').innerText = AppState.currentWord?.example || "";
                 document.getElementById('userTranslation').value = '';
                 document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0}`;
 
@@ -862,27 +864,44 @@
         }
 
         function editList() {
-            let newContent = prompt("Edit the list. Use 'word=translation;word2=translation2' format:",
-                AppState.words.map(word => `${word.word}=${word.translation}`).join(';'));
-            if (newContent) {
-                const newWords = newContent.split(';').map(pair => {
-                    const [word, translation] = pair.split('=').map(item => item.trim());
-                    return { word, translation };
-                }).filter(entry => entry.word && entry.translation);
-                AppState.vocabLists[AppState.currentListName] = newWords;
-                AppState.words = AppState.vocabLists[AppState.currentListName];
-                saveLists();
-                alert("List updated successfully!");
+    let newContent = prompt(
+        "Edit the list. Use 'word(example)=translation;word2=translation2' format:",
+        AppState.words.map(word => word.example 
+            ? `${word.word}(${word.example})=${word.translation}` 
+            : `${word.word}=${word.translation}`
+        ).join(';')
+    );
 
-                // Refresh table if visible
-                if (AppState.isTableVisible) {
-                    AppState.isTableVisible = false; // Reset the state
-                    toggleWordList(); // Show the updated table
-                }
+    if (newContent) {
+        const newWords = newContent.split(';').map(pair => {
+            const [left, translation] = pair.split('=').map(item => item.trim());
+            if (!left || !translation) return null; // Skip invalid entries
 
-                showNextWord();
+            const wordMatch = left.match(/^(.*?)\((.*?)\)$/);
+
+            if (wordMatch) {
+                const [, word, example] = wordMatch;
+                return { word: word.trim(), example: example.trim(), translation: translation.trim() };
+            } else {
+                return { word: left.trim(), example: null, translation: translation.trim() };
             }
+        }).filter(entry => entry && entry.word && entry.translation);
+
+        AppState.vocabLists[AppState.currentListName] = newWords;
+        AppState.words = AppState.vocabLists[AppState.currentListName];
+        saveLists();
+        alert("List updated successfully!");
+
+        // Refresh table if visible
+        if (AppState.isTableVisible) {
+            AppState.isTableVisible = false; // Reset the state
+            toggleWordList(); // Show the updated table
         }
+
+        showNextWord();
+    }
+}
+
 
         document.getElementById('checkButton').addEventListener('click', () => {
             checkTranslation();
@@ -1230,6 +1249,7 @@
             const userTranslationElement = document.getElementById('userTranslation');
             const counterElement = document.getElementById('counter');
             const lastShownElement = document.getElementById('lastShown');
+            const example = document.getElementById('example');
 
             // Check the state of AppState.words and update the UI accordingly
             if (AppState.words.length === 0) {
@@ -1243,6 +1263,7 @@
             userTranslationElement.value = '';
             counterElement.innerText = '';
             lastShownElement.innerText = '';
+            example.innerText = '';
 
             // Reset the current word
             AppState.currentWord = null;
