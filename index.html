@@ -758,7 +758,7 @@
 
             return `
         <tr ${rowStyle}>
-            <td><input type="checkbox" class="word-checkbox" data-index="${index}"></td>
+            <td><input type="checkbox" class="word-checkbox" id="word-checkbox-${index}" data-index="${index}"></td>
             <td style="border-right: none" contenteditable="true" onblur="updateWord(${index}, 'word', this.innerHTML)">${entry.word}</td>
             <td style="border-left: none">${generateSearchLink(entry.word, true)}</td>
             <td contenteditable="true" onblur="updateWord(${index}, 'translation', this.innerText)">${entry.translation}</td>
