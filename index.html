@@ -573,23 +573,33 @@
             document.getElementById('userTranslation').focus();
         }
 
-        function timeElapsed(date) {
+        function timeElapsed(lastShownTime) {
             const now = new Date();
-            const inputDate = new Date(date);
-            const diffInSeconds = Math.floor((now - inputDate) / 1000);
-            if (diffInSeconds < 60) {
-                return `${diffInSeconds} second${diffInSeconds !== 1 ? 's' : ''} ago`;
+            const lastShownDate = new Date(lastShownTime);
+
+            // Check if lastShownDate is valid
+            if (isNaN(lastShownDate.getTime())) {
+                return "Never"; // Return a default message if the date is invalid
             }
-            const diffInMinutes = Math.floor(diffInSeconds / 60);
-            if (diffInMinutes < 60) {
-                return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+
+            const elapsedTime = now - lastShownDate; // Calculate elapsed time
+
+            // Format elapsedTime as needed (e.g., in seconds, minutes, etc.)
+            const seconds = Math.floor(elapsedTime / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            // Return a formatted string based on the elapsed time
+            if (days > 0) {
+                return `${days} day${days > 1 ? 's' : ''} ago`;
+            } else if (hours > 0) {
+                return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            } else if (minutes > 0) {
+                return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            } else {
+                return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
             }
-            const diffInHours = Math.floor(diffInMinutes / 60);
-            if (diffInHours < 24) {
-                return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
-            }
-            const diffInDays = Math.floor(diffInHours / 24);
-            return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
         }
 
         function showNextWord() {
