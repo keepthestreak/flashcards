@@ -864,43 +864,58 @@
         }
 
         function editList() {
-    let newContent = prompt(
-        "Edit the list. Use 'word(example)=translation;word2=translation2' format:",
-        AppState.words.map(word => word.example 
-            ? `${word.word}(${word.example})=${word.translation}` 
-            : `${word.word}=${word.translation}`
-        ).join(';')
-    );
+            let newContent = prompt(
+                "Edit the list. Use 'word1(example1)=translation1;' format:",
+                AppState.words.map(word => word.example
+                    ? `${word.word}(${word.example})=${word.translation}`
+                    : `${word.word}=${word.translation}`
+                ).join(';')
+            );
 
-    if (newContent) {
-        const newWords = newContent.split(';').map(pair => {
-            const [left, translation] = pair.split('=').map(item => item.trim());
-            if (!left || !translation) return null; // Skip invalid entries
+            if (newContent) {
+                const newWords = newContent.split(';').map(pair => {
+                    const [left, translation] = pair.split('=').map(item => item.trim());
+                    if (!left || !translation) return null; // Skip invalid entries
 
-            const wordMatch = left.match(/^(.*?)\((.*?)\)$/);
+                    const wordMatch = left.match(/^(.*?)\((.*?)\)$/);
 
-            if (wordMatch) {
-                const [, word, example] = wordMatch;
-                return { word: word.trim(), example: example.trim(), translation: translation.trim() };
-            } else {
-                return { word: left.trim(), example: null, translation: translation.trim() };
+                    if (wordMatch) {
+                        const [, word, example] = wordMatch;
+                        return { word: word.trim(), example: example.trim(), translation: translation.trim() };
+                    } else {
+                        return { word: left.trim(), example: null, translation: translation.trim() };
+                    }
+                }).filter(entry => entry && entry.word && entry.translation);
+
+                // Check for duplicates
+                const uniqueWords = new Map();
+                const filteredWords = newWords.filter(({ word, example }) => {
+                    const key = `${word.toLowerCase()}|${example?.toLowerCase() || ''}`;
+                    if (uniqueWords.has(key)) {
+                        return false; // Duplicate found
+                    }
+                    uniqueWords.set(key, true);
+                    return true;
+                });
+
+                if (filteredWords.length < newWords.length) {
+                    alert("Duplicates were removed from the input.");
+                }
+
+                AppState.vocabLists[AppState.currentListName] = filteredWords;
+                AppState.words = AppState.vocabLists[AppState.currentListName];
+                saveLists();
+                alert("List updated successfully!");
+
+                // Refresh table if visible
+                if (AppState.isTableVisible) {
+                    AppState.isTableVisible = false; // Reset the state
+                    toggleWordList(); // Show the updated table
+                }
+
+                showNextWord();
             }
-        }).filter(entry => entry && entry.word && entry.translation);
-
-        AppState.vocabLists[AppState.currentListName] = newWords;
-        AppState.words = AppState.vocabLists[AppState.currentListName];
-        saveLists();
-        alert("List updated successfully!");
-
-        // Refresh table if visible
-        if (AppState.isTableVisible) {
-            AppState.isTableVisible = false; // Reset the state
-            toggleWordList(); // Show the updated table
         }
-
-        showNextWord();
-    }
-}
 
 
         document.getElementById('checkButton').addEventListener('click', () => {
@@ -1282,7 +1297,7 @@
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#39;");
-//
+            //
             if (icon) {
                 text = '🔍';
             } else {
