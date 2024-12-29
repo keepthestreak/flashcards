@@ -175,6 +175,10 @@
             font-style: italic;
         }
 
+        .empty-list {
+            font-style: italic;
+        }
+
         .button-delete {
             background-color: #e74c3c;
             color: white;
@@ -547,9 +551,14 @@
                 const isCompleted = words.length > 0 &&
                     words.every(word => (AppState.streaks[word.word] || 0) >= MAX_STREAK_LENGTH);
 
+                const isEmpty = words.length === 0;
+
                 if (isCompleted) {
                     option.classList.add('completed-list');
                     option.text += ' (Completed)';
+                } else if (isEmpty) {
+                    option.classList.add('empty-list');
+                    option.text += ' (Empty)';
                 }
 
                 selector.appendChild(option);
