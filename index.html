@@ -1081,11 +1081,9 @@
             }
         });
         function exportToCSV() {
-            const header = ['Word', 'Translation', 'Streak', 'Last Shown'];
+            const header = ['Word', 'Example', 'Translation'];
             const rows = AppState.words.map(entry => {
-                const streak = AppState.streaks[entry.word] || 0;
-                const lastShown = AppState.lastShownTimes[entry.word] || 'Never';
-                return [entry.word, entry.translation, streak, lastShown];
+                return [entry.word, entry.example, entry.translation];
             });
 
             // Combine headers and rows into CSV format
