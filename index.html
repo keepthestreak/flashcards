@@ -508,9 +508,10 @@
             /* Red color for the hide icon */
         }
 
-        .folder-container {
+        .import-container {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            align-items: left;
             gap: 10px;
             margin: 10px 0;
         }
@@ -533,7 +534,7 @@
             gap: 8px;
             padding: 4px 0;
         }
-        
+
         .directory:hover {
             opacity: 0.8;
         }
@@ -544,12 +545,117 @@
 
         /* Dark mode styles */
         body.dark-mode .directory {
-            color: #fff; /* Light text for dark mode */
+            color: #fff;
+            /* Light text for dark mode */
         }
 
         body.dark-mode .directory:hover {
             opacity: 0.8;
         }
+
+        .item {
+            margin: 10px 0;
+            cursor: pointer;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .item:hover {
+            background-color: #e0e0e0;
+        }
+
+        .breadcrumb {
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+
+        .breadcrumb a {
+            text-decoration: none;
+            color: #007bff;
+            margin-right: 5px;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb span {
+            margin-right: 5px;
+        }
+
+        /* Light mode styles */
+        .file-viewer {
+            background-color: #ffffff;
+            /* Light background */
+            color: #333333;
+            /* Dark text */
+            padding: 20px;
+            /* Padding around the viewer */
+            border: 1px solid #ddd;
+            /* Light border */
+            border-radius: 4px;
+            /* Rounded corners */
+        }
+
+        .file-viewer h3 {
+            color: #333;
+            /* Dark text for headers */
+        }
+
+        .file-content {
+            font-size: 14px;
+            /* Font size for file content */
+            line-height: 1.5;
+            /* Line height for readability */
+            white-space: pre-wrap;
+            /* Preserve whitespace and line breaks */
+            overflow: auto;
+            /* Allow scrolling if content overflows */
+            max-height: 400px;
+            /* Set a maximum height for the content area */
+            padding: 10px;
+            /* Padding inside the content area */
+            border: 1px solid #ccc;
+            /* Light border around content */
+            border-radius: 4px;
+            /* Rounded corners */
+            background-color: #f9f9f9;
+            /* Light background for content */
+            margin-top: 10px;
+            /* Space above the content */
+        }
+
+        /* Dark mode styles */
+        body.dark-mode .file-viewer {
+            background-color: #1e1e1e;
+            /* Darker background for better contrast */
+            color: #e0e0e0;
+            /* Light text for better readability */
+            border: 1px solid #444;
+            /* Darker border */
+        }
+
+        body.dark-mode .file-viewer h3 {
+            color: #ffffff;
+            /* Light text for headers */
+        }
+
+        body.dark-mode .file-content {
+            color: #e0e0e0;
+            /* Light text for file content */
+            background-color: #2a2a2a;
+            /* Dark background for content */
+            border: 1px solid #555;
+            /* Darker border around content */
+            cursor: pointer;
+            /* Pointer cursor for clickable items */
+        }
+
     </style>
 </head>
 
@@ -592,13 +698,20 @@
         </div>
 
         <div id="importDiv">
-            <h3>Import Lists</h3>
-            <ul id="fileList"></ul>
-            <div id="tableContainer"></div>
-            <span name="hideImportDiv" class="tooltip">
-                <span class="hide-icon" onclick="toggleImportDiv()">🔒</span>
-                <span class="tooltiptext">Click to hide</span>
-            </span>
+            <h3 style="text-align: center;">Import Lists</h3>
+            <div class="import-container">
+                <div clas="breadcrumb" id="breadcrumb">
+                    Home
+                </div>
+                <div id="file-viewer">
+                    Loading...
+                </div>
+                <span name="hideImportDiv" class="tooltip">
+                    <span class="hide-icon" onclick="toggleImportDiv()">🔒</span>
+                    <span class="tooltiptext">Click to hide</span>
+                </span>
+            </div>
+
         </div>
 
         <div class="flashcard" id="flashcard">
@@ -1459,28 +1572,28 @@
             const li = document.createElement('li');
             const dirContainer = document.createElement('div');
             dirContainer.classList.add('directory');
-            
+
             // Create separate spans for icon and name
             const iconSpan = document.createElement('span');
             iconSpan.classList.add('folder-icon');
             iconSpan.textContent = '📁'; // Closed folder icon
-            
+
             const nameSpan = document.createElement('span');
             nameSpan.textContent = item.name;
-            
+
             dirContainer.appendChild(iconSpan);
             dirContainer.appendChild(nameSpan);
-            
+
             const subList = document.createElement('ul');
             subList.classList.add('subdirectory');
-            
+
             li.appendChild(dirContainer);
             li.appendChild(subList);
 
             dirContainer.addEventListener('click', async () => {
                 const isExpanding = !dirContainer.classList.contains('expanded');
                 dirContainer.classList.toggle('expanded');
-                
+
                 // Update icon and visibility
                 iconSpan.textContent = isExpanding ? '📂' : '📁';
                 subList.style.display = isExpanding ? 'block' : 'none';
@@ -1596,7 +1709,7 @@
             const [headers, ...rows] = csvData;
             const table = document.createElement('table');
             table.className = 'csv-table';
-            
+
             // Create header
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
@@ -1607,7 +1720,7 @@
             });
             thead.appendChild(headerRow);
             table.appendChild(thead);
-            
+
             // Create body
             const tbody = document.createElement('tbody');
             rows.forEach(row => {
@@ -1620,7 +1733,7 @@
                 tbody.appendChild(tr);
             });
             table.appendChild(tbody);
-            
+
             tableContainer.appendChild(table);
 
             updateListSelector();
@@ -1630,8 +1743,6 @@
 
         // Initial load when page opens
         (async () => {
-            fileList.innerHTML = '<li>Loading...</li>';
-
             try {
                 const data = await fetchDirectoryContents(REPO);
                 fileList.innerHTML = '';
@@ -1647,6 +1758,9 @@
 
         async function importListFromCsv(listName, rawUrl) {
             try {
+                console.log("in import");
+                console.log(listName);
+                console.log(rawUrl);
                 // Check if list already exists
                 if (listName in AppState.vocabLists) {
                     throw new Error(`List "${listName}" already exists`);
@@ -1728,6 +1842,92 @@
             const importDiv = document.getElementById('importDiv');
             importDiv.style.display = 'none'; // Ensure it starts hidden
         });
+
+        const baseURL = "https://api.github.com/repos/keepthestreak/lists/contents";
+        let currentPath = [];
+
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById("breadcrumb");
+            breadcrumb.innerHTML = "";
+
+            currentPath.forEach((folder, index) => {
+                const link = document.createElement("a");
+                link.textContent = folder;
+                link.href = "#";
+                link.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    loadDirectory(currentPath.slice(0, index + 1).join("/"));
+                    currentPath = currentPath.slice(0, index + 1);
+                    updateBreadcrumb();
+                });
+
+                breadcrumb.appendChild(link);
+
+                if (index < currentPath.length - 1) {
+                    const separator = document.createElement("span");
+                    separator.textContent = "/";
+                    breadcrumb.appendChild(separator);
+                }
+            });
+
+            if (currentPath.length === 0) {
+                breadcrumb.textContent = "Home 0";
+            }
+        }
+
+        function loadDirectory(path = "") {
+            currentPath = path ? path.split("/") : [];
+            updateBreadcrumb();
+
+            const viewer = document.getElementById("file-viewer");
+            viewer.innerHTML = "Loading...";
+
+            fetch(`${baseURL}/${path}`)
+                .then(response => response.json())
+                .then(data => {
+                    viewer.innerHTML = ""; // Clear current content
+
+                    data
+                        .filter(item => item.type === "file" && item.name.endsWith(".csv") || item.type === "dir")
+                        .forEach(item => {
+                            const div = document.createElement("div");
+                            div.className = "file-content";
+                            div.textContent = item.name;
+
+                            if (item.type === "dir") {
+                                div.textContent = '📁 ' + div.textContent; // Closed folder icon
+                                div.addEventListener("click", () => {
+                                    loadDirectory(item.path);
+                                    currentPath.push(item.name);
+                                    updateBreadcrumb();
+
+
+                                });
+                            } else if (item.type === "file") {
+                                div.addEventListener("click", async () => {
+                                    const fileName = item.name;
+                                    //const rawUrl = `${baseURL}/${fileName}`
+                                    console.log("in loadDirectory");
+                                    const rawUrl = item.download_url;
+                                    console.log(fileName);
+                                    console.log(rawUrl);
+                                    const result = await importListFromCsv(fileName, rawUrl);
+                                    alert(result.message);
+                                    if (result.success) {
+                                        toggleImportDiv();
+                                    }
+                                });
+                            }
+
+                            viewer.appendChild(div);
+                        });
+                })
+                .catch(err => {
+                    viewer.innerHTML = "Error loading directory.";
+                    console.error(err);
+                });
+        }
+        loadDirectory();
     </script>
 </body>
 
