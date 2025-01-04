@@ -49,8 +49,10 @@
             padding: 0;
             background: linear-gradient(to right, #6dd5ed, #2193b0);
             color: #333;
-            width: 100%; /* Set width to 100% of the viewport */
-            overflow-x: hidden; /* Prevent horizontal scrolling */
+            width: 100%;
+            /* Set width to 100% of the viewport */
+            overflow-x: hidden;
+            /* Prevent horizontal scrolling */
         }
 
         h1 {
@@ -110,6 +112,7 @@
         }
 
         .flashcard {
+            position: relative;
             text-align: center;
             padding: 30px;
             border-radius: 10px;
@@ -219,14 +222,21 @@
         }
 
         .dropdown {
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            position: absolute;
             display: inline-block;
+            top: 0;
+            /* Align to the top */
+            right: 0;
+            /* Align to the right */
         }
 
         .dropdown-content {
             display: none;
+            position: relative;
             /* Hidden by default */
-            position: absolute;
             background-color: #f9f9f9;
             min-width: 200px;
             box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
@@ -251,6 +261,13 @@
             /* Add some space between the button and the dropdown */
         }
 
+        .gear-wheel {
+            display: flex;
+            position: absolute;
+            align-items: right;
+            top: 0;
+            right: 0;
+        }
         .gear-icon {
             width: 50px;
             height: 50px;
@@ -377,6 +394,7 @@
         }
 
         .dark-mode .flashcard {
+            position: relative;
             background: #444;
             border: 1px solid #555;
             color: #e0e0e0;
@@ -657,7 +675,6 @@
             cursor: pointer;
             /* Pointer cursor for clickable items */
         }
-
     </style>
 </head>
 
@@ -683,16 +700,6 @@
                 <button id="theme-toggle">🌞</button>
                 <span class="tooltiptext">Toggle Dark Mode</span>
             </div>
-            <div class="dropdown">
-                <button id="settingsButton" class="gear-icon">
-                    <i class="fas fa-cog" style="font-size: 24px; color: #4CAF50;"></i>
-                </button>
-                <div id="settingsDropdown" class="dropdown-content">
-                    <label for="maxStreakLength">Max Streak Length:</label>
-                    <input type="number" id="maxStreakLength" min="1" />
-                    <button id="setMaxStreakButton">Set</button>
-                </div>
-            </div>
             <span class="tooltip">
                 <span class="import-icon" onclick="toggleImportDiv()">📥</span>
                 <span class="tooltiptext">Click to import lists</span>
@@ -717,23 +724,33 @@
         </div>
 
         <div class="flashcard" id="flashcard">
+                <span id="settingsButton" class="gear-wheel">⚙️</span>
+            <div class="dropdown">
+
+                <div id="settingsDropdown" class="dropdown-content">
+                    <label for="maxStreakLength">Max Streak Length:</label>
+                    <input type="number" id="maxStreakLength" min="1" />
+                    <button id="setMaxStreakButton">Set</button>
+                </div>
+            </div>
             <div>
-            <span id="word">Loading...</span>
-            <spand class="tooltip" onclick="playButtonText()">▶️</button>
+                <span id="word">Loading...</span>
+                <spand class="Xtooltip" style="cursor: pointer;" onclick="playButtonText()">🔊️</span>
             </div>
             <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
-<script>
-        function playButtonText() {
-        const wordElement = document.getElementById('word'); // Get the <p> element
-        const text = wordElement.textContent; // Get the text content
-        responsiveVoice.speak(text, 'French Male'); // Pass it to ResponsiveVoice
-    }
-</script>
+            <script>
+                function playButtonText() {
+                    const wordElement = document.getElementById('word'); // Get the <p> element
+                    const text = wordElement.textContent; // Get the text content
+                    responsiveVoice.speak(text, 'French Male'); // Pass it to ResponsiveVoice
+                }
+            </script>
             <input type="text" id="userTranslation" placeholder="Type the translation">
             <div id="example" style="margin-top: 10px; font-style: italic;"></div>
             <p id="feedback"></p>
             <button id="checkButton">Check</button>
-            <p id="counter">Streak: 0</p>
+            <p id="counter">Streak: 0 /</p>
+
             <p id="lastShown">Last Shown: N/A</p>
         </div>
 
@@ -893,7 +910,7 @@
                 document.getElementById('feedback').innerText = '';
                 document.getElementById('example').innerText = AppState.currentWord?.example || "";
                 document.getElementById('userTranslation').value = '';
-                document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0}`;
+                document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0} / ${MAX_STREAK_LENGTH}`;
 
                 const lastShown = AppState.lastShownTimes[AppState.currentWord.word] ?
                     timeElapsed(AppState.lastShownTimes[AppState.currentWord.word]) : 'Never';
@@ -924,7 +941,7 @@
                 wordStats[AppState.currentWord.word].correct++;
                 AppState.streaks[AppState.currentWord.word] = (AppState.streaks[AppState.currentWord.word] || 0) + 1;
                 updateFeedback(true, 'Correct!');
-                document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word]}`;
+                document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word]} / ${MAX_STREAK_LENGTH}`;
                 if (AppState.streaks[AppState.currentWord.word] >= MAX_STREAK_LENGTH) {
                     alert(`You've mastered "${AppState.currentWord.word}". Consider deleting it.`);
                 }
@@ -935,7 +952,7 @@
             } else {
                 AppState.streaks[AppState.currentWord.word] = 0;
                 updateFeedback(false, `Incorrect! The correct translation is: ${AppState.currentWord.translation}`);
-                document.getElementById('counter').innerText = 'Streak: 0';
+                document.getElementById('counter').innerText = 'Streak: 0 / ${MAX_STREAK_LENGTH}';
                 saveLists();
                 updateListSelector();
                 refreshTable();
@@ -1438,11 +1455,14 @@
             const newLength = parseInt(document.getElementById('maxStreakLength').value);
             if (!isNaN(newLength) && newLength > 0) {
                 setMaxStreakLength(newLength); // Update and save to local storage
-                alert(`Maximum streak length set to ${MAX_STREAK_LENGTH}`);
+                //alert(`Maximum streak length set to ${MAX_STREAK_LENGTH}`);
             } else {
                 alert("Please enter a valid positive number.");
             }
+            const dropdown = document.getElementById('settingsDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         });
+
 
         // Show/hide dropdown on settings button click
         document.getElementById('settingsButton').addEventListener('click', (event) => {
