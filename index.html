@@ -119,7 +119,7 @@
             margin-bottom: 20px;
         }
 
-        .flashcard p {
+        .flashcard span {
             font-size: 1.5rem;
             margin: 10px 0;
         }
@@ -717,7 +717,18 @@
         </div>
 
         <div class="flashcard" id="flashcard">
-            <p id="word">Loading...</p>
+            <div>
+            <span id="word">Loading...</span>
+            <spand class="tooltip" onclick="playButtonText()">▶️</button>
+            </div>
+            <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+<script>
+        function playButtonText() {
+        const wordElement = document.getElementById('word'); // Get the <p> element
+        const text = wordElement.textContent; // Get the text content
+        responsiveVoice.speak(text, 'French Male'); // Pass it to ResponsiveVoice
+    }
+</script>
             <input type="text" id="userTranslation" placeholder="Type the translation">
             <div id="example" style="margin-top: 10px; font-style: italic;"></div>
             <p id="feedback"></p>
