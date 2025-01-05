@@ -972,7 +972,7 @@
             } else {
                 AppState.streaks[AppState.currentWord.word] = 0;
                 updateFeedback(false, `Incorrect! The correct translation is: ${AppState.currentWord.translation}`);
-                document.getElementById('counter').innerText = 'Streak: 0 / ${MAX_STREAK_LENGTH}';
+                document.getElementById('counter').innerText = `Streak: 0 / ${MAX_STREAK_LENGTH}`;
                 saveLists();
                 updateListSelector();
                 refreshTable();
