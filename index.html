@@ -675,6 +675,24 @@
             cursor: pointer;
             /* Pointer cursor for clickable items */
         }
+
+  #modeButton {
+    cursor: pointer;
+    font-size: small;
+    transition: font-size 0.3s;
+    transition: 0.3s;
+    padding: 1px;
+    margin-left: 3px;
+    float: righ;
+  }
+  
+  #modeButton:hover {
+    font-size: large;
+    color:#b821f3;
+    /* border: 1px solid black; */
+    cursor: help;
+    box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.3);
+  }
     </style>
 </head>
 
@@ -724,7 +742,7 @@
         </div>
 
         <div class="flashcard" id="flashcard">
-                <span id="settingsButton" class="gear-wheel">⚙️</span>
+            <span id="settingsButton" class="gear-wheel">⚙️</span>
             <div class="dropdown">
 
                 <div id="settingsDropdown" class="dropdown-content">
@@ -746,9 +764,11 @@
                 }
             </script>
             <input type="text" id="userTranslation" placeholder="Type the translation">
+            <div id="showTranslation" style="visibility: hidden;"></div>
             <div id="example" style="margin-top: 10px; font-style: italic;"></div>
             <p id="feedback"></p>
             <button id="checkButton">Check</button>
+            <span id="modeButton" class="modeButton">⌨️</span>
             <p id="counter">Streak: 0 /</p>
 
             <p id="lastShown">Last Shown: N/A</p>
@@ -1193,11 +1213,82 @@
             }
         }
 
+function handleShowEvent() {
+    const checkButton = document.getElementById('checkButton');
+    const showTranslation = document.getElementById('showTranslation');
+    const userTranslation = document.getElementById('userTranslation');
+    const counter = document.getElementById('counter');
 
+    userTranslation.style.visibility = 'hidden';
+    showTranslation.style.visibility = 'visible';
+    counter.style.visibility = 'hidden';
+    showTranslation.innerText = `${AppState.currentWord.translation}`;
+
+    checkButton.innerText = 'Next';
+
+    // Change click event to handleNextEvent
+    checkButton.removeEventListener('click', handleShowEvent);
+    checkButton.addEventListener('click', handleNextEvent);
+}
+
+// Define the 'Next' event handler function
+function handleNextEvent() {
+    const checkButton = document.getElementById('checkButton');
+    const showTranslation = document.getElementById('showTranslation');
+
+    showTranslation.style.visibility = 'hidden';
+    checkButton.innerText = 'Show';
+
+    // Change click event to handleShowEvent
+    checkButton.removeEventListener('click', handleNextEvent);
+    checkButton.addEventListener('click', handleShowEvent);
+
+    showNextWord();
+}
+
+function isNexMode(text) {
+    return (checkButton.innerText.includes('Next'));
+}
+function isShowMode(text) {
+    return (checkButton.innerText.includes('Show'));
+}
+function isCheckMode(text) {
+    return (checkButton.innerText.includes('Check'));
+}
+function handleCheckEvent() {
+    console.log('Handling Check Event');
+    // Add functionality for "Check" event here
+}
         document.getElementById('checkButton').addEventListener('click', () => {
             checkTranslation();
             document.getElementById('userTranslation').focus();
         });
+        document.getElementById('modeButton').addEventListener('click', () => {
+    console.log('Button was double-clicked!');
+
+
+    const modeButton = document.getElementById('modeButton');
+    const checkButton = document.getElementById('checkButton');
+    const userTranslation = document.getElementById('userTranslation');
+    const showTranslation = document.getElementById('showTranslation');
+    const counter = document.getElementById('counter');
+
+    if (isCheckMode(checkButton.innerText)) {
+        checkButton.removeEventListener('click', handleCheckEvent); // Remove previous listener
+        modeButton.innerText = '👁️';
+        handleShowEvent();
+    } else {
+        modeButton.innerText = '⌨';
+        checkButton.innerText = 'Check'; // Change text to 'Check'
+        checkButton.removeEventListener('click', handleShowEvent); // Remove previous listener
+        checkButton.removeEventListener('click', handleNextEvent); // Remove previous listener
+        checkButton.addEventListener('click', handleCheckEvent); // Add 'Check' event listener
+        showTranslation.style.visibility = 'hidden';
+        userTranslation.style.visibility = 'visible';
+        counter.style.visibility = 'visible';
+        userTranslation.focus();
+    }
+});
 
         document.getElementById('listSelector').addEventListener('change', switchList);
         document.getElementById('toggleListButton').addEventListener('click', toggleWordList);
