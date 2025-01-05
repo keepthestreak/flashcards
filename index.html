@@ -770,6 +770,7 @@
             <button id="checkButton">Check</button>
             <span id="modeButton" class="modeButton">⌨️</span>
             <p id="counter">Streak: 0 /</p>
+            <p id="completeButton" onclick="handleCompleteEvent()" style="cursor: pointer; visibility: hidden;">✅</p>
 
             <p id="lastShown">Last Shown: N/A</p>
         </div>
@@ -1213,15 +1214,28 @@
             }
         }
 
+function handleCompleteEvent() {
+    console.log("in complete event");
+    wordStats[AppState.currentWord.word].correct = MAX_STREAK_LENGTH;
+    wordStats[AppState.currentWord.word].total = MAX_STREAK_LENGTH;
+    AppState.streaks[AppState.currentWord.word] = MAX_STREAK_LENGTH;
+                saveLists();
+                updateListSelector();
+                //showNextWord();
+                refreshTable();
+}
+
 function handleShowEvent() {
     const checkButton = document.getElementById('checkButton');
     const showTranslation = document.getElementById('showTranslation');
     const userTranslation = document.getElementById('userTranslation');
     const counter = document.getElementById('counter');
+    const completeButton = document.getElementById('completeButton');
 
     userTranslation.style.visibility = 'hidden';
     showTranslation.style.visibility = 'visible';
     counter.style.visibility = 'hidden';
+    completeButton.style.visibility = 'visible';
     showTranslation.innerText = `${AppState.currentWord.translation}`;
 
     checkButton.innerText = 'Next';
@@ -1256,7 +1270,6 @@ function isCheckMode(text) {
     return (checkButton.innerText.includes('Check'));
 }
 function handleCheckEvent() {
-    console.log('Handling Check Event');
     // Add functionality for "Check" event here
 }
         document.getElementById('checkButton').addEventListener('click', () => {
@@ -1264,7 +1277,6 @@ function handleCheckEvent() {
             document.getElementById('userTranslation').focus();
         });
         document.getElementById('modeButton').addEventListener('click', () => {
-    console.log('Button was double-clicked!');
 
 
     const modeButton = document.getElementById('modeButton');
@@ -1272,6 +1284,7 @@ function handleCheckEvent() {
     const userTranslation = document.getElementById('userTranslation');
     const showTranslation = document.getElementById('showTranslation');
     const counter = document.getElementById('counter');
+    const completeButton = document.getElementById('completeButton');
 
     if (isCheckMode(checkButton.innerText)) {
         checkButton.removeEventListener('click', handleCheckEvent); // Remove previous listener
@@ -1286,6 +1299,7 @@ function handleCheckEvent() {
         showTranslation.style.visibility = 'hidden';
         userTranslation.style.visibility = 'visible';
         counter.style.visibility = 'visible';
+        completeButton.style.visibility = 'hidden';
         userTranslation.focus();
     }
 });
@@ -1590,7 +1604,6 @@ function handleCheckEvent() {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   if (isMobile) {
-    console.log("User is on a mobile device.");
         checkButton.removeEventListener('click', handleCheckEvent); // Remove previous listener
         modeButton.innerText = '👁️';
         handleShowEvent();
@@ -1893,9 +1906,6 @@ function handleCheckEvent() {
 
         async function importListFromCsv(listName, rawUrl) {
             try {
-                console.log("in import");
-                console.log(listName);
-                console.log(rawUrl);
                 // Check if list already exists
                 if (listName in AppState.vocabLists) {
                     throw new Error(`List "${listName}" already exists`);
@@ -2042,10 +2052,7 @@ function handleCheckEvent() {
                                 div.addEventListener("click", async () => {
                                     const fileName = item.name;
                                     //const rawUrl = `${baseURL}/${fileName}`
-                                    console.log("in loadDirectory");
                                     const rawUrl = item.download_url;
-                                    console.log(fileName);
-                                    console.log(rawUrl);
                                     const result = await importListFromCsv(fileName, rawUrl);
                                     alert(result.message);
                                     if (result.success) {
