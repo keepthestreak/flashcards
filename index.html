@@ -1607,6 +1607,8 @@ function handleCheckEvent() {
         checkButton.removeEventListener('click', handleCheckEvent); // Remove previous listener
         modeButton.innerText = '👁️';
         handleShowEvent();
+
+        document.getElementById('completeButton').innerHTML = '✅ (mark word \'done\')';
   }
 });
 
