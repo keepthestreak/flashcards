@@ -1223,6 +1223,11 @@ function handleCompleteEvent() {
                 updateListSelector();
                 //showNextWord();
                 refreshTable();
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  if (isMobile) {
+        document.getElementById('completeButton').innerHTML = '❌ (word is hidden until reset)';
+  }
 }
 
 function handleShowEvent() {
