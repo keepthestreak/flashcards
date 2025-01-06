@@ -1219,7 +1219,6 @@
         }
 
         function handleCompleteEvent() {
-            console.log("in complete event");
             wordStats[AppState.currentWord.word].correct = MAX_STREAK_LENGTH;
             wordStats[AppState.currentWord.word].total = MAX_STREAK_LENGTH;
             AppState.streaks[AppState.currentWord.word] = MAX_STREAK_LENGTH;
@@ -1731,91 +1730,6 @@
             return await response.json();
         }
 
-        function createDirectoryItem(item, repo) {
-            const li = document.createElement('li');
-            const dirContainer = document.createElement('div');
-            dirContainer.classList.add('directory');
-
-            // Create separate spans for icon and name
-            const iconSpan = document.createElement('span');
-            iconSpan.classList.add('folder-icon');
-            iconSpan.textContent = '📁'; // Closed folder icon
-
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = item.name;
-
-            dirContainer.appendChild(iconSpan);
-            dirContainer.appendChild(nameSpan);
-
-            const subList = document.createElement('ul');
-            subList.classList.add('subdirectory');
-
-            li.appendChild(dirContainer);
-            li.appendChild(subList);
-
-            dirContainer.addEventListener('click', async () => {
-                const isExpanding = !dirContainer.classList.contains('expanded');
-                dirContainer.classList.toggle('expanded');
-
-                // Update icon and visibility
-                iconSpan.textContent = isExpanding ? '📂' : '📁';
-                subList.style.display = isExpanding ? 'block' : 'none';
-
-                // Only fetch contents if expanding and no content yet
-                if (isExpanding && subList.children.length === 0) {
-                    try {
-                        const contents = await fetchDirectoryContents(repo, item.path);
-                        displayContents(contents, subList, repo);
-                    } catch (error) {
-                        subList.innerHTML = `<li>Error: ${error.message}</li>`;
-                    }
-                }
-            });
-
-            return li;
-        }
-
-        function createFileItem(item) {
-            if (!item.name.toLowerCase().endsWith('.csv')) {
-                return null;
-            }
-            const list_name = item.name.substring(0, item.name.lastIndexOf('.'));
-
-            const li = document.createElement('li');
-            const link = document.createElement('a');
-            link.href = '#';
-            link.textContent = item.name;
-
-            link.addEventListener('click', async (e) => {
-                e.preventDefault();
-                try {
-                    // Get raw content URL
-                    const rawUrl = item.download_url;
-                    const csvContent = await fetchCsvContent(rawUrl);
-                    const csvData = parseCsv(csvContent);
-                    displayCsvTable(csvData, list_name, rawUrl);
-                } catch (error) {
-                    tableContainer.innerHTML = `<p style="color: red;">Error loading CSV: ${error.message}</p>`;
-                }
-            });
-
-            li.appendChild(link);
-            return li;
-        }
-
-        function displayContents(data, parentElement, repo) {
-            data.forEach(item => {
-                if (item.type === 'dir') {
-                    parentElement.appendChild(createDirectoryItem(item, repo));
-                } else if (item.type === 'file') {
-                    const fileItem = createFileItem(item);
-                    if (fileItem) {  // Only append if it's a CSV file
-                        parentElement.appendChild(fileItem);
-                    }
-                }
-            });
-        }
-
         async function fetchCsvContent(url) {
             const response = await fetch(url);
             if (!response.ok) {
@@ -1832,92 +1746,6 @@
                     .map(cell => cell.trim().replace(/^["']|["']$/g, '')) // Remove quotes
                 );
         }
-
-        function displayCsvTable(csvData, fileName, rawUrl) {
-            const tableContainer = document.getElementById('tableContainer');
-            tableContainer.innerHTML = '';
-
-            // Create header div with centered list name and import button
-            const headerDiv = document.createElement('div');
-            headerDiv.style.display = 'flex';
-            headerDiv.style.alignItems = 'center';
-            headerDiv.style.marginBottom = '10px';
-            headerDiv.style.position = 'relative'; // For absolute positioning
-
-            // Add list name in center
-            const listName = document.createElement('h3');
-            listName.textContent = fileName.replace('.csv', '');
-            listName.style.margin = '0';
-            listName.style.width = '100%';
-            listName.style.textAlign = 'center';
-
-            // Add import button (positioned absolutely)
-            const importButton = document.createElement('button');
-            importButton.textContent = 'Import List';
-            importButton.style.position = 'absolute';
-            importButton.style.right = '0';
-            importButton.onclick = async () => {
-                const result = await importListFromCsv(fileName, rawUrl);
-                alert(result.message);
-                if (result.success) {
-                    toggleImportDiv();
-                }
-            };
-
-            headerDiv.appendChild(listName);
-            headerDiv.appendChild(importButton);
-            tableContainer.appendChild(headerDiv);
-
-            // Create and populate table
-            const [headers, ...rows] = csvData;
-            const table = document.createElement('table');
-            table.className = 'csv-table';
-
-            // Create header
-            const thead = document.createElement('thead');
-            const headerRow = document.createElement('tr');
-            headers.forEach(header => {
-                const th = document.createElement('th');
-                th.textContent = header;
-                headerRow.appendChild(th);
-            });
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-
-            // Create body
-            const tbody = document.createElement('tbody');
-            rows.forEach(row => {
-                const tr = document.createElement('tr');
-                row.forEach(cell => {
-                    const td = document.createElement('td');
-                    td.textContent = cell;
-                    tr.appendChild(td);
-                });
-                tbody.appendChild(tr);
-            });
-            table.appendChild(tbody);
-
-            tableContainer.appendChild(table);
-
-            updateListSelector();
-            showNextWord();
-            refreshTable();
-        }
-
-        // Initial load when page opens
-        (async () => {
-            try {
-                const data = await fetchDirectoryContents(REPO);
-                fileList.innerHTML = '';
-                displayContents(data, fileList, REPO);
-
-                if (fileList.innerHTML === '') {
-                    fileList.innerHTML = '<li>No CSV files found in this repository.</li>';
-                }
-            } catch (error) {
-                fileList.innerHTML = `<li>Error: ${error.message}</li>`;
-            }
-        })();
 
         async function importListFromCsv(listName, rawUrl) {
             try {
