@@ -256,49 +256,6 @@
             margin: 5px 0;
         }
 
-        #settingsButton {
-            margin-left: 10px;
-            /* Add some space between the button and the dropdown */
-        }
-
-        .gear-wheel {
-            display: flex;
-            position: absolute;
-            align-items: right;
-            top: 0;
-            right: 0;
-        }
-
-        .gear-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #ccc;
-            position: relative;
-        }
-
-        .gear-icon::before,
-        .gear-icon::after {
-            content: "";
-            position: absolute;
-            width: 10px;
-            height: 20px;
-            background-color: #333;
-            border-radius: 5px;
-        }
-
-        .gear-icon::before {
-            top: 15px;
-            left: 15px;
-            transform: rotate(45deg);
-        }
-
-        .gear-icon::after {
-            top: 15px;
-            right: 15px;
-            transform: rotate(-45deg);
-        }
-
         .tooltip {
             position: relative;
             display: inline-block;
@@ -685,6 +642,7 @@
             padding: 1px;
             margin-left: 3px;
             float: righ;
+            margin-left: 10px;
         }
 
         #modeButton:hover {
@@ -693,6 +651,24 @@
             /* border: 1px solid black; */
             cursor: help;
             box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.3);
+        }
+
+        #streakButton {
+            font-size: 0.7em;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            display: inline-block;
+            /* This helps with consistent scaling */
+            vertical-align: 0.2em;
+            /* This aligns it better with surrounding text */
+        }
+
+        #streakButton:hover {
+            transform: scale(1.1);
+            font-size: large;
+            color: #b821f3;
+            /* border: 1px solid black; */
+            box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -743,15 +719,6 @@
         </div>
 
         <div class="flashcard" id="flashcard">
-            <span id="settingsButton" class="gear-wheel">⚙️</span>
-            <div class="dropdown">
-
-                <div id="settingsDropdown" class="dropdown-content">
-                    <label for="maxStreakLength">Max Streak Length:</label>
-                    <input type="number" id="maxStreakLength" min="1" />
-                    <button id="setMaxStreakButton">Set</button>
-                </div>
-            </div>
             <div>
                 <span id="word">Loading...</span>
                 <spand class="Xtooltip" style="cursor: pointer;" onclick="playButtonText()">🔊️</span>
@@ -770,12 +737,23 @@
             <p id="feedback"></p>
             <button id="checkButton">Check</button>
             <span id="modeButton" class="modeButton">⌨️</span>
-            <p id="counter">Streak: 0 /</p>
+            <div id="counterDiv">
+                <span id="counter">Streak: 0 /</span>
+                <span id="streakButton" class="streakButton">⚙️</span>
+                <div class="dropdown">
+
+                    <div id="settingsDropdown" class="dropdown-content">
+                        <label for="maxStreakLength">Max Streak Length:</label>
+                        <input type="number" id="maxStreakLength" min="1" />
+                        <button id="setMaxStreakButton">Set</button>
+                    </div>
+                </div>
+            </div>
             <p id="completeButton"
                 title="Click to mark as &quot;Completed&quot; (the word will remain hidden until reset)."
                 onclick="handleCompleteEvent()" style="cursor: pointer; visibility: hidden;">✅</p>
 
-            <p id="lastShown">Last Shown: N/A</p>
+            <p id="lastShown" style="visibility: hidden;">Last Shown: N/A</p>
         </div>
 
         <div class="controls">
@@ -1236,7 +1214,7 @@
             const checkButton = document.getElementById('checkButton');
             const showTranslation = document.getElementById('showTranslation');
             const userTranslation = document.getElementById('userTranslation');
-            const counter = document.getElementById('counter');
+            const counter = document.getElementById('counterDiv');
             const completeButton = document.getElementById('completeButton');
 
             userTranslation.style.visibility = 'hidden';
@@ -1294,7 +1272,7 @@
             const checkButton = document.getElementById('checkButton');
             const userTranslation = document.getElementById('userTranslation');
             const showTranslation = document.getElementById('showTranslation');
-            const counter = document.getElementById('counter');
+            const counter = document.getElementById('counterDiv');
             const completeButton = document.getElementById('completeButton');
 
             if (isCheckMode(checkButton.innerText)) {
@@ -1581,7 +1559,7 @@
 
 
         // Show/hide dropdown on settings button click
-        document.getElementById('settingsButton').addEventListener('click', (event) => {
+        document.getElementById('streakButton').addEventListener('click', (event) => {
             const dropdown = document.getElementById('settingsDropdown');
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             event.stopPropagation(); // Prevent the click event from bubbling up
@@ -1590,7 +1568,7 @@
         // Close dropdown if clicked outside
         window.onclick = function (event) {
             const dropdown = document.getElementById('settingsDropdown');
-            if (!event.target.matches('#settingsButton') && !dropdown.contains(event.target)) {
+            if (!event.target.matches('#streakButton') && !dropdown.contains(event.target)) {
                 dropdown.style.display = "none"; // Close the dropdown if clicking outside
             }
         };
