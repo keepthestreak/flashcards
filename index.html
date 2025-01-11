@@ -73,7 +73,10 @@
 
         .controls {
             display: flex;
+            align-items: center;
             justify-content: center;
+            width: 100%;
+            position: relative;
             flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
@@ -256,11 +259,19 @@
             margin: 5px 0;
         }
 
+        #dark-mode-button {
+            position: absolute;
+            /* Position relative to the nearest positioned ancestor */
+            top: 10px;
+            /* Distance from the top */
+            right: 10px;
+            /* Distance from the right */
+        }
+
         .tooltip {
             position: relative;
             display: inline-block;
             cursor: pointer;
-            margin-left: 10px;
         }
 
         .tooltip .tooltiptext {
@@ -273,11 +284,12 @@
             padding: 5px;
             position: absolute;
             z-index: 1;
-            bottom: 125%;
-            /* Position above the button */
-            left: 50%;
-            margin-left: -60px;
-            /* Center the tooltip */
+            top: 100%;
+            /* Position below the button */
+            right: 0;
+            /* Align to the left of the parent */
+            margin-top: 5px;
+            /* Add some space between button and tooltip */
             opacity: 0;
             /* Hidden by default */
             transition: opacity 0.3s;
@@ -333,6 +345,7 @@
             color: #f0f0f0;
         }
 
+        .dark-mode lmc_dropdown_row,
         .dark-mode select,
         .dark-mode button,
         .dark-mode input {
@@ -403,7 +416,7 @@
         }
 
         .dark-mode .tooltip .tooltiptext {
-            background-color: #333;
+            background-color: #4b4646;
             color: #e0e0e0;
         }
 
@@ -456,28 +469,6 @@
             display: inline-block;
             cursor: pointer;
             margin-left: 10px;
-        }
-
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 120px;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
         }
 
         .hide-icon {
@@ -670,52 +661,244 @@
             /* border: 1px solid black; */
             box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.2);
         }
+
+
+        .local-import-container {
+            width: 300px;
+            padding: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .local-import-button {
+            width: 100%;
+            padding: 8px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .local-import-button:hover {
+            background-color: #45a049;
+        }
+
+        .local-import-content {
+            margin-top: 16px;
+            display: none;
+        }
+
+        .local-import-content.active {
+            display: block;
+        }
+
+        .file-input {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        /* lmc */
+        .lists_management_container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .lmc-list-row {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+
+        .lmc-status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 0 10px;
+        }
+
+        .lmc-completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .lmc-empty {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .lmc-in-progress {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .lmc-button-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .lmc-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .lmc-button:hover {
+            background-color: #1565c0;
+        }
+
+        .lmc-button.delete {
+            background-color: #d32f2f;
+        }
+
+        .lmc-button.delete:hover {
+            background-color: #c62828;
+        }
+
+        .lmc-checkbox-wrapper {
+            margin-right: 15px;
+        }
+
+        .lmc-list-name {
+            flex-grow: 1;
+        }
+
+        .lmc-select-all-wrapper {
+            margin-bottom: 10px;
+        }
+
+        .lmc_dropdown_container {
+            position: relative;
+            display: inline-block;
+            padding: 10px;
+            cursor: pointer;
+            user-select: none;
+            margin-left: auto;
+        }
+
+        .lmc_dropdown_content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 4px;
+            margin-top: 5px;
+            right: 0;
+        }
+
+        .lmc_dropdown_row {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .lmc_dropdown_row:hover {
+            background-color: #f1f1f1;
+        }
+
+        .lmc_show {
+            display: block;
+        }
+
+        .dark-mode .lmc_dropdown_content {
+            background-color: #3a3a3a;
+        }
+
+        .dark-mode .lmc_dropdown_row {
+            color: #e0e0e0;
+        }
+
+        .dark-mode .lmc_dropdown_row:hover {
+            background-color: #32277c;
+        }
+
+        #dropdownTrigger::after {
+            content: "📋";
+        }
+
+        @media (min-width: 711px) {
+            #dropdownTrigger::after {
+                content: "📋 Lists Management";
+            }
+        }
     </style>
 </head>
 
 <body>
     <h1>Flashcard Vocabulary</h1>
+    <div id="dark-mode-button" class="tooltip">
+        <button id="theme-toggle">🌞</button>
+        <span class="tooltiptext">Toggle Dark Mode</span>
+    </div>
     <div class="container">
         <div class="controls">
-            <label for="listSelector">Choose a list:</label>
-            <select id="listSelector"></select>
-            <div class="tooltip">
-                <button id="createListButton" class="icon-button">✚
-                    <i class="fas fa-plus"></i>
-                </button>
-                <span class="tooltiptext">Create New List</span>
+            <select id="listSelector" style="position: absolute; left: 50%; transform: translateX(-50%);"></select>
+            <div class="lmc_dropdown_container">
+                <div id="dropdownTrigger"></div>
+                <div id="dropdownContent" class="lmc_dropdown_content">
+                    <div id='lmc_row_1' class="lmc_dropdown_row" onclick="row_1()">Manage Lists</div>
+                    <div id='lmc_row_2' class="lmc_dropdown_row" onclick="row_2()">Import List</div>
+                    <div id='lmc_row_3' class="lmc_dropdown_row" onclick="row_3()">Upload List</div>
+                </div>
             </div>
-            <div class="tooltip">
-                <button id="deleteListButton" class="icon-button">✖
-                    <i class="fas fa-plus"></i>
-                </button>
-                <span class="tooltiptext">Delete Current List</span>
-            </div>
-            <div class="tooltip">
-                <button id="theme-toggle">🌞</button>
-                <span class="tooltiptext">Toggle Dark Mode</span>
-            </div>
-            <span class="tooltip">
-                <span class="import-icon" onclick="toggleImportDiv()">📥</span>
-                <span class="tooltiptext">Click to import lists</span>
-            </span>
         </div>
 
-        <div id="importDiv">
-            <h3 style="text-align: center;">Import Lists</h3>
-            <div class="import-container">
-                <div clas="breadcrumb" id="breadcrumb">
-                    Home
+        <div id="lists_management_card" style="border: 1px solid #ddd;">
+
+            <div id="lists_management_container" style='display: none' class="lists_management_container">
+                <div class="lmc_button-group">
+                    <button class="lmc-button" onclick="loadSelected()">Load Selected</button>
+                    <button class="lmc-button" onclick="create_list()">Create New List</button>
+                    <button onclick="resetSelected()">Reset Selected</button>
+                    <button class="lmc-button" class="delete" onclick="deleteSelected()">Delete Selected</button>
+                    <span class="tooltip">
+                        <span class="import-icon" onclick="toggleListManagementDiv()">📥</span>
+                        <span class="tooltiptext">Click to import lists</span>
+                    </span>
                 </div>
-                <div id="file-viewer">
-                    Loading...
+                <div class="lmc-select-all-wrapper">
+                    <input type="checkbox" id="lmc-select-all" onclick="toggleSelectAll()">
+                    <label for="lmc-select-all">Select All</label>
                 </div>
-                <span name="hideImportDiv" class="tooltip">
-                    <span class="hide-icon" onclick="toggleImportDiv()">🔒</span>
-                    <span class="tooltiptext">Click to hide</span>
-                </span>
+                <div id="manage_loaded_lists"></div>
             </div>
 
+            <div id="importDiv" style='display: none'>
+                <h3 style="text-align: center;">Import Lists</h3>
+                <div class="import-container">
+                    <div clas="breadcrumb" id="breadcrumb">
+                        Home
+                    </div>
+                    <div id="file-viewer">
+                        Loading...
+                    </div>
+                    <span name="hideImportDiv" class="tooltip">
+                        <span class="hide-icon" onclick="toggleImportDiv()">🔒</span>
+                        <span class="tooltiptext">Click to hide</span>
+                    </span>
+                </div>
+
+            </div>
+
+            <div id="local_list_import" class="local-import-container" style='display: none'>
+                <button class="local-import-button">Import list from local</button>
+                <div class="local-import-content">
+                    <input type="file" accept=".csv" class="file-input" />
+                </div>
+            </div>
         </div>
 
         <div class="flashcard" id="flashcard">
@@ -1295,7 +1478,7 @@
 
         document.getElementById('listSelector').addEventListener('change', switchList);
         document.getElementById('toggleListButton').addEventListener('click', toggleWordList);
-        document.getElementById('createListButton').addEventListener('click', () => {
+        function create_list() {
             const listName = prompt("Enter a name for the new list:").trim();
             if (listName && !AppState.vocabLists[listName]) {
                 AppState.vocabLists[listName] = [];
@@ -1304,17 +1487,15 @@
             } else {
                 alert("List name already exists or is invalid.");
             }
-        });
-        document.getElementById('deleteListButton').addEventListener('click', () => {
+        }
+        function delete_list(list_name) {
             if (Object.keys(AppState.vocabLists).length === 1) {
                 alert("You cannot delete the last remaining list.");
                 return;
             }
-            if (confirm(`Are you sure you want to delete the list: ${AppState.currentListName}?`)) {
-                delete AppState.vocabLists[AppState.currentListName];
-                updateListAndUI(Object.keys(AppState.vocabLists)[0]);
-            }
-        });
+            delete AppState.vocabLists[AppState.currentListName];
+            updateListAndUI(Object.keys(AppState.vocabLists)[0]);
+        }
         function exportToCSV() {
             const header = ['Word', 'Example', 'Translation'];
             const rows = AppState.words.map(entry => {
@@ -1696,6 +1877,11 @@
             importDiv.style.display = importDiv.style.display === 'none' ? 'block' : 'none';
         }
 
+        function toggleListManagementDiv() {
+            const importDiv = document.getElementById('lists_management_container');
+            importDiv.style.display = importDiv.style.display === 'none' ? 'block' : 'none';
+        }
+
         const fileList = document.getElementById('fileList');
         const tableContainer = document.getElementById('tableContainer');
         const REPO = 'keepthestreak/lists';
@@ -1891,6 +2077,207 @@
                 });
         }
         loadDirectory();
+
+        const importContainer = document.getElementById('local_list_import');
+        const importButton = importContainer.querySelector('.local-import-button');
+        const importContent = importContainer.querySelector('.local-import-content');
+        const fileInput = importContainer.querySelector('.file-input');
+
+        importButton.addEventListener('click', () => {
+            importContent.classList.toggle('active');
+        });
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                import_from_csv(file.name);
+            }
+        });
+
+        function import_from_csv(file_name) {
+            console.log(file_name);
+        }
+
+        function renderLists() {
+            const container = document.getElementById('manage_loaded_lists');
+            container.innerHTML = '';
+
+            Object.entries(AppState.vocabLists).forEach(([listName, words]) => {
+                const isCompleted = words.length > 0 &&
+                    words.every(word => (AppState.streaks[word.word] || 0) >= MAX_STREAK_LENGTH);
+                const isEmpty = words.length === 0;
+
+                const listElement = document.createElement('div');
+                listElement.className = 'lmc-list-row';
+
+                // Checkbox
+                const checkboxWrapper = document.createElement('div');
+                checkboxWrapper.className = 'lmc-checkbox-wrapper';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `checkbox-${listName}`;
+                checkbox.onclick = updateSelectAllState;
+                checkboxWrapper.appendChild(checkbox);
+                listElement.appendChild(checkboxWrapper);
+
+                // List name
+                const nameElement = document.createElement('span');
+                nameElement.className = 'lmc-list-name';
+                nameElement.textContent = listName;
+                listElement.appendChild(nameElement);
+
+                // Status badge
+                const statusBadge = document.createElement('span');
+                statusBadge.className = 'lmc-status-badge';
+                if (isCompleted) {
+                    statusBadge.textContent = 'Completed';
+                    statusBadge.classList.add('lmc-completed');
+                } else if (isEmpty) {
+                    statusBadge.textContent = 'Empty';
+                    statusBadge.classList.add('lmc-empty');
+                } else {
+                    statusBadge.textContent = 'In Progress';
+                    statusBadge.classList.add('lmc-in-progress');
+                }
+                listElement.appendChild(statusBadge);
+
+                container.appendChild(listElement);
+                console.log(listName);
+            });
+        }
+
+        function updateSelectAllState() {
+            const selectAllCheckbox = document.getElementById('lmc-select-all');
+            const allCheckboxes = Object.keys(AppState.vocabLists).map(listName =>
+                document.getElementById(`checkbox-${listName}`)
+            );
+            const allChecked = allCheckboxes.every(checkbox => checkbox && checkbox.checked);
+            const noneChecked = allCheckboxes.every(checkbox => checkbox && !checkbox.checked);
+
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = !allChecked && !noneChecked;
+        }
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('lmc-select-all');
+            const isChecked = selectAllCheckbox.checked;
+            Object.keys(AppState.vocabLists).forEach(listName => {
+                const checkbox = document.getElementById(`checkbox-${listName}`);
+                if (checkbox) {
+                    checkbox.checked = isChecked;
+                }
+            });
+        }
+
+        function updateSelectAllState() {
+            const selectAllCheckbox = document.getElementById('lmc-select-all');
+            const allCheckboxes = Object.keys(AppState.vocabLists).map(listName =>
+                document.getElementById(`checkbox-${listName}`)
+            );
+            const allChecked = allCheckboxes.every(checkbox => checkbox && checkbox.checked);
+            const noneChecked = allCheckboxes.every(checkbox => checkbox && !checkbox.checked);
+
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = !allChecked && !noneChecked;
+        }
+        function getSelectedLists() {
+            const selected = [];
+            Object.keys(AppState.vocabLists).forEach(listName => {
+                const checkbox = document.getElementById(`checkbox-${listName}`);
+                if (checkbox && checkbox.checked) {
+                    console.log(listName);
+                    selected.push(listName);
+                }
+            });
+            return selected;
+        }
+        function deleteSelected() {
+            const selected = getSelectedLists();
+            selected.forEach(listName => {
+                delete AppState.vocabLists[listName];
+            });
+            renderLists();
+            updateSelectAllState();
+            updateListAndUI(Object.keys(AppState.vocabLists)[0]);
+        }
+        renderLists();
+        const dropdownTrigger = document.getElementById('dropdownTrigger');
+        const dropdownContent = document.getElementById('dropdownContent');
+
+        // Toggle dropdown on click
+        dropdownTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownContent.classList.toggle('lmc_show');
+        });
+
+        // Show dropdown on hover
+        dropdownTrigger.addEventListener('mouseenter', () => {
+            dropdownContent.classList.add('lmc_show');
+        });
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', () => {
+            if (dropdownContent.classList.contains('lmc_show')) {
+                dropdownContent.classList.remove('lmc_show');
+            }
+        });
+
+        // Row click functions
+        function row_1() {
+            const list_manage = document.getElementById('lists_management_container');
+            const list_import = document.getElementById('importDiv');
+            const list_upload = document.getElementById('local_list_import');
+
+            list_manage.style.display = list_manage.style.display === 'none' ? 'block' : 'none';
+            list_import.style.display = 'none';
+            list_upload.style.display = 'none';
+
+            const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
+            const row_1 = document.getElementById('lmc_row_1');
+            const row_2 = document.getElementById('lmc_row_2');
+            const row_3 = document.getElementById('lmc_row_3');
+            row_1.style.backgroundColor = list_manage.style.display === 'none' ? '' : color;
+            row_2.style.backgroundColor = '';
+            row_3.style.backgroundColor = '';
+        }
+
+        function row_2() {
+            const list_manage = document.getElementById('lists_management_container');
+            const list_import = document.getElementById('importDiv');
+            const list_upload = document.getElementById('local_list_import');
+
+            list_manage.style.display = 'none';
+            list_import.style.display = list_import.style.display === 'none' ? 'block' : 'none';
+            list_upload.style.display = 'none';
+
+            const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
+            const row_1 = document.getElementById('lmc_row_1');
+            const row_2 = document.getElementById('lmc_row_2');
+            const row_3 = document.getElementById('lmc_row_3');
+            row_1.style.backgroundColor = '';
+            row_2.style.backgroundColor = list_import.style.display === 'none' ? '' : color;
+            row_3.style.backgroundColor = '';
+        }
+
+        function row_3() {
+            const list_manage = document.getElementById('lists_management_container');
+            const list_import = document.getElementById('importDiv');
+            const list_upload = document.getElementById('local_list_import');
+
+            list_manage.style.display = 'none';
+            list_import.style.display = 'none';
+            list_upload.style.display = list_upload.style.display === 'none' ? 'block' : 'none';
+
+            const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
+            const row_1 = document.getElementById('lmc_row_1');
+            const row_2 = document.getElementById('lmc_row_2');
+            const row_3 = document.getElementById('lmc_row_3');
+            row_1.style.backgroundColor = '';
+            row_2.style.backgroundColor = '';
+            row_3.style.backgroundColor = list_upload.style.display === 'none' ? '' : color;
+        }
+        function iskDarkMode() {
+            return document.body.classList.contains('dark-mode');
+        }
     </script>
 </body>
 
