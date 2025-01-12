@@ -834,6 +834,187 @@
                 content: "📋 Lists Management";
             }
         }
+
+        /* file upload */
+        .upload-container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .upload-zone {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .dark-mode .upload-zone {
+            background-color: #1a1a1a;
+            border-color: #444;
+        }
+
+        .upload-zone:hover {
+            border-color: #0066cc;
+            background-color: rgba(0, 102, 204, 0.05);
+        }
+
+        .dark-mode .upload-zone:hover {
+            background-color: rgba(0, 102, 204, 0.15);
+        }
+
+        .upload-zone.dragging {
+            border-color: #0066cc;
+            background-color: rgba(0, 102, 204, 0.1);
+        }
+
+        .upload-zone.success {
+            border-color: #00cc66;
+        }
+
+        .upload-zone.error {
+            border-color: #cc0000;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .dark-mode .upload-icon {
+            color: #888;
+        }
+
+        .upload-text {
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .dark-mode .upload-text {
+            color: #fff;
+        }
+
+        .file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .feedback-message {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 4px;
+            display: none;
+            opacity: 0;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .feedback-message.animate {
+            animation: fadeInOut 3s ease forwards;
+        }
+
+        /* --- */
+        .feedback-message.success {
+            display: block;
+            background-color: #e6ffe6;
+            color: #006600;
+            border: 1px solid #00cc66;
+        }
+
+        .dark-mode .feedback-message.success {
+            background-color: rgba(0, 204, 102, 0.1);
+            color: #00cc66;
+            border-color: #00cc66;
+        }
+
+        .feedback-message.error {
+            display: block;
+            background-color: #ffe6e6;
+            color: #cc0000;
+            border: 1px solid #cc0000;
+        }
+
+        .dark-mode .feedback-message.error {
+            background-color: rgba(204, 0, 0, 0.1);
+            color: #ff3333;
+            border-color: #cc0000;
+        }
+
+        .file-preview {
+            margin-top: 20px;
+            display: none;
+            text-align: left;
+        }
+
+        .file-preview.active {
+            display: block;
+        }
+
+        .file-info {
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .dark-mode .file-info {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .dark-mode .preview-table th,
+        .dark-mode .preview-table td {
+            border-color: #444;
+            color: #fff;
+        }
+
+        .preview-table th {
+            background-color: #f0f0f0;
+        }
+
+        .dark-mode .preview-table th {
+            background-color: #2a2a2a;
+        }
     </style>
 </head>
 
@@ -895,11 +1076,29 @@
 
             <div id="local_list_import" class="local-import-container" style='display: none'>
                 <button class="local-import-button">Import list from local</button>
-                <div class="local-import-content">
+                <div class="local-import-content" onchange="handleFileSelect(event)">
                     <input type="file" accept=".csv" class="file-input" />
                 </div>
             </div>
         </div>
+
+
+        <div id="upload-container" class="upload-container" style='display: none'>
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drop your CSV file here or click to upload</div>
+                <input type="file" onchange="handleFileSelect(event)" class="file-input" accept=".csv" id="fileInput">
+            </div>
+            <div class="feedback-message" id="feedbackMessage"></div>
+            <div class="file-preview" id="filePreview">
+                <div class="file-info" id="fileInfo"></div>
+                <div id="previewContent"></div>
+            </div>
+        </div>
+
+
+
+
 
         <div class="flashcard" id="flashcard">
             <div>
@@ -1404,7 +1603,9 @@
             showTranslation.style.visibility = 'visible';
             counter.style.visibility = 'hidden';
             completeButton.style.visibility = 'visible';
-            showTranslation.innerText = `${AppState.currentWord.translation}`;
+            if (AppState.currentWord) {
+                showTranslation.innerText = `${AppState.currentWord.translation}`;
+            }
 
             checkButton.innerText = 'Next';
 
@@ -1911,8 +2112,9 @@
                 );
         }
 
-        async function importListFromCsv(listName, rawUrl) {
+        async function importListFromCsv(listName, rawUrl, fileInput = { target: {} }) {
             try {
+                console.log("import list from csv");
                 // Check if list already exists
                 if (listName in AppState.vocabLists) {
                     throw new Error(`List "${listName}" already exists`);
@@ -1976,12 +2178,16 @@
                 saveLists();
                 updateListAndUI(listName);
 
+                showFeedback('File successfully uploaded!', 'success');
+                fileInput.value = '';
                 return {
                     success: true,
                     message: `Successfully imported ${words.length} words to list "${listName}"`
                 };
 
             } catch (error) {
+                fileInput.value = '';
+                showFeedback(`Import failed: ${error.message}`, 'error');
                 return {
                     success: false,
                     message: `Import failed: ${error.message}`
@@ -2076,6 +2282,24 @@
                     console.error(err);
                 });
         }
+        async function handleFileSelect(event) {
+            console.log("in handle file select");
+            const file = event.target.files[0];
+            if (file) {
+                if (!file.name.endsWith('.csv')) {
+                    showFeedback('Please upload a CSV file', 'error');
+                    return;
+                }
+
+                const fileUrl = URL.createObjectURL(file);
+
+                const fn = file.name.replace(/\.csv$/i, "");
+                importListFromCsv(fn, fileUrl, event.target);
+
+                // Clean up the URL object when done
+                URL.revokeObjectURL(fileUrl);
+            }
+        }
         loadDirectory();
 
         const importContainer = document.getElementById('local_list_import');
@@ -2089,6 +2313,7 @@
 
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
+            console.log(file);
             if (file) {
                 import_from_csv(file.name);
             }
@@ -2225,7 +2450,7 @@
         function row_1() {
             const list_manage = document.getElementById('lists_management_container');
             const list_import = document.getElementById('importDiv');
-            const list_upload = document.getElementById('local_list_import');
+            const list_upload = document.getElementById('upload-container');
 
             list_manage.style.display = list_manage.style.display === 'none' ? 'block' : 'none';
             list_import.style.display = 'none';
@@ -2243,7 +2468,7 @@
         function row_2() {
             const list_manage = document.getElementById('lists_management_container');
             const list_import = document.getElementById('importDiv');
-            const list_upload = document.getElementById('local_list_import');
+            const list_upload = document.getElementById('upload-container');
 
             list_manage.style.display = 'none';
             list_import.style.display = list_import.style.display === 'none' ? 'block' : 'none';
@@ -2261,7 +2486,7 @@
         function row_3() {
             const list_manage = document.getElementById('lists_management_container');
             const list_import = document.getElementById('importDiv');
-            const list_upload = document.getElementById('local_list_import');
+            const list_upload = document.getElementById('upload-container');
 
             list_manage.style.display = 'none';
             list_import.style.display = 'none';
@@ -2277,6 +2502,27 @@
         }
         function iskDarkMode() {
             return document.body.classList.contains('dark-mode');
+        }
+
+        function showFeedback(message, type) {
+            const feedbackMessage = document.getElementById('feedbackMessage');
+            const uploadZone = document.getElementById('uploadZone');
+
+            console.log("in show feedback");
+
+            // Reset element state
+            feedbackMessage.classList.remove('animate');
+
+            // Set content and base classes
+            feedbackMessage.textContent = message;
+            feedbackMessage.className = `feedback-message ${type}`;
+            uploadZone.className = `upload-zone ${type}`;
+
+            // Force reflow
+            void feedbackMessage.offsetWidth;
+
+            // Add animation class
+            feedbackMessage.classList.add('animate');
         }
     </script>
 </body>
