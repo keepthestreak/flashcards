@@ -2471,6 +2471,10 @@
             dropdownContent.classList.add('lmc_show');
         });
 
+        dropdownContent.addEventListener('mouseleave', () => {
+            dropdownContent.classList.toggle('lmc_show');
+        });
+
         // Close dropdown when clicking outside
         window.addEventListener('click', () => {
             if (dropdownContent.classList.contains('lmc_show')) {
