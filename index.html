@@ -2135,8 +2135,8 @@
             // Clear other UI elements
             feedbackElement.innerText = '';
             userTranslationElement.value = '';
-            counterElement.innerText = '';
-            lastShownElement.innerText = '';
+            if (counterElement) { counterElement.innerText = '';}
+            if (lastShownElement) { lastShownElement.innerText = '';}
             example.innerText = '';
 
             // Reset the current word
