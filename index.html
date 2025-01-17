@@ -136,7 +136,7 @@
             right: 0;
             top: 50%;
             transform: translateY(-50%);
-            width: 18px;
+            width: 14px;
             height: 60px;
             background: #e2e8f0;
             border-radius: 0 6px 6px 0;
@@ -152,18 +152,20 @@
         .menu-container {
             position: absolute;
             top: 0;
-            right: -200px;
+            right: -33%;
+            max-width: -200px;
+            width: 33%;
             height: 100%;
             transition: transform 0.3s ease;
         }
 
   
         .menu-container.clicked {
-            transform: translateX(-200px);
+            transform: translateX(-100%);
         }
 
         .sidebar {
-            width: 200px;
+            width: 100%;
             height: 100%;
             background: white;
             box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
@@ -912,7 +914,7 @@
 
         @media (min-width: 711px) {
             #dropdownTrigger::after {
-                content: "📋 Lists Management";
+                content: "📋 Manage Lists";
             }
         }
 
@@ -2626,7 +2628,11 @@
         menuContainer.classList.remove('clicked');
       }
     });
-
+    hint.addEventListener('mouseleave', () => {
+      if (!isClicked) {
+        menuContainer.classList.remove('clicked');
+      }
+    });
 
 
         hint.addEventListener('click', () => {
