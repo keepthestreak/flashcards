@@ -154,12 +154,13 @@
             top: 0;
             right: -33%;
             max-width: -200px;
+            min-width: 100px;
             width: 33%;
             height: 100%;
             transition: transform 0.3s ease;
         }
 
-  
+
         .menu-container.clicked {
             transform: translateX(-100%);
         }
@@ -184,7 +185,8 @@
             border-radius: 6px;
             transition: background-color 0.2s;
             cursor: pointer;
-            font-size: clamp(8px, 2vw, 28x); /* min value, preferred value, max value */
+            font-size: clamp(4px, 2vw, 28x);
+            /* min value, preferred value, max value */
         }
 
         .sidebar_item:hover {
@@ -1661,13 +1663,15 @@
         }
 
         function handleCompleteEvent() {
-            wordStats[AppState.currentWord.word] = { correct: MAX_STREAK_LENGTH, total: MAX_STREAK_LENGTH };
-            wordStats[AppState.currentWord.word].total = MAX_STREAK_LENGTH;
-            AppState.streaks[AppState.currentWord.word] = MAX_STREAK_LENGTH;
-            saveLists();
-            updateListSelector();
-            //showNextWord();
-            refreshTable();
+            if (AppState.currentWord) {
+                wordStats[AppState.currentWord.word] = { correct: MAX_STREAK_LENGTH, total: MAX_STREAK_LENGTH };
+                wordStats[AppState.currentWord.word].total = MAX_STREAK_LENGTH;
+                AppState.streaks[AppState.currentWord.word] = MAX_STREAK_LENGTH;
+                saveLists();
+                updateListSelector();
+                //showNextWord();
+                refreshTable();
+            }
         }
 
         function handleShowEvent() {
@@ -1739,7 +1743,6 @@
             const userTranslation = document.getElementById('userTranslation');
             const showTranslation = document.getElementById('showTranslation');
             const counter = document.getElementById('counterDiv');
-            const completeButton = document.getElementById('completeButton');
 
             if (isCheckMode(checkButton.innerText)) {
                 checkButton.removeEventListener('click', handleCheckEvent); // Remove previous listener
@@ -1752,7 +1755,6 @@
                 showTranslation.style.visibility = 'hidden';
                 userTranslation.style.visibility = 'visible';
                 counter.style.visibility = 'visible';
-                completeButton.style.visibility = 'hidden';
                 userTranslation.focus();
             }
         });
@@ -2137,8 +2139,8 @@
             // Clear other UI elements
             feedbackElement.innerText = '';
             userTranslationElement.value = '';
-            if (counterElement) { counterElement.innerText = '';}
-            if (lastShownElement) { lastShownElement.innerText = '';}
+            if (counterElement) { counterElement.innerText = ''; }
+            if (lastShownElement) { lastShownElement.innerText = ''; }
             example.innerText = '';
 
             // Reset the current word
@@ -2613,27 +2615,27 @@
         let isClicked = false;
 
         hint.addEventListener('mouseenter', () => {
-      if (!isClicked) {
-        menuContainer.classList.add('clicked');
-      }
-    });
-    
-    menuContainer.addEventListener('mouseenter', () => {
-      if (!isClicked) {
-        menuContainer.classList.add('clicked');
-      }
-    });
-    
-    menuContainer.addEventListener('mouseleave', () => {
-      if (!isClicked) {
-        menuContainer.classList.remove('clicked');
-      }
-    });
-    hint.addEventListener('mouseleave', () => {
-      if (!isClicked) {
-        menuContainer.classList.remove('clicked');
-      }
-    });
+            if (!isClicked) {
+                menuContainer.classList.add('clicked');
+            }
+        });
+
+        menuContainer.addEventListener('mouseenter', () => {
+            if (!isClicked) {
+                menuContainer.classList.add('clicked');
+            }
+        });
+
+        menuContainer.addEventListener('mouseleave', () => {
+            if (!isClicked) {
+                menuContainer.classList.remove('clicked');
+            }
+        });
+        hint.addEventListener('mouseleave', () => {
+            if (!isClicked) {
+                menuContainer.classList.remove('clicked');
+            }
+        });
 
 
         hint.addEventListener('click', () => {
