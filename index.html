@@ -185,7 +185,13 @@
             border-radius: 6px;
             transition: background-color 0.2s;
             cursor: pointer;
-            font-size: clamp(10px, 2vw, 28px);
+            font-size: clamp(10px, 2vw, 22px);
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 0;
+
             /* min value, preferred value, max value */
         }
 
@@ -1217,6 +1223,7 @@
                     <div id="pause_word_button" class="sidebar_item" onclick="handleCompleteEvent()">Pause Word</div>
                     <div id="reset_word_button" class="sidebar_item" onclick="resetStreak()">Reset Word</div>
                     <div id="switch_mode_button" class="sidebar_item">Switch Mode</div>
+                    <div id="play_mode_button" class="sidebar_item">&#9658</div>
                 </div>
             </div>
 
