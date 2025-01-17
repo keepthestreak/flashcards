@@ -193,6 +193,13 @@
             background: #e2e8f0;
         }
 
+        .sidebar_item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            /* Prevents hover effects */
+        }
+
         /* Dark mode styles */
         .dark-mode .sidebar_hint {
             background: #1e293b;
@@ -214,6 +221,11 @@
 
         .dark-mode .sidebar_item:hover {
             background: #334155;
+        }
+
+        .dark-mode .sidebar_item.disabled {
+            opacity: 0.4;
+            background: #0f172a;
         }
 
         #word {
@@ -1385,6 +1397,9 @@
                 document.getElementById('userTranslation').value = '';
                 document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0} / ${MAX_STREAK_LENGTH}`;
 
+                const pauseButton = document.getElementById('pause_word_button');
+                pauseButton.innerText = "Pause Word";
+                pauseButton.classList.remove('disabled');
                 // Update the last shown time after displaying it
                 const now = new Date();
                 AppState.lastShownTimes[AppState.currentWord.word] = now.toISOString();
@@ -1667,6 +1682,13 @@
                 wordStats[AppState.currentWord.word] = { correct: MAX_STREAK_LENGTH, total: MAX_STREAK_LENGTH };
                 wordStats[AppState.currentWord.word].total = MAX_STREAK_LENGTH;
                 AppState.streaks[AppState.currentWord.word] = MAX_STREAK_LENGTH;
+                counter = document.getElementById('counter');
+                counter.innerText = "word is paussed and will not show up until reset";
+
+                const pauseButton = document.getElementById('pause_word_button');
+                pauseButton.disabled = true;
+                pauseButton.innerText = "Word Paussed";
+                pauseButton.classList.add('disabled');
                 saveLists();
                 updateListSelector();
                 //showNextWord();
@@ -1801,6 +1823,10 @@
             const wordElement = document.getElementById('word'); // Get the <p> element
             const text = wordElement.textContent; // Get the text content
             AppState.streaks[text] = 0;
+            document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0} / ${MAX_STREAK_LENGTH}`;
+            const pauseButton = document.getElementById('pause_word_button');
+            pauseButton.innerText = "Pause Word";
+            pauseButton.classList.remove('disabled');
             saveLists();
             refreshTable();
         }
