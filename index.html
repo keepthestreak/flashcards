@@ -136,7 +136,7 @@
             right: 0;
             top: 50%;
             transform: translateY(-50%);
-            width: 12px;
+            width: 18px;
             height: 60px;
             background: #e2e8f0;
             border-radius: 0 6px 6px 0;
@@ -157,8 +157,7 @@
             transition: transform 0.3s ease;
         }
 
-        .sidebar_hint:hover~.menu-container,
-        .menu-container:hover,
+  
         .menu-container.clicked {
             transform: translateX(-200px);
         }
@@ -2609,6 +2608,26 @@
         const hint = document.querySelector('.sidebar_hint');
         const menuContainer = document.querySelector('.menu-container');
         let isClicked = false;
+
+        hint.addEventListener('mouseenter', () => {
+      if (!isClicked) {
+        menuContainer.classList.add('clicked');
+      }
+    });
+    
+    menuContainer.addEventListener('mouseenter', () => {
+      if (!isClicked) {
+        menuContainer.classList.add('clicked');
+      }
+    });
+    
+    menuContainer.addEventListener('mouseleave', () => {
+      if (!isClicked) {
+        menuContainer.classList.remove('clicked');
+      }
+    });
+
+
 
         hint.addEventListener('click', () => {
             isClicked = !isClicked;
