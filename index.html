@@ -1223,7 +1223,7 @@
                     <div id="pause_word_button" class="sidebar_item" onclick="handleCompleteEvent()">Pause Word</div>
                     <div id="reset_word_button" class="sidebar_item" onclick="resetStreak()">Reset Word</div>
                     <div id="switch_mode_button" class="sidebar_item">Switch Mode</div>
-                    <div id="play_mode_button" class="sidebar_item">&#9658</div>
+                    <div id="play_mode_button" class="sidebar_item">▶</div>
                 </div>
             </div>
 
@@ -2671,6 +2671,7 @@
         });
 
 
+
         hint.addEventListener('click', () => {
             isClicked = !isClicked;
             if (isClicked) {
@@ -2688,6 +2689,33 @@
             }
         });
 
+
+        function play_list() {
+            const check_button = document.getElementById('checkButton');
+            if (check_button.innerText === 'Next') {
+                handleNextEvent();
+                playButtonText();
+            } else {
+                handleShowEvent();
+            }
+        }
+        let intervalId; // Variable to store the interval ID
+        document.addEventListener('DOMContentLoaded', () => {
+            const button = document.getElementById("play_mode_button");
+            button.addEventListener('click', () => {
+                const button = document.getElementById("play_mode_button");
+
+                if (button.innerHTML === "▶") { // Play icon
+                    button.innerHTML = "⏸"; // Pause icon
+                    // Start calling showNextWord() every 3 seconds
+                    intervalId = setInterval(play_list, 1500);
+                } else {
+                    button.innerHTML = "▶"; // Play icon
+                    // Stop the interval when paused
+                    clearInterval(intervalId);
+                }
+            });
+        });
     </script>
 </body>
 
