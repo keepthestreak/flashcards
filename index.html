@@ -136,7 +136,7 @@
             right: 0;
             top: 50%;
             transform: translateY(-50%);
-            width: 14px;
+            width: 12px;
             height: 60px;
             background: #e2e8f0;
             border-radius: 0 6px 6px 0;
@@ -170,7 +170,7 @@
             height: 100%;
             background: white;
             box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            padding: 5px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -181,16 +181,18 @@
 
         .sidebar_item {
             padding: 15px;
+            padding-left: 2px;
             background: #f1f5f9;
             border-radius: 6px;
             transition: background-color 0.2s;
             cursor: pointer;
-            font-size: clamp(10px, 2vw, 22px);
+            font-size: clamp(10px, 2vw, 16px);
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 0;
+            min-width: 0;
 
             /* min value, preferred value, max value */
         }
@@ -1123,13 +1125,13 @@
 </head>
 
 <body>
-    <h1>Flashcard Vocabulary</h1>
+    <h1 id="header">Flashcard Vocabulary</h1>
     <div id="dark-mode-button" class="tooltip">
         <button id="theme-toggle">🌞</button>
         <span class="tooltiptext">Toggle Dark Mode</span>
     </div>
     <div class="container">
-        <div class="controls">
+        <div id="controls" class="controls">
             <select id="listSelector" style="position: absolute; left: 50%; transform: translateX(-50%);"></select>
             <div class="lmc_dropdown_container">
                 <div id="dropdownTrigger"></div>
@@ -1224,6 +1226,7 @@
                     <div id="reset_word_button" class="sidebar_item" onclick="resetStreak()">Reset Word</div>
                     <div id="switch_mode_button" class="sidebar_item">Switch Mode</div>
                     <div id="play_mode_button" class="sidebar_item">▶</div>
+                    <div id="invert_button" class="sidebar_item">Invert Word</div>
                 </div>
             </div>
 
@@ -1256,6 +1259,49 @@
     <div class="footer">
         <p>Flashcard App © 2024. Made with 💙 for learning.</p>
     </div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/5.0.0/introjs.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/5.0.0/intro.min.js"></script>
+    <script>
+        function startTour(e) {
+            if (e) { e.stopPropagation(); }
+            dropdownContent.classList.toggle('lmc_show');
+            dropdownContent.removeEventListener('click', toggleDropdown);
+            window.removeEventListener('click', toggleDropdown);
+            const tour = introJs()
+                .setOptions({
+                    steps: [
+                        { element: '#header', intro: 'Welcome to Flashcard Vocabulary, the simplest and most effective flashcards app for spaced repetition learning.' },
+                        { element: '#flashcard', intro: 'This is your flashcard' },
+                        { element: '#word', intro: 'Your word or phrase to memorize.' },
+                        { element: '#example', intro: 'An example or explanation' },
+                        { element: '#checkButton', intro: 'Click or swipe to see the translation' },
+                        { element: '#showTranslation', intro: 'The translation' },
+                        { element: '#controls', intro: 'Here you can switch between your list or import publicly shared lists' },
+                        { element: 'lmc_row_1', intro: 'Finally, this is important!' },
+                    ],
+                    showProgress: true,
+                    showbuttons: true,
+                    showbullet: true,
+                });
+            tour.onstart(() => {
+                dropdownContent.classList.add('lmc_show');
+                dropdownContent.removeEventListener('click', toggleDropdown);
+            });
+            tour.onbeforechange((element) => {
+                if (element && element.id === 'lmc_row_1') {
+                    dropdownContent.addEventListener('click', toggleDropdown);
+                } else if (element && element.id === 'showTranslation') {
+                    handleShowEvent();
+                }
+            });
+            tour.start();
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('tour_button').addEventListener('click', startTour);
+        });
+
+    </script>
+    <button id="tour_button">Start Tour</button>
 
     <script>
         const storageKey = 'vocabLists';
@@ -1287,6 +1333,16 @@
         AppState.words = AppState.vocabLists[AppState.currentListName];
         AppState.currentWord = null;
         sortTable('streak');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (AppState.currentListName === 'default' &&
+                AppState.words.length === 0) {
+                const wordListDiv = document.getElementById('wordList');
+                wordListDiv.style.display = 'none';
+                AppState.isTableVisible = false;
+                startTour();
+            }
+        });
 
         document.getElementById('userTranslation').addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
@@ -2543,10 +2599,12 @@
         const dropdownContent = document.getElementById('dropdownContent');
 
         // Toggle dropdown on click
-        dropdownTrigger.addEventListener('click', (e) => {
-            e.stopPropagation();
+        dropdownTrigger.addEventListener('click', toggleDropdown);
+
+        function toggleDropdown() {
+            //e.stopPropagation();
             dropdownContent.classList.toggle('lmc_show');
-        });
+        }
 
         // Show dropdown on hover
         dropdownTrigger.addEventListener('mouseenter', () => {
@@ -2555,13 +2613,6 @@
 
         dropdownContent.addEventListener('mouseleave', () => {
             dropdownContent.classList.toggle('lmc_show');
-        });
-
-        // Close dropdown when clicking outside
-        window.addEventListener('click', () => {
-            if (dropdownContent.classList.contains('lmc_show')) {
-                dropdownContent.classList.remove('lmc_show');
-            }
         });
 
         // Row click functions
@@ -2716,6 +2767,14 @@
                 }
             });
         });
+        // Toggle dropdown on click
+        dropdownTrigger.addEventListener('click', toggleDropdown);
+        window.addEventListener('click', toggleDropdown);
+
+        function toggleDropdown() {
+            //e.stopPropagation();
+            dropdownContent.classList.toggle('lmc_show');
+        }
     </script>
 </body>
 
