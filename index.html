@@ -2651,8 +2651,9 @@
         // Toggle dropdown on click
         dropdownTrigger.addEventListener('click', toggleDropdown);
 
-        function toggleDropdown() {
-            //e.stopPropagation();
+        function toggleDropdown(e) {
+            e.stopPropagation();
+            console.log('toggleDropdown');
             dropdownContent.classList.toggle('lmc_show');
         }
 
@@ -2820,11 +2821,8 @@
 
         function turnOffDropdown() {
             //e.stopPropagation();
+            console.log('turnOffDropdown');
             dropdownContent.classList.remove('lmc_show');
-        }
-        function toggleDropdown() {
-            //e.stopPropagation();
-            dropdownContent.classList.toggle('lmc_show');
         }
     </script>
 </body>
