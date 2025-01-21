@@ -149,7 +149,7 @@
             background: #94a3b8;
         }
 
-        .menu-container {
+        .menu_container {
             position: absolute;
             top: 0;
             right: -33%;
@@ -161,7 +161,7 @@
         }
 
 
-        .menu-container.clicked {
+        .menu_container.clicked {
             transform: translateX(-100%);
         }
 
@@ -375,8 +375,9 @@
         }
 
         .tooltip {
-            position: relative;
-            display: inline-block;
+            position: absolute;
+            top: 0;
+            right: 0;
             cursor: pointer;
         }
 
@@ -408,6 +409,9 @@
         }
 
         .import-icon {
+            position: absolute;
+            right: 0;
+            top: 0;
             font-size: 1.2em;
             color: #4CAF50;
         }
@@ -535,14 +539,10 @@
 
         #importDiv {
             display: none;
-            /* Hidden by default */
-            margin-bottom: 20px;
-            /* Space between importDiv and flashcard */
+            margin-bottom: 20px; /* Space between importDiv and flashcard */
             padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
-            /* Light background for visibility */
             border-radius: 5px;
+            width: 100%;
         }
 
         /* Dark mode styles */
@@ -573,6 +573,8 @@
         .tooltip {
             position: relative;
             display: inline-block;
+            top: 0;
+            right: 0;
             cursor: pointer;
             margin-left: 10px;
         }
@@ -807,11 +809,29 @@
         }
 
         /* lmc */
+        #lists_management_card {
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            border-radius: 4px;
+            position: relative;
+            display: none;
+        }
+
+        #lists_management_card_button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            cursor: pointer;
+        }
+
         .lists_management_container {
+            position: relative;
             padding: 20px;
             max-width: 800px;
             margin: 0 auto;
-            display: block;
+            display: none;
         }
 
         .lmc-list-row {
@@ -845,8 +865,8 @@
             color: #1565c0;
         }
 
-        .lmc-button-group {
-            margin: 20px 0;
+        .lmc_button_group {
+            margin: 20px;
             display: flex;
             gap: 10px;
         }
@@ -942,7 +962,7 @@
         }
 
         /* file upload */
-        .upload-container {
+        .upload_container {
             max-width: 500px;
             margin: 20px auto;
             padding: 20px;
@@ -1148,18 +1168,17 @@
             </div>
         </div>
 
-        <div id="lists_management_card" style="border: 1px solid #ddd;">
+        <div id="lists_management_card">
+            <div id="lists_management_card_button" class="tooltip">
+                <span class="import-icon" onclick="toggleListManagementCard()">📥</span>
+            </div>
 
-            <div id="lists_management_container" style='display: none' class="lists_management_container">
-                <div class="lmc_button-group">
+            <div id="lists_management_container" class="lists_management_container">
+                <div class="lmc_button_group">
                     <button class="lmc-button" onclick="loadSelected()">Load Selected</button>
                     <button class="lmc-button" onclick="create_list()">Create New List</button>
                     <button onclick="resetSelected()">Reset Selected</button>
                     <button class="lmc-button" class="delete" onclick="deleteSelected()">Delete Selected</button>
-                    <span class="tooltip">
-                        <span class="import-icon" onclick="toggleListManagementDiv()">📥</span>
-                        <span class="tooltiptext">Click to import lists</span>
-                    </span>
                 </div>
                 <div class="lmc-select-all-wrapper">
                     <input type="checkbox" id="lmc-select-all" onclick="toggleSelectAll()">
@@ -1168,7 +1187,7 @@
                 <div id="manage_loaded_lists"></div>
             </div>
 
-            <div id="importDiv" style='display: none'>
+            <div id="importDiv">
                 <h3 style="text-align: center;">Import Lists</h3>
                 <div class="import-container">
                     <div clas="breadcrumb" id="breadcrumb">
@@ -1191,19 +1210,20 @@
                     <input type="file" accept=".csv" class="file-input" />
                 </div>
             </div>
-        </div>
 
 
-        <div id="upload-container" class="upload-container" style='display: none'>
-            <div class="upload-zone" id="uploadZone">
-                <div class="upload-icon">📁</div>
-                <div class="upload-text">Drop your CSV file here or click to upload</div>
-                <input type="file" onchange="handleFileSelect(event)" class="file-input" accept=".csv" id="fileInput">
-            </div>
-            <div class="feedback-message" id="feedbackMessage"></div>
-            <div class="file-preview" id="filePreview">
-                <div class="file-info" id="fileInfo"></div>
-                <div id="previewContent"></div>
+            <div id="upload_container" class="upload_container" style='display: none'>
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Drop your CSV file here or click to upload</div>
+                    <input type="file" onchange="handleFileSelect(event)" class="file-input" accept=".csv"
+                        id="fileInput">
+                </div>
+                <div class="feedback-message" id="feedbackMessage"></div>
+                <div class="file-preview" id="filePreview">
+                    <div class="file-info" id="fileInfo"></div>
+                    <div id="previewContent"></div>
+                </div>
             </div>
         </div>
 
@@ -1225,9 +1245,10 @@
                 }
             </script>
             <div class="sidebar_hint"></div>
-            <div class="menu-container">
+            <div class="menu_container">
                 <div class="sidebar">
-                    <div id="pause_word_button" class="sidebar_item" onclick="handleCompleteEvent()">Pause Word</div>
+                    <div id="pause_word_button" class="sidebar_item" onclick="handleCompleteEvent()">Pause Word
+                    </div>
                     <div id="reset_word_button" class="sidebar_item" onclick="resetStreak()">Reset Word</div>
                     <div id="switch_mode_button" class="sidebar_item">Switch Mode</div>
                     <div id="play_mode_button" class="sidebar_item">▶</div>
@@ -2269,6 +2290,30 @@
             importDiv.style.display = importDiv.style.display === 'none' ? 'block' : 'none';
         }
 
+        function turnOffListManagementCard() {
+            const card = document.getElementById('lists_management_card');
+            card.style.display = 'none';
+
+            const list_manage = document.getElementById('lists_management_container');
+            const list_import = document.getElementById('importDiv');
+            const list_upload = document.getElementById('upload_container');
+
+            list_manage.style.display = 'none';
+            list_import.style.display = 'none';
+            list_upload.style.display = 'none';
+
+            turnOffRows();
+        }
+
+        function toggleListManagementCard() {
+            const card = document.getElementById('lists_management_card');
+            if (card.style.display === 'flex') {
+                turnOffListManagementCard();
+            } else {
+                card.style.display = 'flex';
+            }
+        }
+
         function toggleListManagementDiv() {
             const importDiv = document.getElementById('lists_management_container');
             importDiv.style.display = importDiv.style.display === 'none' ? 'block' : 'none';
@@ -2620,60 +2665,57 @@
             dropdownContent.classList.toggle('lmc_show');
         });
 
+        function turnOffRows() {
+            const row_1 = document.getElementById('lmc_row_1');
+            const row_2 = document.getElementById('lmc_row_2');
+            const row_3 = document.getElementById('lmc_row_3');
+            row_1.style.backgroundColor = '';
+            row_2.style.backgroundColor = '';
+            row_3.style.backgroundColor = '';
+
+        }
+        turnOffListManagementCard();
         // Row click functions
         function row_1() {
             const list_manage = document.getElementById('lists_management_container');
-            const list_import = document.getElementById('importDiv');
-            const list_upload = document.getElementById('upload-container');
-
-            list_manage.style.display = list_manage.style.display === 'none' ? 'block' : 'none';
-            list_import.style.display = 'none';
-            list_upload.style.display = 'none';
-
-            const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
-            const row_1 = document.getElementById('lmc_row_1');
-            const row_2 = document.getElementById('lmc_row_2');
-            const row_3 = document.getElementById('lmc_row_3');
-            row_1.style.backgroundColor = list_manage.style.display === 'none' ? '' : color;
-            row_2.style.backgroundColor = '';
-            row_3.style.backgroundColor = '';
+            if (list_manage.style.display === 'block') {
+                turnOffListManagementCard();
+            } else {
+                turnOffListManagementCard();
+                toggleListManagementCard();
+                list_manage.style.display = 'block';
+                const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
+                const row_1 = document.getElementById('lmc_row_1');
+                row_1.style.backgroundColor = list_manage.style.display === 'none' ? '' : color;
+            }
         }
-
         function row_2() {
-            const list_manage = document.getElementById('lists_management_container');
             const list_import = document.getElementById('importDiv');
-            const list_upload = document.getElementById('upload-container');
-
-            list_manage.style.display = 'none';
-            list_import.style.display = list_import.style.display === 'none' ? 'block' : 'none';
-            list_upload.style.display = 'none';
-
-            const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
-            const row_1 = document.getElementById('lmc_row_1');
-            const row_2 = document.getElementById('lmc_row_2');
-            const row_3 = document.getElementById('lmc_row_3');
-            row_1.style.backgroundColor = '';
-            row_2.style.backgroundColor = list_import.style.display === 'none' ? '' : color;
-            row_3.style.backgroundColor = '';
+            if (list_import.style.display === 'block') {
+                turnOffListManagementCard();
+            } else {
+                turnOffListManagementCard();
+                toggleListManagementCard();
+                list_import.style.display = 'block';
+                const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
+                const row_2 = document.getElementById('lmc_row_2');
+                row_2.style.backgroundColor = list_import.style.display === 'none' ? '' : color;
+            }
         }
-
         function row_3() {
-            const list_manage = document.getElementById('lists_management_container');
-            const list_import = document.getElementById('importDiv');
-            const list_upload = document.getElementById('upload-container');
-
-            list_manage.style.display = 'none';
-            list_import.style.display = 'none';
-            list_upload.style.display = list_upload.style.display === 'none' ? 'block' : 'none';
-
-            const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
-            const row_1 = document.getElementById('lmc_row_1');
-            const row_2 = document.getElementById('lmc_row_2');
-            const row_3 = document.getElementById('lmc_row_3');
-            row_1.style.backgroundColor = '';
-            row_2.style.backgroundColor = '';
-            row_3.style.backgroundColor = list_upload.style.display === 'none' ? '' : color;
+            const list_upload = document.getElementById('upload_container');
+            if (list_upload.style.display === 'block') {
+                turnOffListManagementCard();
+            } else {
+                turnOffListManagementCard();
+                toggleListManagementCard();
+                list_upload.style.display = 'block';
+                const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
+                const row_3 = document.getElementById('lmc_row_3');
+                row_3.style.backgroundColor = list_upload.style.display === 'none' ? '' : color;
+            }
         }
+
         function iskDarkMode() {
             return document.body.classList.contains('dark-mode');
         }
@@ -2700,7 +2742,7 @@
 
         /* sidebar */
         const hint = document.querySelector('.sidebar_hint');
-        const menuContainer = document.querySelector('.menu-container');
+        const menuContainer = document.querySelector('.menu_container');
         let isClicked = false;
 
         hint.addEventListener('mouseenter', () => {
@@ -2774,8 +2816,12 @@
         });
         // Toggle dropdown on click
         dropdownTrigger.addEventListener('click', toggleDropdown);
-        window.addEventListener('click', toggleDropdown);
+        window.addEventListener('click', turnOffDropdown);
 
+        function turnOffDropdown() {
+            //e.stopPropagation();
+            dropdownContent.classList.remove('lmc_show');
+        }
         function toggleDropdown() {
             //e.stopPropagation();
             dropdownContent.classList.toggle('lmc_show');
