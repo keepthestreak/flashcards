@@ -88,6 +88,13 @@
             font-weight: bold;
         }
 
+        #listSelector {
+            width: auto;
+            max-width:40%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
         select,
         button,
         input {
@@ -540,7 +547,8 @@
 
         #importDiv {
             display: none;
-            margin-bottom: 20px; /* Space between importDiv and flashcard */
+            margin-bottom: 20px;
+            /* Space between importDiv and flashcard */
             padding: 10px;
             border-radius: 5px;
             width: 100%;
@@ -833,10 +841,14 @@
             max-width: 800px;
             margin: 0 auto;
             display: none;
+            flex-wrap: wrap;
+            width: 100%;
+            overflow-x: scroll;
         }
 
-        .lmc-list-row {
+        .lmc_list_row {
             display: flex;
+            overflow-x: auto;
             align-items: center;
             padding: 10px;
             border: 1px solid #ddd;
@@ -903,7 +915,7 @@
             flex-grow: 1;
         }
 
-        .lmc-select-all-wrapper {
+        .lmc_select_all_wrapper {
             margin-bottom: 10px;
         }
 
@@ -1160,7 +1172,7 @@
     </div>
     <div class="container">
         <div id="controls" class="controls">
-            <select id="listSelector" style="position: absolute; left: 50%; transform: translateX(-50%);"></select>
+            <select id="listSelector"></select>
             <div class="lmc_dropdown_container">
                 <div id="dropdownTrigger"></div>
                 <div id="dropdownContent" class="lmc_dropdown_content">
@@ -1173,7 +1185,7 @@
 
         <div id="lists_management_card">
             <div id="lists_management_card_button" class="tooltip">
-                <span class="import-icon" onclick="turnOffListManagementCard()">📥</span>
+                <span class="import-icon" onclick="turnOffListManagementCard()">🗙</span>
             </div>
 
             <div id="lists_management_container" class="lists_management_container">
@@ -1183,7 +1195,7 @@
                     <button onclick="resetSelected()">Reset Selected</button>
                     <button class="lmc-button" class="delete" onclick="deleteSelected()">Delete Selected</button>
                 </div>
-                <div class="lmc-select-all-wrapper">
+                <div class="lmc_select_all_wrapper">
                     <input type="checkbox" id="lmc-select-all" onclick="toggleSelectAll()">
                     <label for="lmc-select-all">Select All</label>
                 </div>
@@ -1883,6 +1895,9 @@
                 AppState.vocabLists[listName] = [];
                 updateListAndUI(listName);
                 document.getElementById('listSelector').value = AppState.currentListName;
+                renderLists();
+                updateSelectAllState();
+                updateListAndUI(Object.keys(AppState.vocabLists)[0]);
             } else {
                 alert("List name already exists or is invalid.");
             }
@@ -2560,7 +2575,7 @@
                 const isEmpty = words.length === 0;
 
                 const listElement = document.createElement('div');
-                listElement.className = 'lmc-list-row';
+                listElement.className = 'lmc_list_row';
 
                 // Checkbox
                 const checkboxWrapper = document.createElement('div');
