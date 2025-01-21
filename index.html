@@ -1577,10 +1577,12 @@
             const tableRows = AppState.words.map((entry, index) => createTableRowHTML(entry, index)).join('');
 
             return `
+        <div id='table_container' style="overflow-x: scroll;">
         <table>
             <thead>${tableHeader}</thead>
             <tbody>${tableRows}</tbody>
         </table>
+        </div>
     `;
         }
 
