@@ -1177,16 +1177,16 @@
             <div class="lmc_dropdown_container">
                 <div id="dropdownTrigger"></div>
                 <div id="dropdownContent" class="lmc_dropdown_content">
-                    <div id='lmc_row_1' class="lmc_dropdown_row" onclick="row_1()">Manage Lists</div>
-                    <div id='lmc_row_2' class="lmc_dropdown_row" onclick="row_2()">Import List</div>
-                    <div id='lmc_row_3' class="lmc_dropdown_row" onclick="row_3()">Upload List</div>
+                    <div id='lmc_row_1' class="lmc_dropdown_row" onclick="frow_1()">Manage Lists</div>
+                    <div id='lmc_row_2' class="lmc_dropdown_row" onclick="frow_2()">Import List</div>
+                    <div id='lmc_row_3' class="lmc_dropdown_row" onclick="frow_3()">Upload List</div>
                 </div>
             </div>
         </div>
 
         <div id="lists_management_card">
-            <div id="lists_management_card_button" class="tooltip">
-                <span class="import-icon" onclick="turnOffListManagementCard()">📥</span>
+            <div id="lists_management_card_button"  onclick="turnOffListManagementCard()">
+                <span class="import-icon">📥</span>
             </div>
 
             <div id="lists_management_container" class="lists_management_container">
@@ -1212,7 +1212,8 @@
                     <div id="file-viewer">
                         Loading...
                     </div>
-                    <span class="hide-icon" style="position:absolute; bottom: 0; right: 0; cursor: pointer" onclick="turnOffListManagementCard()">📥</span>
+                    <span class="hide-icon" style="position:absolute; bottom: 0; right: 0; cursor: pointer"
+                        onclick="turnOffListManagementCard()">📥</span>
                 </div>
 
             </div>
@@ -1338,6 +1339,7 @@
             tour.onbeforechange((element) => {
                 if (element && element.id === 'flashcard') {
                     handleShowEvent();
+                    flashcard.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     const word = document.getElementById('word');
                     const showTranslation = document.getElementById('showTranslation');
                     word.innerText = 'Bonjour';
@@ -2729,7 +2731,7 @@
         }
         turnOffListManagementCard();
         // Row click functions
-        function row_1() {
+        function frow_1() {
             const list_manage = document.getElementById('lists_management_container');
             if (list_manage.style.display === 'block') {
                 turnOffListManagementCard();
@@ -2742,7 +2744,7 @@
                 row_1.style.backgroundColor = list_manage.style.display === 'none' ? '' : color;
             }
         }
-        function row_2() {
+        function frow_2() {
             const list_import = document.getElementById('importDiv');
             if (list_import.style.display === 'block') {
                 turnOffListManagementCard();
@@ -2755,7 +2757,7 @@
                 row_2.style.backgroundColor = list_import.style.display === 'none' ? '' : color;
             }
         }
-        function row_3() {
+        function frow_3() {
             const list_upload = document.getElementById('upload_container');
             if (list_upload.style.display === 'block') {
                 turnOffListManagementCard();
@@ -2871,7 +2873,10 @@
         dropdownTrigger.addEventListener('click', toggleDropdown);
         window.addEventListener('click', turnOffDropdown);
 
-        function turnOffDropdown() {
+        function turnOffDropdown(event) {
+            if (event && dropdownContent.contains(event.target)) {
+                return;
+            }
             dropdownContent.classList.remove('lmc_show');
         }
     </script>
