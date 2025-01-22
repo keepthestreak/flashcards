@@ -90,11 +90,12 @@
 
         #listSelector {
             width: auto;
-            max-width:40%;
+            max-width: 40%;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
         }
+
         select,
         button,
         input {
@@ -1185,7 +1186,7 @@
 
         <div id="lists_management_card">
             <div id="lists_management_card_button" class="tooltip">
-                <span class="import-icon" onclick="turnOffListManagementCard()">🗙</span>
+                <span class="import-icon" onclick="turnOffListManagementCard()">📥</span>
             </div>
 
             <div id="lists_management_container" class="lists_management_container">
@@ -1211,10 +1212,7 @@
                     <div id="file-viewer">
                         Loading...
                     </div>
-                    <span name="hideImportDiv" class="tooltip">
-                        <span class="hide-icon" onclick="toggleImportDiv()">🔒</span>
-                        <span class="tooltiptext">Click to hide</span>
-                    </span>
+                    <span class="hide-icon" style="position:absolute; bottom: 0; right: 0; cursor: pointer" onclick="turnOffListManagementCard()">📥</span>
                 </div>
 
             </div>
@@ -1305,37 +1303,69 @@
     <script>
         function startTour(e) {
             if (e) { e.stopPropagation(); }
-            dropdownContent.classList.toggle('lmc_show');
-            dropdownContent.removeEventListener('click', toggleDropdown);
-            window.removeEventListener('click', toggleDropdown);
             const tour = introJs()
                 .setOptions({
                     steps: [
-                        { element: '#header', intro: 'Welcome to Flashcard Vocabulary, the simplest and most effective flashcards app for spaced repetition learning.' },
-                        { element: '#flashcard', intro: 'This is your flashcard' },
-                        { element: '#word', intro: 'Your word or phrase to memorize.' },
-                        { element: '#example', intro: 'An example or explanation' },
-                        { element: '#checkButton', intro: 'Click or swipe to see the translation' },
-                        { element: '#showTranslation', intro: 'The translation' },
-                        { element: '#controls', intro: 'Here you can switch between your list or import publicly shared lists' },
-                        { element: 'lmc_row_1', intro: 'Finally, this is important!' },
+                        {
+                            element: '#header',
+                            intro: 'Flashcard Vocab is the simplest and most effective flashcards app for spaced repetition learning.',
+                            position: 'bottom',
+                        },
+                        {
+                            element: '#flashcard',
+                            intro: 'This is your flashcard',
+                            position: 'bottom-center',
+                            disableInteraction: true,
+                            scrollTo: "tooltip",
+                        },
+                        {
+                            element: '#controls',
+                            intro: 'Here you can switch between your list or import publicly shared lists',
+                            position: 'bottom'
+                        },
                     ],
                     showProgress: true,
                     showbuttons: true,
                     showbullet: true,
                 });
             tour.onstart(() => {
-                dropdownContent.classList.add('lmc_show');
                 dropdownContent.removeEventListener('click', toggleDropdown);
+                window.removeEventListener('click', toggleDropdown);
+                turnOffDropdown();
+                turnOffListManagementCard();
+                turn_off_word_list();
             });
             tour.onbeforechange((element) => {
-                if (element && element.id === 'lmc_row_1') {
-                    dropdownContent.addEventListener('click', toggleDropdown);
-                } else if (element && element.id === 'showTranslation') {
+                if (element && element.id === 'flashcard') {
                     handleShowEvent();
+                    const word = document.getElementById('word');
+                    const showTranslation = document.getElementById('showTranslation');
+                    word.innerText = 'Bonjour';
+                    showTranslation.innerText = 'Hello';
+                } else if (element && element.id === 'header') {
+                } else if (element && element.id === 'controls') {
+                    dropdownContent.classList.add('lmc_show');
                 }
             });
+            tour.oncomplete(() => {
+                clear_tour();
+            });
+            tour.onexit(() => {
+                clear_tour();
+            });
             tour.start();
+        }
+
+        function clear_tour() {
+            turnOffDropdown();
+            dropdownContent.addEventListener('click', toggleDropdown);
+            window.addEventListener('click', toggleDropdown);
+            const word = document.getElementById('word');
+            const showTranslation = document.getElementById('showTranslation');
+            showNextWord();
+            word.innerText = '';
+            showTranslation.innerText = '';
+            showNextWord();
         }
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tour_button').addEventListener('click', startTour);
@@ -1548,17 +1578,25 @@
         }
 
         function toggleWordList() {
-            const wordListDiv = document.getElementById('wordList');
-
             if (!AppState.isTableVisible) {
-                const tableContent = createTableContent();
-                wordListDiv.innerHTML = tableContent;
-                wordListDiv.style.display = 'block';
-                AppState.isTableVisible = true;
+                turn_on_word_list();
             } else {
-                wordListDiv.style.display = 'none';
-                AppState.isTableVisible = false;
+                turn_off_word_list();
             }
+        }
+
+        function turn_off_word_list() {
+            const wordListDiv = document.getElementById('wordList');
+            wordListDiv.style.display = 'none';
+            AppState.isTableVisible = false;
+        }
+
+        function turn_on_word_list() {
+            const wordListDiv = document.getElementById('wordList');
+            const tableContent = createTableContent();
+            wordListDiv.innerHTML = tableContent;
+            wordListDiv.style.display = 'block';
+            AppState.isTableVisible = true;
         }
 
         function createTableContent() {
@@ -2673,7 +2711,6 @@
 
         function toggleDropdown(e) {
             e.stopPropagation();
-            console.log('toggleDropdown');
             dropdownContent.classList.toggle('lmc_show');
         }
 
@@ -2840,8 +2877,6 @@
         window.addEventListener('click', turnOffDropdown);
 
         function turnOffDropdown() {
-            //e.stopPropagation();
-            console.log('turnOffDropdown');
             dropdownContent.classList.remove('lmc_show');
         }
     </script>
