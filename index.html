@@ -1330,7 +1330,7 @@
                 });
             tour.onstart(() => {
                 dropdownContent.removeEventListener('click', toggleDropdown);
-                window.removeEventListener('click', toggleDropdown);
+                window.removeEventListener('click', turnOffDropdown);
                 turnOffDropdown();
                 turnOffListManagementCard();
                 turn_off_word_list();
@@ -1359,7 +1359,7 @@
         function clear_tour() {
             turnOffDropdown();
             dropdownContent.addEventListener('click', toggleDropdown);
-            window.addEventListener('click', toggleDropdown);
+            window.addEventListener('click', turnOffDropdown);
             const word = document.getElementById('word');
             const showTranslation = document.getElementById('showTranslation');
             showNextWord();
@@ -2201,12 +2201,7 @@
         });
 
         // Close dropdown if clicked outside
-        window.onclick = function (event) {
-            const dropdown = document.getElementById('settingsDropdown');
-            if (!event.target.matches('#streakButton') && !dropdown.contains(event.target)) {
-                dropdown.style.display = "none"; // Close the dropdown if clicking outside
-            }
-        };
+        window.onclick = turnOffDropdown;
 
         function validateInput(userInput) {
             if (userInput.length > MAX_STREAK_LENGTH) {
