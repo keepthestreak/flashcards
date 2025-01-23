@@ -140,6 +140,68 @@
             margin: 10px 0;
         }
 
+        .flashcard:fullscreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 50px;
+            border: none;
+            border-radius: 0;
+            background: #ffffff;
+            box-shadow: none;
+        }
+
+        /* Optional: Add some responsive text scaling for fullscreen */
+        .flashcard:fullscreen h1,
+        .flashcard:fullscreen h2 {
+            font-size: calc(2vw + 2vh);
+        }
+
+        .flashcard:fullscreen p {
+            font-size: calc(1vw + 1vh);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        /* Ensure proper support across browsers */
+        .flashcard:-webkit-full-screen {
+            /* Safari */
+            /* Same styles as above */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 50px;
+            border: none;
+            border-radius: 0;
+            background: #ffffff;
+            box-shadow: none;
+        }
+
+        .flashcard:-ms-fullscreen {
+            /* IE11 */
+            /* Same styles as above */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 50px;
+            border: none;
+            border-radius: 0;
+            background: #ffffff;
+            box-shadow: none;
+        }
+
         .sidebar_hint {
             position: absolute;
             right: 0;
@@ -1185,7 +1247,7 @@
         </div>
 
         <div id="lists_management_card">
-            <div id="lists_management_card_button"  onclick="turnOffListManagementCard()">
+            <div id="lists_management_card_button" onclick="turnOffListManagementCard()">
                 <span class="import-icon">📥</span>
             </div>
 
@@ -1258,6 +1320,11 @@
                     responsiveVoice.speak(text, 'French Male'); // Pass it to ResponsiveVoice
                 }
             </script>
+            <div id="full_screen_button" style="position: absolute; top: 0; right: 0;" class="tooltip"
+                onclick="toggleFullScreen()">l
+                <button id="fullScreenButton">🖥️</button>
+                <span class="tooltiptext">Toggle Full Screen</span>
+            </div>
             <div class="sidebar_hint"></div>
             <div class="menu_container">
                 <div class="sidebar">
@@ -1302,6 +1369,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/5.0.0/introjs.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/5.0.0/intro.min.js"></script>
     <script>
+        function toggleFullScreen(e) {
+            if (!document.fullscreenElement) {
+                flashcard.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
         function startTour(e) {
             if (e) { e.stopPropagation(); }
             const tour = introJs()
@@ -2862,6 +2938,7 @@
                     button.innerHTML = "⏸"; // Pause icon
                     // Start calling showNextWord() every 3 seconds
                     intervalId = setInterval(play_list, 1500);
+                    flashcard.requestFullscreen();
                 } else {
                     button.innerHTML = "▶"; // Play icon
                     // Stop the interval when paused
