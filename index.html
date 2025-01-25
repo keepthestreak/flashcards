@@ -2916,6 +2916,10 @@
             if (check_button.innerText === 'Next') {
                 handleNextEvent();
                 play_text(word.innerText);
+                const backgroundTask = setInterval(() => {
+                    // Perform periodic task
+                    console.log('Background task running');
+                }, 5000);
             } else {
                 handleShowEvent();
             }
@@ -2951,7 +2955,10 @@
 
         /* start: text to speech */
         function play_text(text, language = 'fr') {
+            const voices = speechSynthesis.getVoices();
+            const voice = voices.find(voice => voice.lang.startsWith(language));
             const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = voice;
             utterance.lang = language;
             speechSynthesis.speak(utterance);
         }
