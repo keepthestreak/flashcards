@@ -1310,16 +1310,8 @@
         <div class="flashcard" id="flashcard">
             <div>
                 <span id="word">Loading...</span>
-                <spand class="Xtooltip" style="cursor: pointer;" onclick="playButtonText()">🔊️</span>
+                <spand id="play_button" class="Xtooltip" style="cursor: pointer;">🔊️</span>
             </div>
-            <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
-            <script>
-                function playButtonText() {
-                    const wordElement = document.getElementById('word'); // Get the <p> element
-                    const text = wordElement.textContent; // Get the text content
-                    responsiveVoice.speak(text, 'French Male'); // Pass it to ResponsiveVoice
-                }
-            </script>
             <div id="full_screen_button" style="position: absolute; top: 0; right: 0;" class="tooltip"
                 onclick="toggleFullScreen()">
                 <button id="fullScreenButton">🖥️</button>
@@ -2923,7 +2915,7 @@
             const check_button = document.getElementById('checkButton');
             if (check_button.innerText === 'Next') {
                 handleNextEvent();
-                playButtonText();
+                play_text(word.innerText);
             } else {
                 handleShowEvent();
             }
@@ -2956,6 +2948,17 @@
             }
             dropdownContent.classList.remove('lmc_show');
         }
+
+        /* start: text to speech */
+        function play_text(text, language = 'fr') {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = language;
+            speechSynthesis.speak(utterance);
+        }
+
+        document.getElementById('play_button').addEventListener('click', () => {
+            play_text(word.innerText);
+        });
     </script>
 </body>
 
