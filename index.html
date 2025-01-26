@@ -1384,7 +1384,7 @@
                 <p id="list_summary_total_words"></p>
                 <p id="list_summary_completed_words"></p>
                 <p id="list_summary_lang_field"></p>
-                <div id="list_summary_lang">
+                <div id="list_summary_lang" style="display: none;">
                     <p>Select a Language</p>
                     <input list="voiceList" id="languageInput" placeholder="Type to search for a language">
                     <datalist id="voiceList">
@@ -3044,9 +3044,13 @@
                 const voice = voices.find(voice => voice.lang.startsWith(language));
 
                 if (voice) {
+                    console.log(`Voice found for language: ${language}`);
+                    console.log(voice);
                     const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = language;
                     utterance.voice = voice;
                     utterance.lang = language;
+                    utterance.voice = voice;
                     speechSynthesis.speak(utterance);
                 } else {
                     console.error(`Voice not found for language: ${language}`);
