@@ -1283,7 +1283,7 @@
             <div id="local_list_import" class="local-import-container" style='display: none'>
                 <button class="local-import-button">Import list from local</button>
                 <div class="local-import-content" onchange="handleFileSelect(event)">
-                    <input type="file" accept=".csv" class="file-input" />
+                    <input type="file" accept=".json" class="file-input" />
                 </div>
             </div>
 
@@ -1291,8 +1291,8 @@
             <div id="upload_container" class="upload_container" style='display: none'>
                 <div class="upload-zone" id="uploadZone">
                     <div class="upload-icon">📁</div>
-                    <div class="upload-text">Drop your CSV file here or click to upload</div>
-                    <input type="file" onchange="handleFileSelect(event)" class="file-input" accept=".csv"
+                    <div class="upload-text">Drop your JSON file here or click to upload</div>
+                    <input type="file" onchange="handleFileSelect(event)" class="file-input" accept=".json"
                         id="fileInput">
                 </div>
                 <div class="feedback-message" id="feedbackMessage"></div>
@@ -1352,7 +1352,40 @@
             <button id="toggleListButton">Show/Hide All Words</button>
         </div>
 
-        <div id="wordList"></div>
+        <div id="wordList">
+            <div id="list_summary" style="margin-bottom: 15px;">
+                <p id="list_summary_total_words"></p>
+                <p id="list_summary_completed_words"></p>
+                <p id="list_summary_lang_field"></p>
+                <div id="list_summary_lang">
+                    <p>Select a Language</p>
+                    <input list="voiceList" id="languageInput" placeholder="Type to search for a language">
+                    <datalist id="voiceList">
+                        <!-- Options will be populated dynamically -->
+                    </datalist>
+                    <button id="setButton">Set</button>
+                </div>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <button class="button-delete" onclick="deleteSelectedWords()">Delete Selected Words</button>
+                <button class="button-reset" onclick="resetSelectedWords()">Reset Selected Words</button>
+                <button class="button-edit" onclick="editList()">Edit List</button>
+                <button class="button-export" onclick="exportToJson()">Export to JSON</button>
+                <button class="button-set_lang" onclick="set_list_language()">Set List Language</button>
+            </div>
+            <div id='table_container' style="overflow-x: scroll;">
+            </div>
+            <div style="margin-top: 15px;">
+                <input type="text" id="newWord" placeholder="New Word"
+                    style="padding: 5px; width: 40%; margin-right: 10px;">
+                <input type="text" id="newTranslation" placeholder="Translation"
+                    style="padding: 5px; width: 40%; margin-right: 10px;">
+                <button onclick="addWordToList()"
+                    style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Add
+                    Word</button>
+            </div>
+
+        </div>
     </div>
 
     <div class="footer">
@@ -1462,8 +1495,20 @@
             currentWord: null,
             isTableVisible: false,
             sortColumn: 'streak',
-            sortDirection: -1
+            sortDirection: -1,
+            listLanguages: JSON.parse(localStorage.getItem('listLanguages')) || {}, // Track languages per list
+            currentListLanguage: null // Language for the current list
         };
+        document.addEventListener('DOMContentLoaded', () => {
+            AppState.currentListLanguage = AppState.listLanguages[AppState.currentListName] || null;
+            set_list_summary_lang_field(AppState.currentListLanguage);
+        });
+        function set_list_summary_lang_field(lang) {
+            AppState.currentListLanguage = lang;
+            AppState.listLanguages[AppState.currentListName] = lang;
+            localStorage.setItem('listLanguages', JSON.stringify(AppState.listLanguages));
+            document.getElementById("list_summary_lang_field").innerText = "Language: " + AppState.currentListLanguage || 'N/A';
+        }
 
         let wordStats = JSON.parse(localStorage.getItem(statsKey)) || {};
 
@@ -1473,7 +1518,9 @@
         }
         AppState.words = AppState.vocabLists[AppState.currentListName];
         AppState.currentWord = null;
-        sortTable('streak');
+        if (AppState.words) {
+            sortTable('streak');
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             if (AppState.currentListName === 'default' &&
@@ -1536,11 +1583,10 @@
             AppState.currentListName = document.getElementById('listSelector').value;
             localStorage.setItem(currentListKey, AppState.currentListName);
             AppState.words = AppState.vocabLists[AppState.currentListName];
+            AppState.currentListLanguage = AppState.listLanguages[AppState.currentListName] || null;
 
-            if (AppState.isTableVisible) {
-                toggleWordList(); // Hide current table
-                toggleWordList(); // Show new table
-            }
+            turn_off_word_list();
+            turn_on_word_list();
 
             showNextWord(); // Show the next word in the new list
 
@@ -1578,6 +1624,10 @@
         }
 
         function showNextWord() {
+            if (!AppState.words || AppState.words.length === 0) {
+                handleEmptyWordList();
+                return;
+            }
             const incompleteWords = AppState.words.filter(entry => (AppState.streaks[entry.word] || 0) < MAX_STREAK_LENGTH);
 
             if (incompleteWords.length === 0) {
@@ -1662,47 +1712,44 @@
         }
 
         function turn_on_word_list() {
-            const wordListDiv = document.getElementById('wordList');
+            createSummaryHTML();
+            const table_container = document.getElementById('table_container');
             const tableContent = createTableContent();
-            wordListDiv.innerHTML = tableContent;
-            wordListDiv.style.display = 'block';
+            table_container.innerHTML = tableContent;
+            wordList.style.display = 'block';
             AppState.isTableVisible = true;
         }
 
         function createTableContent() {
-            const totalWords = AppState.words.length;
-            const completedWords = AppState.words.filter(word => (AppState.streaks[word.word] || 0) >= MAX_STREAK_LENGTH).length;
-
             return `
-        <div style="margin-bottom: 15px;">
-            ${createSummaryHTML(totalWords, completedWords)}
-        </div>
-        <div style="margin-bottom: 10px;">
-            ${createButtonHTML()}
-        </div>
         ${createTableHTML()}
-        ${createAddWordFormHTML()}
     `;
         }
 
-        function createSummaryHTML(totalWords, completedWords) {
-            return `
-        <p><strong>Total Words:</strong> ${totalWords}</p>
-        <p><strong>Completed Words:</strong> ${completedWords}</p>
-    `;
+        document.addEventListener('DOMContentLoaded', createSummaryHTML);
+        function createSummaryHTML() {
+            if (!AppState.words) {
+                return;
+            }
+            const totalWords = AppState.words.length;
+            const completedWords = AppState.words.filter(word => (AppState.streaks[word.word] || 0) >= MAX_STREAK_LENGTH).length;
+            document.getElementById('list_summary_total_words').innerText = `Total Words: ${totalWords}`;
+            document.getElementById('list_summary_completed_words').innerText = `Completed Words: ${completedWords}`;
+            document.getElementById('list_summary_lang_field').innerText = "Language: " + AppState.currentListLanguage || 'N/A';
         }
 
         function createTableHTML() {
+            if (!AppState.words) {
+                return '';
+            }
             const tableHeader = createTableHeaderHTML();
             const tableRows = AppState.words.map((entry, index) => createTableRowHTML(entry, index)).join('');
 
             return `
-        <div id='table_container' style="overflow-x: scroll;">
         <table>
             <thead>${tableHeader}</thead>
             <tbody>${tableRows}</tbody>
         </table>
-        </div>
     `;
         }
 
@@ -2018,25 +2065,48 @@
             delete AppState.vocabLists[AppState.currentListName];
             updateListAndUI(Object.keys(AppState.vocabLists)[0]);
         }
-        function exportToCSV() {
-            const header = ['Word', 'Example', 'Translation'];
-            const rows = AppState.words.map(entry => {
-                return [entry.word, entry.example, entry.translation];
-            });
+        function exportToJson() {
+            const words = AppState.words;
 
-            // Combine headers and rows into CSV format
-            const csvContent = [header, ...rows]
-                .map(row => row.map(value => `"${value}"`).join(","))
-                .join("\n");
+            // Create meta section with optional language
+            const meta = {
+                language: AppState.listLanguages[AppState.currentListName] || undefined // Get language for the current list
+            };
 
-            // Create a blob and trigger download
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            // Create JSON structure
+            const jsonData = {
+                meta: removeUndefinedFields(meta), // Clean undefined fields
+                words: words
+            };
+
+            // Convert to JSON string
+            const jsonContent = JSON.stringify(jsonData, null, 2);
+
+            // Create and trigger download
+            const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `${AppState.currentListName}_vocabulary.csv`;
+            link.download = `${AppState.currentListName}.json`;
             link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        // Helper function to remove undefined fields from meta
+        function removeUndefinedFields(obj) {
+            return Object.fromEntries(
+                Object.entries(obj).filter(([_, v]) => v !== undefined)
+            );
+        }
+        function set_list_language() {
+            const language = prompt("Enter the language for the current list:");
+            if (language) {
+                set_list_summary_lang_field(language);
+            }
         }
         function resetStreak() {
+            if (!AppState.currentWord) {
+                return;
+            }
             const wordElement = document.getElementById('word'); // Get the <p> element
             const text = wordElement.textContent; // Get the text content
             AppState.streaks[text] = 0;
@@ -2208,16 +2278,6 @@
             feedback.style.color = isCorrect ? 'green' : 'red';
         }
 
-        // Function to create button HTML
-        function createButtonHTML() {
-            return `
-                <button class="button-delete" onclick="deleteSelectedWords()">Delete Selected Words</button>
-                <button class="button-reset" onclick="resetSelectedWords()">Reset Selected Words</button>
-                <button class="button-edit" onclick="editList()">Edit List</button>
-                <button class="button-export" onclick="exportToCSV()">Export to CSV</button>
-            `;
-        }
-
         function validateNewWord(newWord, newTranslation) {
             // Check if the word is empty
             if (!newWord) {
@@ -2368,7 +2428,7 @@
             const example = document.getElementById('example');
 
             // Check the state of AppState.words and update the UI accordingly
-            if (AppState.words.length === 0) {
+            if (!AppState.words || AppState.words.length === 0) {
                 wordElement.innerText = 'List is empty!';
             } else {
                 wordElement.innerText = 'All words completed!';
@@ -2454,66 +2514,42 @@
             return await response.json();
         }
 
-        async function fetchCsvContent(url) {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch CSV: ${response.status} ${response.statusText}`);
-            }
-            return await response.text();
-        }
-
-        function parseCsv(csvText) {
-            return csvText.split('\n')
-                .map(line => line.trim())
-                .filter(line => line) // Remove empty lines
-                .map(line => line.split(',')
-                    .map(cell => cell.trim().replace(/^["']|["']$/g, '')) // Remove quotes
-                );
-        }
-
-        async function importListFromCsv(listName, rawUrl, fileInput = { target: {} }) {
+        async function importListFromJson(listName, jsonUrl, fileInput = { target: {} }) {
             try {
                 // Check if list already exists
                 if (listName in AppState.vocabLists) {
                     throw new Error(`List "${listName}" already exists`);
                 }
 
-                // Fetch CSV content
-                const response = await fetch(rawUrl);
+                // Fetch JSON content
+                const response = await fetch(jsonUrl);
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch CSV: ${response.status} ${response.statusText}`);
+                    throw new Error(`Failed to fetch JSON: ${response.status} ${response.statusText}`);
                 }
 
-                const csvText = await response.text();
-                const csvData = parseCsv(csvText);
+                const jsonData = await response.json();
 
-                // Remove header row
-                const [headers, ...rows] = csvData;
-
-                // Validate headers
-                if (headers.length < 2 || headers.length > 3) {
-                    throw new Error('CSV must have 2 or 3 columns: word, [example], translation');
+                // Validate JSON structure
+                if (!jsonData.words || !Array.isArray(jsonData.words)) {
+                    throw new Error('JSON data must contain a "words" array');
                 }
 
-                // Parse CSV rows into word objects
-                const words = rows.map(row => {
-                    // Handle both 2-column (word, translation) and 3-column (word, example, translation) formats
-                    const [word, exampleOrTranslation, translation] = row;
+                // Extract meta data (if it exists)
+                if (jsonData.meta && jsonData.meta.language) {
+                    set_list_summary_lang_field(jsonData.meta.language);
+                }
 
-                    // If we have 3 columns, use them all. If 2, treat second column as translation
-                    const hasExample = headers.length === 3;
-                    const wordObj = {
-                        word: word ? word.trim() : '',
-                        translation: hasExample ? translation.trim() : exampleOrTranslation.trim(),
-                        example: hasExample ? exampleOrTranslation.trim() : null
-                    };
-
-                    // Validate required fields
-                    if (!wordObj.word || !wordObj.translation) {
-                        throw new Error(`Invalid row format: ${row.join(',')}`);
+                // Parse JSON data into word objects
+                const words = jsonData.words.map(entry => {
+                    if (!entry.word || !entry.translation) {
+                        throw new Error('Each word object must have "word" and "translation" properties');
                     }
 
-                    return wordObj;
+                    return {
+                        word: entry.word.trim(),
+                        translation: entry.translation.trim(),
+                        example: entry.example ? entry.example.trim() : null
+                    };
                 });
 
                 // Check for duplicate words
@@ -2528,13 +2564,14 @@
                 });
 
                 if (duplicates.length > 0) {
-                    throw new Error(`Duplicate words found in CSV: ${duplicates.join(', ')}`);
+                    throw new Error(`Duplicate words found in JSON: ${duplicates.join(', ')}`);
                 }
 
                 // Add the new list
                 AppState.vocabLists[listName] = words;
                 saveLists();
                 updateListAndUI(listName);
+                renderLists();
 
                 showFeedback('File successfully uploaded!', 'success');
                 fileInput.value = '';
@@ -2552,7 +2589,6 @@
                 };
             }
         }
-
         // Initialize importDiv display state when page loads
         document.addEventListener('DOMContentLoaded', () => {
             const importDiv = document.getElementById('importDiv');
@@ -2604,7 +2640,7 @@
                     viewer.innerHTML = ""; // Clear current content
 
                     data
-                        .filter(item => item.type === "file" && item.name.endsWith(".csv") || item.type === "dir")
+                        .filter(item => item.type === "file" && item.name.endsWith(".json") || item.type === "dir")
                         .forEach(item => {
                             const div = document.createElement("div");
                             div.className = "file-content";
@@ -2624,7 +2660,7 @@
                                     const fileName = item.name;
                                     //const rawUrl = `${baseURL}/${fileName}`
                                     const rawUrl = item.download_url;
-                                    const result = await importListFromCsv(fileName, rawUrl);
+                                    const result = await importListFromJson(fileName, rawUrl);
                                     alert(result.message);
                                     if (result.success) {
                                         toggleImportDiv();
@@ -2643,15 +2679,15 @@
         async function handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
-                if (!file.name.endsWith('.csv')) {
-                    showFeedback('Please upload a CSV file', 'error');
+                if (!file.name.endsWith('.json')) {
+                    showFeedback('Please upload a Json file', 'error');
                     return;
                 }
 
                 const fileUrl = URL.createObjectURL(file);
 
-                const fn = file.name.replace(/\.csv$/i, "");
-                importListFromCsv(fn, fileUrl, event.target);
+                const fn = file.name.replace(/\.json$/i, "");
+                importListFromJson(fn, fileUrl, event.target);
 
                 // Clean up the URL object when done
                 URL.revokeObjectURL(fileUrl);
@@ -2915,11 +2951,7 @@
             const check_button = document.getElementById('checkButton');
             if (check_button.innerText === 'Next') {
                 handleNextEvent();
-                play_text(word.innerText);
-                const backgroundTask = setInterval(() => {
-                    // Perform periodic task
-                    console.log('Background task running');
-                }, 5000);
+                play_text(word.innerText, AppState.currentListLanguage);
             } else {
                 handleShowEvent();
             }
@@ -2954,17 +2986,97 @@
         }
 
         /* start: text to speech */
-        function play_text(text, language = 'fr') {
-            const voices = speechSynthesis.getVoices();
-            const voice = voices.find(voice => voice.lang.startsWith(language));
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.voice = voice;
-            utterance.lang = language;
-            speechSynthesis.speak(utterance);
+        // Function to load voices and return a Promise
+        function loadVoices() {
+            return new Promise((resolve) => {
+                const voices = speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    resolve(voices); // Voices are already loaded
+                } else {
+                    // Wait for the 'voiceschanged' event
+                    speechSynthesis.onvoiceschanged = () => {
+                        const voices = speechSynthesis.getVoices();
+                        resolve(voices);
+                    };
+                }
+            });
+        }
+
+        // Function to play text with the specified language
+        async function play_text(text, language = 'fr') {
+            try {
+                // Wait for voices to load
+                const voices = await loadVoices();
+
+                // Find the voice for the specified language
+                const voice = voices.find(voice => voice.lang.startsWith(language));
+
+                if (voice) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.voice = voice;
+                    utterance.lang = language;
+                    speechSynthesis.speak(utterance);
+                } else {
+                    console.error(`Voice not found for language: ${language}`);
+                }
+            } catch (error) {
+                console.error('Error loading voices:', error);
+            }
         }
 
         document.getElementById('play_button').addEventListener('click', () => {
-            play_text(word.innerText);
+            play_text(word.innerText, AppState.currentListLanguage);
+        });
+        function populateVoiceList() {
+            // Wait for the voices to be loaded
+            window.speechSynthesis.onvoiceschanged = function () {
+                const voices = window.speechSynthesis.getVoices();
+                const datalist = document.getElementById('voiceList');
+
+                // Clear existing options
+                datalist.innerHTML = '';
+
+                // Populate the datalist with available voices
+                voices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = `${voice.name} (${voice.lang})`; // Display name and language
+                    option.setAttribute('data-lang', voice.lang); // Store the language code
+                    datalist.appendChild(option);
+                });
+            };
+
+            // Manually trigger voices loading in some browsers
+            if (window.speechSynthesis.getVoices().length > 0) {
+                window.speechSynthesis.onvoiceschanged();
+            }
+        }
+
+        // Call the function to populate the voice list
+        populateVoiceList();
+        // Function to handle the "Set" button click
+        function set_lang_button_func() {
+            document.getElementById('setButton').addEventListener('click', () => {
+                const input = document.getElementById('languageInput').value;
+                if (!input) {
+                    alert('Please type and select a language.');
+                    return;
+                }
+
+                const selectedOption = Array.from(document.getElementById('voiceList').options)
+                    .find(option => option.value === input);
+
+                if (selectedOption) {
+                    const selectedLang = selectedOption.getAttribute('data-lang');
+                    set_list_summary_lang_field(selectedLang); // Call the function with the selected language
+                } else {
+                    alert('Invalid selection. Please choose a language from the list.');
+                }
+            });
+        }
+
+        // Wait for the document to load before initializing
+        document.addEventListener('DOMContentLoaded', () => {
+            set_lang_button_func(); // Add the listener for the "Set" button
         });
     </script>
 </body>
