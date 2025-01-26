@@ -2534,11 +2534,6 @@
                     throw new Error('JSON data must contain a "words" array');
                 }
 
-                // Extract meta data (if it exists)
-                if (jsonData.meta && jsonData.meta.language) {
-                    set_list_summary_lang_field(jsonData.meta.language);
-                }
-
                 // Parse JSON data into word objects
                 const words = jsonData.words.map(entry => {
                     if (!entry.word || !entry.translation) {
@@ -2572,6 +2567,11 @@
                 saveLists();
                 updateListAndUI(listName);
                 renderLists();
+                // Extract meta data (if it exists)
+                if (jsonData.meta && jsonData.meta.language) {
+                    set_list_summary_lang_field(jsonData.meta.language);
+                }
+
 
                 showFeedback('File successfully uploaded!', 'success');
                 fileInput.value = '';
