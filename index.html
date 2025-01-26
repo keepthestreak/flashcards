@@ -777,6 +777,33 @@
             /* Light background for content */
             margin-top: 10px;
             /* Space above the content */
+            cursor: pointer;
+            /* Change cursor to pointer on hover */
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            /* Smooth transition for hover effect */
+        }
+
+        .file-content:hover {
+            background-color: #e0e0e0;
+            /* Darker background on hover */
+            border-color: #999;
+            /* Darker border on hover */
+        }
+
+        .dark-mode .file-content {
+            background-color: #2d2d2d;
+            /* Dark mode background */
+            border-color: #444;
+            /* Dark mode border */
+            color: #f5f5f5;
+            /* Dark mode text */
+        }
+
+        .dark-mode .file-content:hover {
+            background-color: #444;
+            /* Dark mode hover background */
+            border-color: #666;
+            /* Dark mode hover border */
         }
 
         /* Dark mode styles */
@@ -2600,35 +2627,48 @@
 
         function updateBreadcrumb() {
             const breadcrumb = document.getElementById("breadcrumb");
+            if (!breadcrumb) return;
+
+            // Clear the breadcrumb
             breadcrumb.innerHTML = "";
 
+            // 1. Add the "Home" link
+            const homeLink = document.createElement("a");
+            homeLink.textContent = "Home";
+            homeLink.href = "#";
+            homeLink.addEventListener("click", (e) => {
+                e.preventDefault();
+                currentPath = []; // Reset to root
+                loadDirectory("/"); // Load root directory
+                // Do NOT call updateBreadcrumb() here (let loadDirectory trigger it)
+            });
+            breadcrumb.appendChild(homeLink);
+
+            // 2. Add separator and folder links
             currentPath.forEach((folder, index) => {
+                // Add a separator before each folder (except the first one)
+                const separator = document.createElement("span");
+                separator.textContent = " / ";
+                breadcrumb.appendChild(separator);
+
+                // Create the folder link
                 const link = document.createElement("a");
                 link.textContent = folder;
                 link.href = "#";
                 link.addEventListener("click", (e) => {
                     e.preventDefault();
-                    loadDirectory(currentPath.slice(0, index + 1).join("/"));
-                    currentPath = currentPath.slice(0, index + 1);
-                    updateBreadcrumb();
+                    // Slice the path up to the clicked index
+                    const newPath = currentPath.slice(0, index + 1);
+                    currentPath = newPath; // Update the path
+                    loadDirectory(newPath.join("/")); // Load the directory
+                    // Do NOT call updateBreadcrumb() here (let loadDirectory trigger it)
                 });
 
                 breadcrumb.appendChild(link);
-
-                if (index < currentPath.length - 1) {
-                    const separator = document.createElement("span");
-                    separator.textContent = "/";
-                    breadcrumb.appendChild(separator);
-                }
             });
-
-            if (currentPath.length === 0) {
-                breadcrumb.textContent = "Home 0";
-            }
         }
-
         function loadDirectory(path = "") {
-            currentPath = path ? path.split("/") : [];
+            currentPath = path ? path.split("/") : []; // This is the single source of truth
             updateBreadcrumb();
 
             const viewer = document.getElementById("file-viewer");
@@ -2637,34 +2677,26 @@
             fetch(`${baseURL}/${path}`)
                 .then(response => response.json())
                 .then(data => {
-                    viewer.innerHTML = ""; // Clear current content
+                    viewer.innerHTML = "";
 
-                    data
-                        .filter(item => item.type === "file" && item.name.endsWith(".json") || item.type === "dir")
+                    data.filter(item => item.type === "file" && item.name.endsWith(".json") || item.type === "dir")
                         .forEach(item => {
                             const div = document.createElement("div");
                             div.className = "file-content";
                             div.textContent = item.name;
 
                             if (item.type === "dir") {
-                                div.textContent = '📁 ' + div.textContent; // Closed folder icon
+                                div.textContent = '📁 ' + div.textContent;
                                 div.addEventListener("click", () => {
-                                    loadDirectory(item.path);
-                                    currentPath.push(item.name);
-                                    updateBreadcrumb();
-
-
+                                    // Remove currentPath.push() - use item.path as the full path
+                                    loadDirectory(item.path); // item.path should be the full path
                                 });
                             } else if (item.type === "file") {
                                 div.addEventListener("click", async () => {
-                                    const fileName = item.name;
-                                    //const rawUrl = `${baseURL}/${fileName}`
                                     const rawUrl = item.download_url;
-                                    const result = await importListFromJson(fileName, rawUrl);
+                                    const result = await importListFromJson(item.name, rawUrl);
                                     alert(result.message);
-                                    if (result.success) {
-                                        toggleImportDiv();
-                                    }
+                                    if (result.success) toggleImportDiv();
                                 });
                             }
 
