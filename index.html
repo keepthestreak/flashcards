@@ -3060,6 +3060,9 @@
             }
         }
 
+        document.getElementById('play_button').addEventListener('ontouchstart', () => {
+            play_text(word.innerText, AppState.currentListLanguage);
+        });
         document.getElementById('play_button').addEventListener('click', () => {
             play_text(word.innerText, AppState.currentListLanguage);
         });
