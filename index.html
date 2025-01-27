@@ -3034,8 +3034,66 @@
             });
         }
 
-        // Function to play text with the specified language
+        function myloadVoices() {
+            return new Promise((resolve) => {
+                // Get the voices immediately
+                let voices = speechSynthesis.getVoices();
+
+                // If voices are already loaded, resolve immediately
+                if (voices.length > 0) {
+                    resolve(voices);
+                    return;
+                }
+
+                // If voices haven't loaded yet, wait for the event
+                speechSynthesis.onvoiceschanged = () => {
+                    voices = speechSynthesis.getVoices();
+                    resolve(voices);
+                };
+            });
+        }
+
         async function play_text(text, language = 'fr') {
+            try {
+                // Cancel any ongoing speech
+                speechSynthesis.cancel();
+
+                // Wait for voices to load
+                const voices = await myloadVoices();
+
+                // Log available voices for debugging
+                console.log('Available voices:', voices);
+
+                // Find the voice for the specified language
+                const voice = voices.find(voice => voice.lang.startsWith(language));
+
+                if (voice) {
+                    console.log(`Voice found for language: ${language}`, voice);
+
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = language;
+                    utterance.voice = voice;
+
+                    // Add error handling for the speech synthesis
+                    utterance.onerror = (event) => {
+                        console.error('Speech synthesis error:', event);
+                    };
+
+                    // Speak the text
+                    speechSynthesis.speak(utterance);
+                } else {
+                    // If no specific voice is found, try with just the language
+                    console.log(`No specific voice found for ${language}, using default`);
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = language;
+                    speechSynthesis.speak(utterance);
+                }
+            } catch (error) {
+                console.error('Error in play_text:', error);
+            }
+        }
+        // Function to play text with the specified language
+        async function Xplay_text(text, language = 'fr') {
             try {
                 // Wait for voices to load
                 const voices = await loadVoices();
