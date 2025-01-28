@@ -2986,6 +2986,10 @@
                 play_text(word.innerText, AppState.currentListLanguage);
             } else {
                 handleShowEvent();
+                setTimeout(function () {
+            const translation = document.getElementById('showTranslation');
+                    play_text(translation.innerText, "en-US");
+                }, 500);
             }
         }
         let intervalId; // Variable to store the interval ID
@@ -2997,7 +3001,7 @@
                 if (button.innerHTML === "▶") { // Play icon
                     button.innerHTML = "⏸"; // Pause icon
                     // Start calling showNextWord() every 3 seconds
-                    intervalId = setInterval(play_list, 1500);
+                    intervalId = setInterval(play_list, 3000);
                     flashcard.requestFullscreen();
                 } else {
                     button.innerHTML = "▶"; // Play icon
@@ -3061,15 +3065,10 @@
                 // Wait for voices to load
                 const voices = await myloadVoices();
 
-                // Log available voices for debugging
-                console.log('Available voices:', voices);
-
                 // Find the voice for the specified language
                 const voice = voices.find(voice => voice.lang.startsWith(language));
 
                 if (voice) {
-                    console.log(`Voice found for language: ${language}`, voice);
-
                     const utterance = new SpeechSynthesisUtterance(text);
                     utterance.lang = language;
                     utterance.voice = voice;
