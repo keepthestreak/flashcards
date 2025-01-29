@@ -12,6 +12,22 @@
             margin-top: 15px;
         }
 
+        a {
+            /* Light purple link color */
+            text-decoration: none;
+        }
+
+        .dark-mode a {
+            color: #BB86FC;
+            /* Light purple link color */
+        }
+
+        a:hover {
+            text-decoration: underline;
+            /* Add underline on hover */
+        }
+
+        /* Remove underline */
         table,
         th,
         td {
@@ -326,6 +342,22 @@
             margin-top: 10px;
         }
 
+        #translation_div {
+            visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+
+        .flashcard_text_div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        /* Adjust the height as needed */
         #wordList {
             overflow: hidden;
             border: 1px solid #ddd;
@@ -1337,7 +1369,7 @@
         <div class="flashcard" id="flashcard">
             <div>
                 <span id="word">Loading...</span>
-                <spand id="play_button" class="Xtooltip" style="cursor: pointer;">🔊️</span>
+                <span id="play_button" class="Xtooltip" style="cursor: pointer;">🔊️</span>
             </div>
             <div id="full_screen_button" style="position: absolute; top: 0; right: 0;" class="tooltip"
                 onclick="toggleFullScreen()">
@@ -1357,8 +1389,15 @@
             </div>
 
             <input type="text" id="userTranslation" placeholder="Type the translation">
-            <div id="showTranslation" style="visibility: hidden;"></div>
-            <div id="example" style="margin-top: 10px; font-style: italic;"></div>
+            <div id="translation_div" class="flashcard_text_div" style="visibility: hidden;">
+                <div id="showTranslation"></div>
+                <span id="translation_play_button" class="Xtooltip" style="cursor: pointer;">🔊️</span>
+            </div>
+            <span id="lastShown"></span>
+            <div id="exampleDiv" class="flashcard_text_div">
+                <div id="example" style="margin-top: 10px; font-style: italic;"></div>
+                <span id="example_play_button" class="Xtooltip" style="cursor: pointer;">🔊️</span>
+            </div>
             <p id="feedback"></p>
             <button id="checkButton">Check</button>
             <div id="counterDiv">
@@ -1651,6 +1690,8 @@
         }
 
         function showNextWord() {
+            clear_flashcard();
+
             if (!AppState.words || AppState.words.length === 0) {
                 handleEmptyWordList();
                 return;
@@ -1686,6 +1727,13 @@
                 AppState.lastShownTimes[AppState.currentWord.word] = now.toISOString();
                 saveLists();
             }
+        }
+        function clear_flashcard() {
+            document.getElementById('word').innerText = '';
+            document.getElementById('example').innerText = '';
+            document.getElementById('userTranslation').value = '';
+            document.getElementById('counter').innerText = `Streak: N/A`;
+            document.getElementById('feedback').innerText = '';
         }
 
         function checkTranslation() {
@@ -1986,14 +2034,15 @@
 
         function handleShowEvent() {
             const checkButton = document.getElementById('checkButton');
+            const translationDiv = document.getElementById('translation_div');
             const showTranslation = document.getElementById('showTranslation');
             const userTranslation = document.getElementById('userTranslation');
             const counter = document.getElementById('counterDiv');
 
             userTranslation.style.visibility = 'hidden';
-            showTranslation.style.visibility = 'visible';
             counter.style.visibility = 'hidden';
             if (AppState.currentWord) {
+                translationDiv.style.visibility = 'visible';
                 showTranslation.innerText = `${AppState.currentWord.translation}`;
             }
 
@@ -2008,13 +2057,13 @@
         // Define the 'Next' event handler function
         function handleNextEvent() {
             const checkButton = document.getElementById('checkButton');
-            const showTranslation = document.getElementById('showTranslation');
+            const translationDiv = document.getElementById('translation_div');
             const userTranslation = document.getElementById('userTranslation');
             const counter = document.getElementById('counterDiv');
 
             userTranslation.style.visibility = 'hidden';
             userTranslation.style.visibility = 'hidden';
-            showTranslation.style.visibility = 'hidden';
+            translationDiv.style.visibility = 'hidden';
             counter.style.visibility = 'hidden';
             checkButton.innerText = 'Show';
 
@@ -2051,7 +2100,7 @@
             const mode_button = document.getElementById('switch_mode_button');
             const checkButton = document.getElementById('checkButton');
             const userTranslation = document.getElementById('userTranslation');
-            const showTranslation = document.getElementById('showTranslation');
+            const translationDiv = document.getElementById('translation_div');
             const counter = document.getElementById('counterDiv');
 
             if (isCheckMode(checkButton.innerText)) {
@@ -2062,7 +2111,7 @@
                 checkButton.removeEventListener('click', handleShowEvent); // Remove previous listener
                 checkButton.removeEventListener('click', handleNextEvent); // Remove previous listener
                 checkButton.addEventListener('click', handleCheckEvent); // Add 'Check' event listener
-                showTranslation.style.visibility = 'hidden';
+                translationDiv.style.visibility = 'hidden';
                 userTranslation.style.visibility = 'visible';
                 counter.style.visibility = 'visible';
                 userTranslation.focus();
@@ -2987,7 +3036,7 @@
             } else {
                 handleShowEvent();
                 setTimeout(function () {
-            const translation = document.getElementById('showTranslation');
+                    const translation = document.getElementById('showTranslation');
                     play_text(translation.innerText, "en-US");
                 }, 500);
             }
@@ -3117,6 +3166,22 @@
             }
         }
 
+        document.getElementById('example_play_button').addEventListener('ontouchstart', () => {
+            example = document.getElementById('example');
+            play_text((example.innerText), AppState.currentListLanguage);
+        });
+        document.getElementById('example_play_button').addEventListener('click', () => {
+            example = document.getElementById('example');
+            play_text((example.innerText), AppState.currentListLanguage);
+        });
+        document.getElementById('translation_play_button').addEventListener('ontouchstart', () => {
+            translation = document.getElementById('showTranslation');
+            play_text(translation.innerText, "en-US");
+        });
+        document.getElementById('translation_play_button').addEventListener('click', () => {
+            translation = document.getElementById('showTranslation');
+            play_text(translation.innerText, "en-US");
+        });
         document.getElementById('play_button').addEventListener('ontouchstart', () => {
             play_text(word.innerText, AppState.currentListLanguage);
         });
