@@ -140,6 +140,8 @@
         }
 
         .flashcard {
+            display: flex;
+            flex-direction: column;
             position: relative;
             text-align: center;
             padding: 30px;
@@ -350,6 +352,8 @@
             justify-content: center;
             align-items: center;
             height: 100%;
+            font-size: 1.5rem;
+            padding-bottom: 5px;
         }
 
         .play_button {
@@ -1393,7 +1397,9 @@
                 </div>
             </div>
 
-            <input type="text" id="userTranslation" placeholder="Type the translation">
+            <div id="user_translation_div" class="flashcard_text_div">
+                <input type="text" id="userTranslation" placeholder="Type the translation">
+            </div>
             <div id="translation_div" class="flashcard_text_div" style="visibility: hidden;">
                 <div id="showTranslation"></div>
                 <span id="translation_play_button" class="play_button">🔊️</span>
@@ -1404,8 +1410,8 @@
                 <span id="example_play_button" class="play_button">🔊️</span>
             </div>
             <p id="feedback"></p>
-            <button id="checkButton">Check</button>
-            <div id="counterDiv">
+            <button id="checkButton" style="width: 100px; align-self: center;">Check</button>
+            <div id="counterDiv" style="padding-top: 10px;">
                 <span id="counter">Streak: 0 /</span>
                 <span id="streakButton" class="streakButton">⚙️</span>
                 <div class="dropdown">
@@ -3056,9 +3062,13 @@
                     button.innerHTML = "⏸"; // Pause icon
                     // Start calling showNextWord() every 3 seconds
                     intervalId = setInterval(play_list, 3000);
+                    const checkButton = document.getElementById('checkButton');
+                    checkButton.style.display = 'none';
                     flashcard.requestFullscreen();
                 } else {
                     button.innerHTML = "▶"; // Play icon
+                    const checkButton = document.getElementById('checkButton');
+                    checkButton.style.display = 'block';
                     // Stop the interval when paused
                     clearInterval(intervalId);
                 }
