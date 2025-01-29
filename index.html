@@ -1726,6 +1726,14 @@
             if (AppState.currentWord) {
                 document.getElementById('word').innerHTML = generateSearchLink(AppState.currentWord.word);
                 document.getElementById('feedback').innerText = '';
+                const exampleDiv = document.getElementById('exampleDiv');
+                if (AppState.currentWord.example) {
+                    exampleDiv.style.visibility = 'visible';
+                    const example = document.getElementById('example');
+                    example.innerText = AppState.currentWord.example;
+                } else {
+                    exampleDiv.style.visibility = 'hidden';
+                }
                 document.getElementById('example').innerText = AppState.currentWord?.example || "";
                 document.getElementById('userTranslation').value = '';
                 document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0} / ${MAX_STREAK_LENGTH}`;
