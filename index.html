@@ -151,11 +151,6 @@
             overflow: hidden;
         }
 
-        .flashcard span {
-            font-size: 1.5rem;
-            margin: 10px 0;
-        }
-
         .flashcard:fullscreen {
             display: flex;
             flex-direction: column;
@@ -355,6 +350,16 @@
             justify-content: center;
             align-items: center;
             height: 100%;
+        }
+
+        .play_button {
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            margin-left: 3px;
+            padding-left: 3px;
         }
 
         /* Adjust the height as needed */
@@ -1367,9 +1372,9 @@
 
 
         <div class="flashcard" id="flashcard">
-            <div>
+            <div class="flashcard_text_div">
                 <span id="word">Loading...</span>
-                <span id="play_button" class="Xtooltip" style="cursor: pointer;">🔊️</span>
+                <span id="word_play_button" class="play_button">🔊️</span>
             </div>
             <div id="full_screen_button" style="position: absolute; top: 0; right: 0;" class="tooltip"
                 onclick="toggleFullScreen()">
@@ -1391,12 +1396,12 @@
             <input type="text" id="userTranslation" placeholder="Type the translation">
             <div id="translation_div" class="flashcard_text_div" style="visibility: hidden;">
                 <div id="showTranslation"></div>
-                <span id="translation_play_button" class="Xtooltip" style="cursor: pointer;">🔊️</span>
+                <span id="translation_play_button" class="play_button">🔊️</span>
             </div>
             <span id="lastShown"></span>
             <div id="exampleDiv" class="flashcard_text_div">
                 <div id="example" style="margin-top: 10px; font-style: italic;"></div>
-                <span id="example_play_button" class="Xtooltip" style="cursor: pointer;">🔊️</span>
+                <span id="example_play_button" class="play_button">🔊️</span>
             </div>
             <p id="feedback"></p>
             <button id="checkButton">Check</button>
@@ -3182,10 +3187,10 @@
             translation = document.getElementById('showTranslation');
             play_text(translation.innerText, "en-US");
         });
-        document.getElementById('play_button').addEventListener('ontouchstart', () => {
+        document.getElementById('word_play_button').addEventListener('ontouchstart', () => {
             play_text(word.innerText, AppState.currentListLanguage);
         });
-        document.getElementById('play_button').addEventListener('click', () => {
+        document.getElementById('word_play_button').addEventListener('click', () => {
             play_text(word.innerText, AppState.currentListLanguage);
         });
         function populateVoiceList() {
