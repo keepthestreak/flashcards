@@ -355,6 +355,7 @@
             font-size: 1.5rem;
             padding-bottom: 5px;
         }
+
         #showTranslation {
             font-weight: bold;
         }
@@ -3071,20 +3072,33 @@
 
                 if (button.innerHTML === "▶") { // Play icon
                     button.innerHTML = "⏸"; // Pause icon
-                    // Start calling showNextWord() every 3 seconds
                     intervalId = setInterval(play_list, 3000);
                     const checkButton = document.getElementById('checkButton');
                     checkButton.style.display = 'none';
+                    isMenuOpen = true;
                     flashcard.requestFullscreen();
+                    flashcard.addEventListener('click', listener_flashcardClickWhilePlaying);
                 } else {
                     button.innerHTML = "▶"; // Play icon
                     const checkButton = document.getElementById('checkButton');
                     checkButton.style.display = 'block';
+                    flashcard.removeEventListener('click', listener_flashcardClickWhilePlaying);
                     // Stop the interval when paused
                     clearInterval(intervalId);
                 }
             });
         });
+        let isMenuOpen = false;
+        function listener_flashcardClickWhilePlaying(e) {
+            isMenuOpen = !isMenuOpen;
+            let menuContainer = document.querySelector('.menu_container');
+            e.stopPropagation();
+            if (isMenuOpen) {
+                menuContainer.classList.add('clicked');
+            } else {
+                menuContainer.classList.remove('clicked');
+            }
+        }
         // Toggle dropdown on click
         dropdownTrigger.addEventListener('click', toggleDropdown);
         window.addEventListener('click', turnOffDropdown);
@@ -3177,7 +3191,6 @@
 
                 if (voice) {
                     console.log(`Voice found for language: ${language}`);
-                    console.log(voice);
                     const utterance = new SpeechSynthesisUtterance(text);
                     utterance.lang = language;
                     utterance.voice = voice;
