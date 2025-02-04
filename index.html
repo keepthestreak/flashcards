@@ -1182,6 +1182,16 @@
             color: #fff;
         }
 
+        /* Pause Selected Words */
+        .lmc1-button-pause-words {
+            background-color: #FFB300;
+            color: #fff;
+        }
+
+        .lmc1-button-pause-words:hover {
+            background-color: #FFA000;
+        }
+
         /* Edit List - Primary Action */
         .lmc1-button-edit {
             background-color: #607d8b;
@@ -1250,6 +1260,14 @@
         body.dark-mode .lmc1-button-reset-words:hover {
             background-color: #ccc;
             color: #121212;
+        }
+
+        body.dark-mode .lmc1-button-pause-words {
+            background-color: #FF8F00;
+        }
+
+        body.dark-mode .lmc1-button-pause-words:hover {
+            background-color: #FF6F00;
         }
 
         body.dark-mode .lmc1-button-edit {
@@ -1753,6 +1771,9 @@
             </div>
             <div class="lmc1-button-container">
                 <button class="lmc1-button lmc1-button-delete-words" onclick="deleteSelectedWords()">Delete Selected
+                    Words</button>
+
+                <button class="lmc1-button lmc1-button-pause-words" onclick="pauseSelectedWords()">Pause Selected
                     Words</button>
                 <button class="lmc1-button lmc1-button-reset-words" onclick="resetSelectedWords()">Reset Selected
                     Words</button>
@@ -2850,11 +2871,24 @@
             }
         }
 
+        function pauseSelectedWords() {
+            const selectedIndices = getSelectedIndices();
+            if (selectedIndices.length === 0) {
+                return;
+            }
+            selectedIndices.forEach(index => {
+                const word = AppState.words[index].word;
+                app_completeStreak(word);
+            });
+            lsl_update_list_selector();
+            refreshTable();
+            showNextWord();
+        }
+
         function resetSelectedWords() {
             const selectedIndices = getSelectedIndices();
 
             if (selectedIndices.length === 0) {
-                alert("Please select words to reset");
                 return;
             }
 
