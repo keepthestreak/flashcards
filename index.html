@@ -991,6 +991,291 @@
             overflow-x: scroll;
         }
 
+        .lmc1-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .lmc1-heading {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Button Base Styles */
+        .lmc1-button {
+            display: block;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+            text-decoration: none;
+        }
+
+        /* Specific Button Styles */
+        /* Upload List From Local */
+        .lmc1-button-upload {
+            background-color: #2196F3;
+            /* Blue */
+            color: #fff;
+        }
+
+        .lmc1-button-upload:hover {
+            background-color: #1976d2;
+        }
+
+        /* Import List From Github */
+        .lmc1-button-import {
+            background-color: #24292e;
+            /* GitHub-like dark tone */
+            color: #fff;
+        }
+
+        .lmc1-button-import:hover {
+            background-color: #444c56;
+        }
+
+        /* Create New List */
+        .lmc1-button-create {
+            background-color: #4CAF50;
+            /* Green */
+            color: #fff;
+        }
+
+        .lmc1-button-create:hover {
+            background-color: #388E3C;
+        }
+
+        /* Load Selected */
+        .lmc1-button-load {
+            background-color: #ff9800;
+            /* Orange */
+            color: #fff;
+        }
+
+        .lmc1-button-load:hover {
+            background-color: #f57c00;
+        }
+
+        /* Reset Selected - Outline/Ghost Button */
+        .lmc1-button-reset {
+            background-color: transparent;
+            border: 2px solid #777;
+            color: #777;
+        }
+
+        .lmc1-button-reset:hover {
+            background-color: #777;
+            color: #fff;
+        }
+
+        /* Delete Selected - Destructive Action */
+        .lmc1-button-delete {
+            background-color: #f44336;
+            /* Red */
+            color: #fff;
+        }
+
+        .lmc1-button-delete:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Dark Mode Styles
+       To enable dark mode, add the "dark-mode" class to the <body> tag.
+       For example: <body class="dark-mode"> ... </body>
+    */
+        body.dark-mode .lmc1-button-upload {
+            background-color: #1e88e5;
+            /* Slightly adjusted blue */
+        }
+
+        body.dark-mode .lmc1-button-upload:hover {
+            background-color: #1565c0;
+        }
+
+        body.dark-mode .lmc1-button-import {
+            background-color: #2d333b;
+            /* Lighter tone for dark backgrounds */
+        }
+
+        body.dark-mode .lmc1-button-import:hover {
+            background-color: #3e454e;
+        }
+
+        body.dark-mode .lmc1-button-create {
+            background-color: #43a047;
+            /* Adjusted green */
+        }
+
+        body.dark-mode .lmc1-button-create:hover {
+            background-color: #2e7d32;
+        }
+
+        body.dark-mode .lmc1-button-load {
+            background-color: #fb8c00;
+            /* Adjusted orange */
+        }
+
+        body.dark-mode .lmc1-button-load:hover {
+            background-color: #ef6c00;
+        }
+
+        body.dark-mode .lmc1-button-reset {
+            border: 2px solid #ccc;
+            color: #ccc;
+        }
+
+        body.dark-mode .lmc1-button-reset:hover {
+            background-color: #ccc;
+            color: #121212;
+        }
+
+        body.dark-mode .lmc1-button-delete {
+            background-color: #e53935;
+            /* Adjusted red */
+        }
+
+        body.dark-mode .lmc1-button-delete:hover {
+            background-color: #c62828;
+        }
+
+        /* Responsive Layout for Larger Screens */
+        @media (min-width: 600px) {
+            .lmc1-button {
+                display: inline-block;
+                width: auto;
+                min-width: 200px;
+                margin: 8px;
+            }
+
+            .lmc1-button-container {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-around;
+            }
+        }
+
+        /* Delete Selected Words - Destructive Action */
+        .lmc1-button-delete-words {
+            background-color: #f44336;
+            color: #fff;
+        }
+
+        .lmc1-button-delete-words:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Reset Selected Words - Outline/Ghost Button */
+        .lmc1-button-reset-words {
+            background-color: transparent;
+            border: 2px solid #777;
+            color: #777;
+        }
+
+        .lmc1-button-reset-words:hover {
+            background-color: #777;
+            color: #fff;
+        }
+
+        /* Edit List - Primary Action */
+        .lmc1-button-edit {
+            background-color: #607d8b;
+            color: #fff;
+        }
+
+        .lmc1-button-edit:hover {
+            background-color: #455a64;
+        }
+
+        /* Export to JSON - Secondary Action */
+        .lmc1-button-export {
+            background-color: #009688;
+            color: #fff;
+        }
+
+        .lmc1-button-export:hover {
+            background-color: #00796b;
+        }
+
+        /* Set List Language - Accent Action */
+        .lmc1-button-set-language {
+            background-color: #9c27b0;
+            color: #fff;
+        }
+
+        .lmc1-button-set-language:hover {
+            background-color: #7b1fa2;
+        }
+
+        /* Responsive Layout for Larger Screens */
+        @media (min-width: 600px) {
+            .lmc1-button {
+                display: inline-block;
+                width: auto;
+                min-width: 200px;
+                margin: 8px;
+            }
+
+            .lmc1-button-container {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-around;
+            }
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .lmc1-button-delete-words {
+            background-color: #e53935;
+        }
+
+        body.dark-mode .lmc1-button-delete-words:hover {
+            background-color: #c62828;
+        }
+
+        body.dark-mode .lmc1-button-reset-words {
+            border: 2px solid #ccc;
+            color: #ccc;
+        }
+
+        body.dark-mode .lmc1-button-reset-words:hover {
+            background-color: #ccc;
+            color: #121212;
+        }
+
+        body.dark-mode .lmc1-button-edit {
+            background-color: #546e7a;
+        }
+
+        body.dark-mode .lmc1-button-edit:hover {
+            background-color: #37474f;
+        }
+
+        body.dark-mode .lmc1-button-export {
+            background-color: #00897b;
+        }
+
+        body.dark-mode .lmc1-button-export:hover {
+            background-color: #00695c;
+        }
+
+        body.dark-mode .lmc1-button-set-language {
+            background-color: #8e24aa;
+        }
+
+        body.dark-mode .lmc1-button-set-language:hover {
+            background-color: #6a1b9a;
+        }
+
         .lmc_list_row {
             display: flex;
             overflow-x: auto;
@@ -1335,17 +1620,19 @@
             </div>
 
             <div id="lists_management_container" class="lists_management_container">
-                <div class="lmc_button_group">
-                    <div style="width: 100%;">
-                    <button class="lmc_button" onclick="frow_3()" style="background-color: #0077ff;">Upload List From Local</button>
-                    <button class="lmc_button" onclick="frow_2()" style="background-color: #0077ff;">Import List From Github</button>
-                    <button class="lmc_button" onclick="create_list()" style="background-color: #0077ff;">Create New List</button>
-                    </div>
-                    <div style="width: 100%;">
-                    <button class="lmc_button" onclick="load_selected()" style="background-color: #9400d3;">Load Selected</button>
-                    <button class="lmc_button" onclick="reset_selected()" style="background-color: #9400d3;">Reset Selected</button>
-                    </div>
-                    <button class="lmc_button" onclick="deleteSelected()" style="background-color: #ff0077;">Delete Selected</button>
+                <div class="lmc1-button-container">
+                    <button class="lmc1-button lmc1-button-upload" onclick="frow_3()">Upload List
+                        From Local</button>
+                    <button class="lmc1-button lmc1-button-import" onclick="frow_2()">Import List
+                        From Github</button>
+                    <button class="lmc1-button lmc1-button-create" onclick="create_list()">Create New
+                        List</button>
+                    <button class="lmc1-button lmc1-button-load" onclick="load_selected()">Load
+                        Selected</button>
+                    <button class="lmc1-button lmc1-button-reset" onclick="reset_selected()">Reset
+                        Selected</button>
+                    <button class="lmc1-button lmc1-button-delete" onclick="deleteSelected()">Delete
+                        Selected</button>
                 </div>
                 <div class="lmc_select_all_wrapper">
                     <input type="checkbox" id="lmc-select-all" onclick="toggleSelectAll()">
@@ -1464,12 +1751,15 @@
                     <button id="setButton">Set</button>
                 </div>
             </div>
-            <div style="margin-bottom: 10px;">
-                <button class="lmc_button" onclick="deleteSelectedWords()">Delete Selected Words</button>
-                <button class="lmc_button" onclick="resetSelectedWords()">Reset Selected Words</button>
-                <button class="lmc_button" onclick="editList()">Edit List</button>
-                <button class="lmc_button" onclick="exportToJson()">Export to JSON</button>
-                <button class="lmc_button" onclick="set_list_language()">Set List Language</button>
+            <div class="lmc1-button-container">
+                <button class="lmc1-button lmc1-button-delete-words" onclick="deleteSelectedWords()">Delete Selected
+                    Words</button>
+                <button class="lmc1-button lmc1-button-reset-words" onclick="resetSelectedWords()">Reset Selected
+                    Words</button>
+                <button class="lmc1-button lmc1-button-edit" onclick="editList()">Edit List</button>
+                <button class="lmc1-button lmc1-button-export" onclick="exportToJson()">Export to JSON</button>
+                <button class="lmc1-button lmc1-button-set-language" onclick="set_list_language()">Set List
+                    Language</button>
             </div>
             <div id='table_container' style="overflow-x: scroll;">
             </div>
