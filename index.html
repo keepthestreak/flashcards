@@ -112,6 +112,16 @@
             transform: translateX(-50%);
         }
 
+        option[value="manage"] {
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .dark-mode option[value="manage"] {
+            color: #60a5fa;
+        }
+
+
         select,
         button,
         input {
@@ -1311,9 +1321,9 @@
             <div class="lmc_dropdown_container">
                 <div id="dropdownTrigger"></div>
                 <div id="dropdownContent" class="lmc_dropdown_content">
-                    <div id='lmc_row_1' class="lmc_dropdown_row" onclick="frow_1()">Manage Lists</div>
-                    <div id='lmc_row_2' class="lmc_dropdown_row" onclick="frow_2()">Import List</div>
-                    <div id='lmc_row_3' class="lmc_dropdown_row" onclick="frow_3()">Upload List</div>
+                    <div id='lmc_row_1' class="lmc_dropdown_row" onclick="frow_1()">Your lists</div>
+                    <div id='lmc_row_2' class="lmc_dropdown_row" onclick="frow_2()">Import from shared</div>
+                    <div id='lmc_row_3' class="lmc_dropdown_row" onclick="frow_3()">Upload from local</div>
                 </div>
             </div>
         </div>
@@ -1325,9 +1335,9 @@
 
             <div id="lists_management_container" class="lists_management_container">
                 <div class="lmc_button_group">
-                    <button class="lmc-button" onclick="loadSelected()">Load Selected</button>
+                    <button class="lmc-button" onclick="load_selected()">Load Selected</button>
                     <button class="lmc-button" onclick="create_list()">Create New List</button>
-                    <button onclick="resetSelected()">Reset Selected</button>
+                    <button onclick="reset_selected()">Reset Selected</button>
                     <button class="lmc-button" class="delete" onclick="deleteSelected()">Delete Selected</button>
                 </div>
                 <div class="lmc_select_all_wrapper">
@@ -1553,6 +1563,7 @@
         }
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tour_button').addEventListener('click', startTour);
+            document.getElementById('toggleListButton').addEventListener('click', toggleWordList);
         });
 
     </script>
@@ -1560,13 +1571,15 @@
 
     <script>
         const storageKey = 'vocabLists';
+        const recentListsKey = 'recentLists';
         const streakKey = 'wordStreaks';
         const lastShownKey = 'lastShownTimes';
         const statsKey = 'wordStats';
         const currentListKey = 'currentList';
         const MAX_STREAK_LENGTH_KEY = 'maxStreakLength';
-        let MAX_STREAK_LENGTH = localStorage.getItem(MAX_STREAK_LENGTH_KEY) ? parseInt(localStorage.getItem(MAX_STREAK_LENGTH_KEY)) : 20; // Default to 20
+        const MAX_RECENT_LISTS = 5;
 
+        // AppState 
         const AppState = {
             vocabLists: JSON.parse(localStorage.getItem(storageKey)) || { "default": [] },
             streaks: JSON.parse(localStorage.getItem(streakKey)) || {},
@@ -1578,12 +1591,152 @@
             sortColumn: 'streak',
             sortDirection: -1,
             listLanguages: JSON.parse(localStorage.getItem('listLanguages')) || {}, // Track languages per list
-            currentListLanguage: null // Language for the current list
+            currentListLanguage: null, // Language for the current list
+            recentLists: JSON.parse(localStorage.getItem(recentListsKey)) || [], // Array to store recent list names
+            MAX_STREAK_LENGTH: JSON.parse(localStorage.getItem(MAX_STREAK_LENGTH_KEY)) || 20,
         };
-        document.addEventListener('DOMContentLoaded', () => {
-            AppState.currentListLanguage = AppState.listLanguages[AppState.currentListName] || null;
-            set_list_summary_lang_field(AppState.currentListLanguage);
-        });
+
+        // Getter for vocabLists:
+        function app_list_exist(listName) {
+            return AppState.vocabLists.hasOwnProperty(listName);
+        }
+        // Setter for vocabLists:
+        function app_setVocabLists(newListName, newVocabLists) {
+            AppState.vocabLists[newListName] = newVocabLists;
+            localStorage.setItem(storageKey, JSON.stringify(newVocabLists));
+        }
+
+        // getter for streaks:
+        function app_isWordCompleted(word) {
+            return app_getStreak(word) === AppState.MAX_STREAK_LENGTH;
+        }
+        function app_getStreak(word) {
+            return AppState.streaks[word] || 0;
+        }
+        // Setter for streaks:
+        function app_increaseStreak(word) {
+            AppState.streaks[word] = app_getStreak(word) + 1;
+            localStorage.setItem(streakKey, JSON.stringify(AppState.streaks));
+        }
+        function app_resetStreak(word) {
+            AppState.streaks[word] = 0;
+            localStorage.setItem(streakKey, JSON.stringify(AppState.streaks));
+        }
+        function app_completeStreak(word) {
+            AppState.streaks[word] = AppState.MAX_STREAK_LENGTH;
+            localStorage.setItem(streakKey, JSON.stringify(AppState.streaks));
+        }
+
+        // Setter for lastShownTimes:
+        function app_setLastShownTimes(newLastShownTimes) {
+            AppState.lastShownTimes = newLastShownTimes;
+            localStorage.setItem(lastShownKey, JSON.stringify(newLastShownTimes));
+        }
+
+        // Setter for currentListName:
+        function app_setCurrentListName(newListName) {
+            AppState.currentListName = newListName;
+            localStorage.setItem(currentListKey, newListName);
+        }
+        function app_switchList(newList) {
+            app_setCurrentListName(newList);
+            AppState.words = AppState.vocabLists[newList];
+            AppState.currentListLanguage = AppState.listLanguages[newList] || null;
+        }
+
+        // Setter for listLanguages:
+        function app_setListLanguages(newListLanguages) {
+            AppState.listLanguages = newListLanguages;
+            localStorage.setItem('listLanguages', JSON.stringify(newListLanguages));
+        }
+
+        // Setter for currentListLanguage (persisted if needed):
+        function app_setCurrentListLanguage(newLanguage) {
+            AppState.currentListLanguage = newLanguage;
+            // Optionally persist it:
+            localStorage.setItem('currentListLanguage', newLanguage);
+        }
+
+        // Setter for recentLists:
+        function app_setRecentLists(newRecentLists) {
+            AppState.recentLists = newRecentLists;
+            AppState.recentLists = AppState.recentLists.slice(0, MAX_RECENT_LISTS);
+            localStorage.setItem(recentListsKey, JSON.stringify(newRecentLists));
+        }
+        function app_update_recent_lists(list_name) {
+            const isInVocab = AppState.vocabLists.hasOwnProperty(list_name);
+            const isInRecent = AppState.recentLists.includes(list_name);
+
+            // remove from recent
+            if (isInRecent) {
+                const index = AppState.recentLists.indexOf(list_name);
+                AppState.recentLists.splice(index, 1);
+            }
+
+            if (!isInVocab) {
+                console.error("List not found in vocabLists:", list_name);
+                return;
+            }
+
+            // add to top
+            AppState.recentLists.unshift(list_name);
+
+            // remove last item if exceeding max size
+            if (AppState.recentLists.length > MAX_RECENT_LISTS) {
+                AppState.recentLists.pop();
+            }
+
+            // Persist to localStorage
+            try {
+                localStorage.setItem(recentListsKey, JSON.stringify(AppState.recentLists));
+            } catch (error) {
+                console.error('Failed to save recent lists to localStorage:', error);
+            }
+        }
+
+
+        // Setter for MAX_STREAK_LENGTH:
+        function app_setMaxStreakLength(newMaxStreakLength) {
+            if (newMaxStreakLength <= 0) {
+                console.error("streak must be > 0");
+                return;
+            }
+            AppState.MAX_STREAK_LENGTH = newMaxStreakLength;
+            localStorage.setItem(MAX_STREAK_LENGTH_KEY, JSON.stringify(newMaxStreakLength));
+        }
+
+        // Optionally, setters for non-persisted properties:
+
+        function app_setWords(newWords, mode) {
+            if (mode === "append") {
+                AppState.words.push(...newWords);
+            } else {
+                AppState.words = newWords;
+            }
+            // Not persisted to localStorage
+        }
+
+        function app_setCurrentWord(newWord) {
+            AppState.currentWord = newWord;
+            // Not persisted to localStorage
+        }
+
+        function app_setIsTableVisible(isVisible) {
+            AppState.isTableVisible = isVisible;
+            // Not persisted to localStorage
+        }
+
+        function app_setSortColumn(column) {
+            AppState.sortColumn = column;
+            // Not persisted to localStorage
+        }
+
+        function app_setSortDirection(direction) {
+            AppState.sortDirection = direction;
+            // Not persisted to localStorage
+        }
+
+
         function set_list_summary_lang_field(lang) {
             AppState.currentListLanguage = lang;
             AppState.listLanguages[AppState.currentListName] = lang;
@@ -1594,8 +1747,7 @@
         let wordStats = JSON.parse(localStorage.getItem(statsKey)) || {};
 
         if (!AppState.currentListName || !AppState.vocabLists[AppState.currentListName]) {
-            AppState.currentListName = Object.keys(AppState.vocabLists)[0];
-            localStorage.setItem(currentListKey, AppState.currentListName);
+            app_setCurrentListName(Object.keys(AppState.vocabLists)[0]);
         }
         AppState.words = AppState.vocabLists[AppState.currentListName];
         AppState.currentWord = null;
@@ -1603,15 +1755,16 @@
             sortTable('streak');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        function start_tour_if_needed() {
             if (AppState.currentListName === 'default' &&
-                AppState.words.length === 0) {
+                AppState.words.length === 0 &&
+                AppState.recentLists.length === 1) {
                 const wordListDiv = document.getElementById('wordList');
                 wordListDiv.style.display = 'none';
                 AppState.isTableVisible = false;
                 startTour();
             }
-        });
+        }
 
         document.getElementById('userTranslation').addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
@@ -1624,7 +1777,7 @@
         function saveLists() {
             try {
                 localStorage.setItem(storageKey, JSON.stringify(AppState.vocabLists));
-                localStorage.setItem(streakKey, JSON.stringify(AppState.streaks));
+                localStorage.setItem(recentListsKey, JSON.stringify(AppState.recentLists));
                 localStorage.setItem(lastShownKey, JSON.stringify(AppState.lastShownTimes));
                 localStorage.setItem(statsKey, JSON.stringify(wordStats));
             } catch (error) {
@@ -1633,38 +1786,143 @@
             }
         }
 
-        function updateListSelector() {
-            const selector = document.getElementById('listSelector');
-            selector.innerHTML = '';
-            Object.keys(AppState.vocabLists).forEach(listName => {
-                const option = document.createElement('option');
-                option.value = listName;
-                option.text = listName;
+        function app_update_recent_lists_status_in_dropdown() {
+            const listSelector = document.getElementById('listSelector');
 
+            for (let option of listSelector.options) {
+                if (option.value === 'manage') { continue; }
+                const listName = option.value;
                 const words = AppState.vocabLists[listName];
-                const isCompleted = words.length > 0 &&
-                    words.every(word => (AppState.streaks[word.word] || 0) >= MAX_STREAK_LENGTH);
 
-                const isEmpty = words.length === 0;
+                const isCompleted = words && words.length > 0 &&
+                    words.every(word => app_isWordCompleted(word))
+                const isEmpty = !words || words.length === 0;
 
-                if (isCompleted) {
-                    option.classList.add('completed-list');
-                    option.text += ' (Completed)';
-                } else if (isEmpty) {
+                if (isEmpty) {
+                    option.text += ' (empty)';
                     option.classList.add('empty-list');
-                    option.text += ' (Empty)';
+                } else if (isCompleted) {
+                    option.text += ' (completed)';
+                    option.classList.add('completed-list');
                 }
-
-                selector.appendChild(option);
-            });
-            selector.value = AppState.currentListName;
+            }
         }
 
-        function switchList() {
-            AppState.currentListName = document.getElementById('listSelector').value;
-            localStorage.setItem(currentListKey, AppState.currentListName);
-            AppState.words = AppState.vocabLists[AppState.currentListName];
+        function app_init_recent_lists() {
+            // Ensure recentLists is an array. If not, initialize it.
+            if (!Array.isArray(AppState.recentLists)) {
+                AppState.recentLists = [];
+            }
+
+            // Iterate over each list name (key) in vocabLists.
+            for (let listName in AppState.vocabLists) {
+                // If we've reached the maximum number of recent lists, exit the loop.
+                if (AppState.recentLists.length >= MAX_RECENT_LISTS) {
+                    break;
+                }
+                // Only add the listName if it isn't already in recentLists.
+                if (!AppState.recentLists.includes(listName)) {
+                    AppState.recentLists.push(listName);
+                }
+            }
+
+            // Optionally, update the localStorage with the new recentLists array.
+            localStorage.setItem(recentListsKey, JSON.stringify(AppState.recentLists));
+        }
+
+        /**
+         * Updates the list selector dropdown with recent lists and manages selection changes.
+         * Integrates with recent lists management system.
+         */
+        function lsl_update_list_selector() {
+            app_init_recent_lists();
+
+            const selector = document.getElementById('listSelector');
+            selector.innerHTML = ''; // Clear existing options
+
+            // Add recent lists if they exist
+            if (AppState.recentLists.length > 0) {
+                AppState.recentLists.forEach(list => {
+                    // Skip if the list no longer exists in vocabLists
+                    if (!AppState.vocabLists.hasOwnProperty(list)) {
+                        app_update_recent_lists(list); // This will remove it from recent lists
+                        return;
+                    }
+                    const option = document.createElement('option');
+                    option.value = list;
+                    option.textContent = list;
+                    selector.appendChild(option);
+                });
+            }
+
+            // Set the current selection if it exists
+            if (AppState.currentListName && AppState.vocabLists.hasOwnProperty(AppState.currentListName)) {
+                selector.value = AppState.currentListName;
+                selector.text = AppState.currentListName;
+            }
+
+            // Always add the "Manage Lists" option
+            const manageOption = document.createElement('option');
+            manageOption.value = "manage";
+            manageOption.textContent = "📋More ...";
+            selector.appendChild(manageOption);
+
+            // Remove existing event listeners by cloning and replacing the select element
+            const newSelector = selector.cloneNode(true);
+            selector.parentNode.replaceChild(newSelector, selector);
+
+            // Add event listener for dropdown change
+            newSelector.addEventListener('change', (event) => {
+                const selectedValue = event.target.value;
+                if (selectedValue === "manage") {
+                    frow_1();
+                    // Reset the dropdown to the previous selection
+                    newSelector.value = AppState.currentListName || "";
+                } else if (selectedValue !== AppState.recentLists[0]) {
+                    // Only update recents if the selection isn't already at the top
+                    app_update_recent_lists(selectedValue);
+                    app_switchList(selectedValue);
+                    lsl_update_list_selector();
+                    showNextWord();
+                }
+            });
+
+            app_update_recent_lists_status_in_dropdown();
+
+
+            // re-render UI for new current list
+            turn_off_word_list();
+            turn_on_word_list();
+
+
+            // Set focus back to the translation input box
+            document.getElementById('userTranslation').focus();
+
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            lsl_update_list_selector();
+            const selector = document.getElementById('listSelector');
+            selector.value = AppState.currentListName;
+
+            createSummaryHTML();
+            showNextWord(); // Show the next word in the new list
+
+            const importDiv = document.getElementById('importDiv');
+            importDiv.style.display = 'none'; // Ensure it starts hidden
+
+            initializeTheme();
+
+            document.getElementById('userTranslation').focus();
+
+            set_lang_button_func(); // Add the listener for the "Set" button
             AppState.currentListLanguage = AppState.listLanguages[AppState.currentListName] || null;
+            set_list_summary_lang_field(AppState.currentListLanguage);
+
+            start_tour_if_needed();
+        });
+
+        function lsl_switchList() {
+            app_switchList(document.getElementById('listSelector').value);
 
             turn_off_word_list();
             turn_on_word_list();
@@ -1711,7 +1969,7 @@
                 handleEmptyWordList();
                 return;
             }
-            const incompleteWords = AppState.words.filter(entry => (AppState.streaks[entry.word] || 0) < MAX_STREAK_LENGTH);
+            const incompleteWords = AppState.words.filter(entry => !app_isWordCompleted(entry.word));
 
             if (incompleteWords.length === 0) {
                 handleEmptyWordList();
@@ -1740,7 +1998,8 @@
                 }
                 document.getElementById('example').innerText = AppState.currentWord?.example || "";
                 document.getElementById('userTranslation').value = '';
-                document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0} / ${MAX_STREAK_LENGTH}`;
+                document.getElementById('counter').innerText =
+                    `Streak: ${app_getStreak(AppState.currentWord.word)} / ${AppState.MAX_STREAK_LENGTH}`;
 
                 const pauseButton = document.getElementById('pause_word_button');
                 pauseButton.innerText = "Pause Word";
@@ -1775,22 +2034,23 @@
 
             if (userInput === AppState.currentWord.translation) {
                 wordStats[AppState.currentWord.word].correct++;
-                AppState.streaks[AppState.currentWord.word] = (AppState.streaks[AppState.currentWord.word] || 0) + 1;
+                app_increaseStreak(AppState.currentWord.word);
                 updateFeedback(true, 'Correct!');
-                document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word]} / ${MAX_STREAK_LENGTH}`;
-                if (AppState.streaks[AppState.currentWord.word] >= MAX_STREAK_LENGTH) {
+                document.getElementById('counter').innerText =
+                    `Streak: ${app_getStreak(AppState.currentWord.word)} / ${AppState.MAX_STREAK_LENGTH}`;
+                if (app_isWordCompleted(AppState.currentWord.word)) {
                     alert(`You've mastered "${AppState.currentWord.word}". Consider deleting it.`);
                 }
                 saveLists();
-                updateListSelector();
+                lsl_update_list_selector();
                 showNextWord();
                 refreshTable();
             } else {
-                AppState.streaks[AppState.currentWord.word] = 0;
+                app_resetStreak(AppState.currentWord.word);
                 updateFeedback(false, `Incorrect! The correct translation is: ${AppState.currentWord.translation}`);
-                document.getElementById('counter').innerText = `Streak: 0 / ${MAX_STREAK_LENGTH}`;
+                document.getElementById('counter').innerText = `Streak: 0 / ${AppState.MAX_STREAK_LENGTH}`;
                 saveLists();
-                updateListSelector();
+                lsl_update_list_selector();
                 refreshTable();
             }
         }
@@ -1824,13 +2084,12 @@
     `;
         }
 
-        document.addEventListener('DOMContentLoaded', createSummaryHTML);
         function createSummaryHTML() {
             if (!AppState.words) {
                 return;
             }
             const totalWords = AppState.words.length;
-            const completedWords = AppState.words.filter(word => (AppState.streaks[word.word] || 0) >= MAX_STREAK_LENGTH).length;
+            const completedWords = AppState.words.filter(word => app_isWordCompleted(word));
             document.getElementById('list_summary_total_words').innerText = `Total Words: ${totalWords}`;
             document.getElementById('list_summary_completed_words').innerText = `Completed Words: ${completedWords}`;
             document.getElementById('list_summary_lang_field').innerText = "Language: " + AppState.currentListLanguage || 'N/A';
@@ -1881,10 +2140,10 @@
         }
 
         function createTableRowHTML(entry, index) {
-            const streak = AppState.streaks[entry.word] || 0;
+            const streak = app_getStreak(entry.word);
             const lastShown = AppState.lastShownTimes[entry.word] ? timeElapsed(AppState.lastShownTimes[entry.word]) : 'Never';
             const stats = wordStats[entry.word] || { correct: 0, total: 0 };
-            const rowStyle = streak >= MAX_STREAK_LENGTH ? 'style="background-color: #7a7a7a;"' : '';
+            const rowStyle = app_isWordCompleted(entry.word) ? 'style="background-color: #7a7a7a;"' : '';
 
             return `
         <tr ${rowStyle}>
@@ -1892,7 +2151,7 @@
             <td style="border-right: none" contenteditable="true" onblur="updateWord(${index}, 'word', this.innerHTML)">${entry.word}</td>
             <td style="border-left: none">${generateSearchLink(entry.word, true)}</td>
             <td contenteditable="true" onblur="updateWord(${index}, 'translation', this.innerText)">${entry.translation}</td>
-            <td>${streak} ${streak >= MAX_STREAK_LENGTH ? '<span style="color: red;">(Completed)</span>' : ''}</td>
+            <td>${streak} ${app_isWordCompleted(entry.word) ? '<span style="color: red;">(Completed)</span>' : ''}</td>
             <td>${stats.correct}(${stats.total})</td>
             <td>${lastShown}</td>
         </tr>
@@ -1924,16 +2183,16 @@
 
                 // Update the word list
                 AppState.words.push({ word: newWord, translation: newTranslation });
-                AppState.streaks[newWord] = 0; // Initialize streak to 0
+                app_resetStreak(newWord); // Initialize streak to 0
                 AppState.lastShownTimes[newWord] = 'Never'; // Initialize last shown time
                 wordStats[newWord] = { correct: 0, total: 0 }; // Initialize stats
-                AppState.vocabLists[AppState.currentListName] = AppState.words;
+                app_setVocabLists(AppState.currentListName, AppState.words);
 
                 // Save to localStorage
                 saveLists();
 
                 // Update the dropdown and refresh the table
-                updateListSelector(); // Update dropdown to reflect changes
+                lsl_update_list_selector(); // Update dropdown to reflect changes
                 alert(`Added: ${newWord} = ${newTranslation}`);
 
                 // Clear input fields
@@ -1965,7 +2224,7 @@
                 delete AppState.streaks[wordToDelete]; // Remove streak data
                 delete AppState.lastShownTimes[wordToDelete]; // Remove last shown time
                 AppState.words.splice(index, 1); // Remove the word from the list
-                AppState.vocabLists[AppState.currentListName] = AppState.words;
+                app_setVocabLists(AppState.currentListName, AppState.words);
                 saveLists();
                 alert("Word deleted successfully!");
                 toggleWordList(); // Refresh the table
@@ -1978,7 +2237,7 @@
             } else if (field === 'translation') {
                 AppState.words[index].translation = value.trim();
             }
-            AppState.vocabLists[AppState.currentListName] = AppState.words;
+            app_setVocabLists(AppState.currentListName, AppState.words);
             saveLists();
         }
 
@@ -2021,7 +2280,7 @@
                     alert("Duplicates were removed from the input.");
                 }
 
-                AppState.vocabLists[AppState.currentListName] = filteredWords;
+                app_setVocabLists(AppState.currentListName, filteredWords);
                 AppState.words = AppState.vocabLists[AppState.currentListName];
                 saveLists();
                 alert("List updated successfully!");
@@ -2038,9 +2297,10 @@
 
         function handleCompleteEvent() {
             if (AppState.currentWord) {
-                wordStats[AppState.currentWord.word] = { correct: MAX_STREAK_LENGTH, total: MAX_STREAK_LENGTH };
-                wordStats[AppState.currentWord.word].total = MAX_STREAK_LENGTH;
-                AppState.streaks[AppState.currentWord.word] = MAX_STREAK_LENGTH;
+                wordStats[AppState.currentWord.word] =
+                    { correct: AppState.MAX_STREAK_LENGTH, total: AppState.MAX_STREAK_LENGTH };
+                wordStats[AppState.currentWord.word].total = AppState.MAX_STREAK_LENGTH;
+                app_completeStreak(AppState.currentWord.word);
                 counter = document.getElementById('counter');
                 counter.innerText = "word is paussed and will not show up until reset";
 
@@ -2049,7 +2309,7 @@
                 pauseButton.innerText = "Word Paussed";
                 pauseButton.classList.add('disabled');
                 saveLists();
-                updateListSelector();
+                lsl_update_list_selector();
                 //showNextWord();
                 refreshTable();
             }
@@ -2141,28 +2401,51 @@
             }
         });
 
-        document.getElementById('listSelector').addEventListener('change', switchList);
-        document.getElementById('toggleListButton').addEventListener('click', toggleWordList);
+        function reset_selected() {
+            const selected = getSelectedLists();
+            selected.forEach(listName => {
+                const words = AppState.vocabLists[listName];
+                words.forEach(word => app_resetStreak(word.word));
+            });
+        }
+        function load_selected() {
+            const selected = getSelectedLists();
+            if (selected.length == 1) {
+                listName = selected[0];
+                if (app_list_exist(listName)) {
+                    app_switchList(listName);
+                    app_update_recent_lists(listName);
+                    lsl_update_list_selector();
+                }
+            } else if (selected.length > 1) {
+                app_setWords([]);
+                selected.forEach(listName => {
+                    if (app_list_exist(listName)) {
+                        app_setWords(AppState.vocabLists[listName], 'append');
+                    }
+                });
+            } else {
+                return;
+            }
+
+            showNextWord();
+            updateSelectAllState();
+            refreshTable();
+
+        }
         function create_list() {
             const listName = prompt("Enter a name for the new list:").trim();
             if (listName && !AppState.vocabLists[listName]) {
-                AppState.vocabLists[listName] = [];
-                updateListAndUI(listName);
-                document.getElementById('listSelector').value = AppState.currentListName;
+                app_setVocabLists(listName, []);
+                app_setCurrentListName(listName);
+                app_update_recent_lists(listName);
+                lsl_update_list_selector();
                 renderLists();
                 updateSelectAllState();
-                updateListAndUI(Object.keys(AppState.vocabLists)[0]);
+                updateListAndUI(listName);
             } else {
                 alert("List name already exists or is invalid.");
             }
-        }
-        function delete_list(list_name) {
-            if (Object.keys(AppState.vocabLists).length === 1) {
-                alert("You cannot delete the last remaining list.");
-                return;
-            }
-            delete AppState.vocabLists[AppState.currentListName];
-            updateListAndUI(Object.keys(AppState.vocabLists)[0]);
         }
         function exportToJson() {
             const words = AppState.words;
@@ -2209,7 +2492,7 @@
             const wordElement = document.getElementById('word'); // Get the <p> element
             const text = wordElement.textContent; // Get the text content
             AppState.streaks[text] = 0;
-            document.getElementById('counter').innerText = `Streak: ${AppState.streaks[AppState.currentWord.word] || 0} / ${MAX_STREAK_LENGTH}`;
+            document.getElementById('counter').innerText = `Streak: ${app_getStreak(AppState.currentWord.word)} / ${AppState.MAX_STREAK_LENGTH}`;
             const pauseButton = document.getElementById('pause_word_button');
             pauseButton.innerText = "Pause Word";
             pauseButton.classList.remove('disabled');
@@ -2219,8 +2502,6 @@
 
 
 
-        updateListSelector();
-        showNextWord();
 
         function toggleAllCheckboxes() {
             const selectAll = document.getElementById('selectAll');
@@ -2263,9 +2544,9 @@
                     AppState.words.splice(index, 1);
                 });
 
-                AppState.vocabLists[AppState.currentListName] = AppState.words;
+                app_setVocabLists(AppState.currentListName, AppState.words);
                 saveLists();
-                updateListSelector();
+                lsl_update_list_selector();
                 alert("Selected words deleted successfully!");
                 refreshTable();
                 showNextWord();
@@ -2288,7 +2569,7 @@
                 });
 
                 saveLists();
-                updateListSelector();
+                lsl_update_list_selector();
                 alert("Selected words have been reset!");
                 refreshTable();
                 showNextWord();
@@ -2338,7 +2619,7 @@
                 return 0;
             });
 
-            AppState.vocabLists[AppState.currentListName] = AppState.words;
+            app_setVocabLists(AppState.currentListName, AppState.words);
             saveLists();
 
             // Refresh table while preserving visibility
@@ -2354,11 +2635,10 @@
         }
 
         function updateListAndUI(newListName) {
-            AppState.currentListName = newListName;
-            localStorage.setItem(currentListKey, AppState.currentListName);
+            app_setCurrentListName(newListName);
             AppState.words = AppState.vocabLists[AppState.currentListName];
             saveLists();
-            updateListSelector();
+            lsl_update_list_selector();
             refreshTable();
             showNextWord();
         }
@@ -2400,10 +2680,9 @@
 
         // Function to update MAX_STREAK_LENGTH and save to local storage
         function setMaxStreakLength(newLength) {
-            MAX_STREAK_LENGTH = newLength;
-            localStorage.setItem(MAX_STREAK_LENGTH_KEY, MAX_STREAK_LENGTH);
+            app_setMaxStreakLength(newLength);
 
-            updateListSelector();
+            lsl_update_list_selector();
             showNextWord();
             refreshTable();
         }
@@ -2413,7 +2692,6 @@
             const newLength = parseInt(document.getElementById('maxStreakLength').value);
             if (!isNaN(newLength) && newLength > 0) {
                 setMaxStreakLength(newLength); // Update and save to local storage
-                //alert(`Maximum streak length set to ${MAX_STREAK_LENGTH}`);
             } else {
                 alert("Please enter a valid positive number.");
             }
@@ -2432,21 +2710,8 @@
         // Close dropdown if clicked outside
         window.onclick = turnOffDropdown;
 
-        function validateInput(userInput) {
-            if (userInput.length > MAX_STREAK_LENGTH) {
-                alert(`Translation exceeds maximum length of ${MAX_STREAK_LENGTH} characters.`);
-                return false;
-            }
-            return true;
-        }
-
         // Set the initial value of the max streak length input field
-        document.getElementById('maxStreakLength').value = MAX_STREAK_LENGTH;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Set focus to the translation input box when the page loads
-            document.getElementById('userTranslation').focus();
-        });
+        document.getElementById('maxStreakLength').value = AppState.MAX_STREAK_LENGTH;
 
         const flashcard = document.getElementById('flashcard');
         let touchStartX = 0;
@@ -2474,19 +2739,11 @@
                 }
             }
         }
-        //       });
-        document.addEventListener("DOMContentLoaded", () => {
-        });
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
         }
         document.getElementById('theme-toggle').addEventListener('click', toggleDarkMode);
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeTheme();
-            document.getElementById('userTranslation').focus();
-        });
 
         function initializeTheme() {
             const themeToggle = document.getElementById('theme-toggle');
@@ -2662,7 +2919,7 @@
                 }
 
                 // Add the new list
-                AppState.vocabLists[listName] = words;
+                app_setVocabLists(listName, words);
                 saveLists();
                 updateListAndUI(listName);
                 renderLists();
@@ -2688,11 +2945,6 @@
                 };
             }
         }
-        // Initialize importDiv display state when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            const importDiv = document.getElementById('importDiv');
-            importDiv.style.display = 'none'; // Ensure it starts hidden
-        });
 
         const baseURL = "https://api.github.com/repos/keepthestreak/lists/contents";
         let currentPath = [];
@@ -2814,7 +3066,7 @@
 
             Object.entries(AppState.vocabLists).forEach(([listName, words]) => {
                 const isCompleted = words.length > 0 &&
-                    words.every(word => (AppState.streaks[word.word] || 0) >= MAX_STREAK_LENGTH);
+                    words.every(word => app_isWordCompleted(word));
                 const isEmpty = words.length === 0;
 
                 const listElement = document.createElement('div');
@@ -2877,7 +3129,7 @@
             });
         }
 
-        function updateSelectAllState() {
+        function XupdateSelectAllState() {
             const selectAllCheckbox = document.getElementById('lmc-select-all');
             const allCheckboxes = Object.keys(AppState.vocabLists).map(listName =>
                 document.getElementById(`checkbox-${listName}`)
@@ -2898,14 +3150,26 @@
             });
             return selected;
         }
+        function app_get_most_recent_list_name() {
+            if (!AppState.recentLists || AppState.recentLists.length === 0) {
+                return null;
+            }
+            return AppState.recentLists[0];
+        }
         function deleteSelected() {
             const selected = getSelectedLists();
             selected.forEach(listName => {
                 delete AppState.vocabLists[listName];
+                let index = AppState.recentLists.indexOf(listName);
+                if (index !== -1) {
+                    AppState.recentLists.splice(index, 1);
+                }
             });
             renderLists();
             updateSelectAllState();
-            updateListAndUI(Object.keys(AppState.vocabLists)[0]);
+            updateListAndUI(app_get_most_recent_list_name());
+            const selector = document.getElementById('listSelector');
+            selector.value = AppState.currentListName;
         }
         renderLists();
         const dropdownTrigger = document.getElementById('dropdownTrigger');
@@ -3274,10 +3538,6 @@
             });
         }
 
-        // Wait for the document to load before initializing
-        document.addEventListener('DOMContentLoaded', () => {
-            set_lang_button_func(); // Add the listener for the "Set" button
-        });
     </script>
 </body>
 
