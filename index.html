@@ -1031,8 +1031,9 @@
             width: 100%;
         }
 
-        .lmc-button {
+        .lmc_button {
             padding: 8px 16px;
+            margin: 5px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -1040,15 +1041,15 @@
             color: white;
         }
 
-        .lmc-button:hover {
+        .lmc_button:hover {
             background-color: #1565c0;
         }
 
-        .lmc-button.delete {
+        .lmc_button.delete {
             background-color: #d32f2f;
         }
 
-        .lmc-button.delete:hover {
+        .lmc_button.delete:hover {
             background-color: #c62828;
         }
 
@@ -1335,10 +1336,16 @@
 
             <div id="lists_management_container" class="lists_management_container">
                 <div class="lmc_button_group">
-                    <button class="lmc-button" onclick="load_selected()">Load Selected</button>
-                    <button class="lmc-button" onclick="create_list()">Create New List</button>
-                    <button onclick="reset_selected()">Reset Selected</button>
-                    <button class="lmc-button" class="delete" onclick="deleteSelected()">Delete Selected</button>
+                    <div style="width: 100%;">
+                    <button class="lmc_button" onclick="frow_3()" style="background-color: #0077ff;">Upload List From Local</button>
+                    <button class="lmc_button" onclick="frow_2()" style="background-color: #0077ff;">Import List From Github</button>
+                    <button class="lmc_button" onclick="create_list()" style="background-color: #0077ff;">Create New List</button>
+                    </div>
+                    <div style="width: 100%;">
+                    <button class="lmc_button" onclick="load_selected()" style="background-color: #9400d3;">Load Selected</button>
+                    <button class="lmc_button" onclick="reset_selected()" style="background-color: #9400d3;">Reset Selected</button>
+                    </div>
+                    <button class="lmc_button" onclick="deleteSelected()" style="background-color: #ff0077;">Delete Selected</button>
                 </div>
                 <div class="lmc_select_all_wrapper">
                     <input type="checkbox" id="lmc-select-all" onclick="toggleSelectAll()">
@@ -1458,11 +1465,11 @@
                 </div>
             </div>
             <div style="margin-bottom: 10px;">
-                <button class="button-delete" onclick="deleteSelectedWords()">Delete Selected Words</button>
-                <button class="button-reset" onclick="resetSelectedWords()">Reset Selected Words</button>
-                <button class="button-edit" onclick="editList()">Edit List</button>
-                <button class="button-export" onclick="exportToJson()">Export to JSON</button>
-                <button class="button-set_lang" onclick="set_list_language()">Set List Language</button>
+                <button class="lmc_button" onclick="deleteSelectedWords()">Delete Selected Words</button>
+                <button class="lmc_button" onclick="resetSelectedWords()">Reset Selected Words</button>
+                <button class="lmc_button" onclick="editList()">Edit List</button>
+                <button class="lmc_button" onclick="exportToJson()">Export to JSON</button>
+                <button class="lmc_button" onclick="set_list_language()">Set List Language</button>
             </div>
             <div id='table_container' style="overflow-x: scroll;">
             </div>
