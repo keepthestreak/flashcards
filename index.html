@@ -1719,7 +1719,7 @@
                     <div id="reset_word_button" class="sidebar_item" onclick="resetStreak()">Reset Word</div>
                     <div id="switch_mode_button" class="sidebar_item">Switch Mode</div>
                     <div id="play_mode_button" class="sidebar_item">▶</div>
-                    <div id="invert_button" class="sidebar_item">Invert Word</div>
+                    <div id="invert_button" class="sidebar_item" onclick="invertFlashcard()">🔄 <i>Invert</i></i></div>
                 </div>
             </div>
 
@@ -1912,6 +1912,7 @@
             currentListLanguage: null, // Language for the current list
             recentLists: JSON.parse(localStorage.getItem(recentListsKey)) || [], // Array to store recent list names
             MAX_STREAK_LENGTH: JSON.parse(localStorage.getItem(MAX_STREAK_LENGTH_KEY)) || 20,
+            invert: false,
         };
 
         // Getter for vocabLists:
@@ -2326,6 +2327,10 @@
                 const now = new Date();
                 AppState.lastShownTimes[AppState.currentWord.word] = now.toISOString();
                 saveLists();
+
+                if (AppState.invert) {
+                    document.getElementById('word').innerText = AppState.currentWord.translation;
+                }
             }
         }
         function clear_flashcard() {
@@ -2350,7 +2355,11 @@
             }
             wordStats[AppState.currentWord.word].total++;
 
-            if (userInput === AppState.currentWord.translation) {
+            let translation = AppState.currentWord.translation;
+            if (AppState.invert) {
+                translation = AppState.currentWord.word;
+            }
+            if (userInput === translation) {
                 wordStats[AppState.currentWord.word].correct++;
                 app_increaseStreak(AppState.currentWord.word);
                 updateFeedback(true, 'Correct!');
@@ -2365,7 +2374,7 @@
                 refreshTable();
             } else {
                 app_resetStreak(AppState.currentWord.word);
-                updateFeedback(false, `Incorrect! The correct translation is: ${AppState.currentWord.translation}`);
+                updateFeedback(false, `Incorrect! The correct translation is: ${translation}`);
                 document.getElementById('counter').innerText = `Streak: 0 / ${AppState.MAX_STREAK_LENGTH}`;
                 saveLists();
                 lsl_update_list_selector();
@@ -2645,6 +2654,10 @@
             if (AppState.currentWord) {
                 translationDiv.style.visibility = 'visible';
                 showTranslation.innerText = `${AppState.currentWord.translation}`;
+
+                if (AppState.invert) {
+                    showTranslation.innerText = AppState.currentWord.word;
+                }
             }
 
             checkButton.innerText = 'Next';
@@ -2802,6 +2815,19 @@
             if (language) {
                 set_list_summary_lang_field(language);
             }
+        }
+        function invertFlashcard() {
+            console.log("invertFlashcard called");
+            const invertButton = document.getElementById('invert_button');
+            if (AppState.invert) {
+                console.log("inverting to normal");
+                invertButton.innerHTML = "🔄 <i>Invert</i>";
+            } else {
+                console.log("inverting to flip");
+                invertButton.innerHTML = "🔃 <i>Uninvert</i>";
+            }
+            AppState.invert = !AppState.invert;
+            showNextWord();
         }
         function resetStreak() {
             if (!AppState.currentWord) {
@@ -3648,14 +3674,22 @@
 
         function play_list() {
             const check_button = document.getElementById('checkButton');
+            const translation = document.getElementById('showTranslation');
             if (check_button.innerText === 'Next') {
                 handleNextEvent();
-                play_text(word.innerText, AppState.currentListLanguage);
+                if (!AppState.invert) {
+                    play_text(AppState.currentWord.word, AppState.currentListLanguage);
+                } else {
+                    play_text(AppState.currentWord.translation, "en-US");
+                }
             } else {
                 handleShowEvent();
                 setTimeout(function () {
-                    const translation = document.getElementById('showTranslation');
-                    play_text(translation.innerText, "en-US");
+                    if (!AppState.invert) {
+                        play_text(translation.innerText, "en-US");
+                    } else {
+                        play_text(AppState.currentWord.word, AppState.currentListLanguage);
+                    }
                 }, 500);
             }
         }
