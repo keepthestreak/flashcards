@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+e!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1626,7 +1626,7 @@
                 <div id="dropdownTrigger"></div>
                 <div id="dropdownContent" class="lmc_dropdown_content">
                     <div id='lmc_row_1' class="lmc_dropdown_row" onclick="frow_1()">Your lists</div>
-                    <div id='lmc_row_2' class="lmc_dropdown_row" onclick="frow_2()">Import from shared</div>
+                    <div id='lmc_row_2' class="lmc_dropdown_row" onclick="frow_2()">Import from github</div>
                     <div id='lmc_row_3' class="lmc_dropdown_row" onclick="frow_3()">Upload from local</div>
                 </div>
             </div>
@@ -1898,23 +1898,41 @@
         const MAX_RECENT_LISTS = 5;
 
         // AppState 
-        const AppState = {
-            vocabLists: JSON.parse(localStorage.getItem(storageKey)) || { "default": [] },
-            streaks: JSON.parse(localStorage.getItem(streakKey)) || {},
-            lastShownTimes: JSON.parse(localStorage.getItem(lastShownKey)) || {},
-            currentListName: localStorage.getItem(currentListKey),
-            words: [],
-            currentWord: null,
-            isTableVisible: false,
-            sortColumn: 'streak',
-            sortDirection: -1,
-            listLanguages: JSON.parse(localStorage.getItem('listLanguages')) || {}, // Track languages per list
-            currentListLanguage: null, // Language for the current list
-            recentLists: JSON.parse(localStorage.getItem(recentListsKey)) || [], // Array to store recent list names
-            MAX_STREAK_LENGTH: JSON.parse(localStorage.getItem(MAX_STREAK_LENGTH_KEY)) || 20,
-            invert: false,
-        };
+        const AppState = {};
 
+        function app_init_default_state() {
+            //localStorage.clear();
+
+            AppState.vocabLists = { "default": [] };
+            AppState.streaks = {};
+            AppState.lastShownTimes = {};
+            AppState.currentListName = null;
+            AppState.words = [];
+            AppState.currentWord = null;
+            AppState.isTableVisible = false;
+            AppState.sortColumn = 'streak';
+            AppState.sortDirection = -1;
+            AppState.listLanguages = {};
+            AppState.currentListLanguage = null; // Language for the current list
+            AppState.recentLists = [];
+            AppState.MAX_STREAK_LENGTH = 20;
+            AppState.invert = false;
+        }
+        function app_init_from_local_storage() {
+            AppState.vocabLists = JSON.parse(localStorage.getItem(storageKey)) || { "default": [] };
+            AppState.streaks = JSON.parse(localStorage.getItem(streakKey)) || {};
+            AppState.lastShownTimes = JSON.parse(localStorage.getItem(lastShownKey)) || {};
+            AppState.currentListName = localStorage.getItem(currentListKey) || "default";
+            AppState.listLanguages = JSON.parse(localStorage.getItem('listLanguages')) || {};
+            AppState.recentLists = JSON.parse(localStorage.getItem(recentListsKey)) || [];
+            AppState.MAX_STREAK_LENGTH = JSON.parse(localStorage.getItem(MAX_STREAK_LENGTH_KEY)) || 20;
+
+            AppState.words = AppState.vocabLists[AppState.currentListName] || [];
+        }
+        function app_init() {
+            app_init_default_state();
+            app_init_from_local_storage();
+        }
         // Getter for vocabLists:
         function app_list_exist(listName) {
             return AppState.vocabLists.hasOwnProperty(listName);
@@ -1922,7 +1940,7 @@
         // Setter for vocabLists:
         function app_setVocabLists(newListName, newVocabLists) {
             AppState.vocabLists[newListName] = newVocabLists;
-            localStorage.setItem(storageKey, JSON.stringify(newVocabLists));
+            localStorage.setItem(storageKey, JSON.stringify(AppState.vocabLists));
         }
 
         // getter for streaks:
@@ -1961,6 +1979,8 @@
             app_setCurrentListName(newList);
             AppState.words = AppState.vocabLists[newList];
             AppState.currentListLanguage = AppState.listLanguages[newList] || null;
+
+            app_update_recent_lists(newList);
         }
 
         // Setter for listLanguages:
@@ -1994,6 +2014,8 @@
 
             if (!isInVocab) {
                 console.error("List not found in vocabLists:", list_name);
+                console.error("cleaning up recent lists from local storage");
+                app_setRecentLists([]);
                 return;
             }
 
@@ -2064,15 +2086,6 @@
         }
 
         let wordStats = JSON.parse(localStorage.getItem(statsKey)) || {};
-
-        if (!AppState.currentListName || !AppState.vocabLists[AppState.currentListName]) {
-            app_setCurrentListName(Object.keys(AppState.vocabLists)[0]);
-        }
-        AppState.words = AppState.vocabLists[AppState.currentListName];
-        AppState.currentWord = null;
-        if (AppState.words) {
-            sortTable('streak');
-        }
 
         function start_tour_if_needed() {
             if (AppState.currentListName === 'default' &&
@@ -2219,6 +2232,8 @@
 
         }
         document.addEventListener('DOMContentLoaded', () => {
+            console.log("starting ...");
+            app_init();
             lsl_update_list_selector();
             const selector = document.getElementById('listSelector');
             selector.value = AppState.currentListName;
@@ -2236,6 +2251,15 @@
             set_lang_button_func(); // Add the listener for the "Set" button
             AppState.currentListLanguage = AppState.listLanguages[AppState.currentListName] || null;
             set_list_summary_lang_field(AppState.currentListLanguage);
+
+            if (!AppState.currentListName || !AppState.vocabLists[AppState.currentListName]) {
+                app_setCurrentListName(Object.keys(AppState.vocabLists)[0]);
+            }
+            AppState.words = AppState.vocabLists[AppState.currentListName];
+            AppState.currentWord = null;
+            if (AppState.words) {
+                sortTable('streak');
+            }
 
             start_tour_if_needed();
         });
@@ -2817,13 +2841,10 @@
             }
         }
         function invertFlashcard() {
-            console.log("invertFlashcard called");
             const invertButton = document.getElementById('invert_button');
             if (AppState.invert) {
-                console.log("inverting to normal");
                 invertButton.innerHTML = "🔄 <i>Invert</i>";
             } else {
-                console.log("inverting to flip");
                 invertButton.innerHTML = "🔃 <i>Uninvert</i>";
             }
             AppState.invert = !AppState.invert;
@@ -3277,6 +3298,7 @@
 
                 // Add the new list
                 app_setVocabLists(listName, words);
+                app_switchList(listName);
                 saveLists();
                 updateListAndUI(listName);
                 renderLists();
@@ -3528,7 +3550,6 @@
             const selector = document.getElementById('listSelector');
             selector.value = AppState.currentListName;
         }
-        renderLists();
         const dropdownTrigger = document.getElementById('dropdownTrigger');
         const dropdownContent = document.getElementById('dropdownContent');
 
