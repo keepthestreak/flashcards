@@ -1,4 +1,4 @@
-e!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1757,6 +1757,7 @@ e!DOCTYPE html>
 
         <div id="wordList">
             <div id="list_summary" style="margin-bottom: 15px;">
+                <p id="list_summary_list_name"></p>
                 <p id="list_summary_total_words"></p>
                 <p id="list_summary_completed_words"></p>
                 <p id="list_summary_lang_field"></p>
@@ -2093,7 +2094,7 @@ e!DOCTYPE html>
                 AppState.recentLists.length === 1) {
                 const wordListDiv = document.getElementById('wordList');
                 wordListDiv.style.display = 'none';
-                AppState.isTableVisible = false;
+                turn_off_word_list();
                 startTour();
             }
         }
@@ -2223,8 +2224,9 @@ e!DOCTYPE html>
 
 
             // re-render UI for new current list
-            turn_off_word_list();
-            turn_on_word_list();
+            if (AppState.isTableVisible) {
+                turn_on_word_list();
+            }
 
 
             // Set focus back to the translation input box
@@ -2234,10 +2236,12 @@ e!DOCTYPE html>
         document.addEventListener('DOMContentLoaded', () => {
             console.log("starting ...");
             app_init();
+            turn_off_word_list();
             lsl_update_list_selector();
             const selector = document.getElementById('listSelector');
             selector.value = AppState.currentListName;
 
+            renderLists();
             createSummaryHTML();
             showNextWord(); // Show the next word in the new list
 
@@ -2441,6 +2445,7 @@ e!DOCTYPE html>
             }
             const totalWords = AppState.words.length;
             const completedWords = AppState.words.filter(word => app_isWordCompleted(word));
+            document.getElementById('list_summary_list_name').innerText = `List Name: ${AppState.currentListName}`;
             document.getElementById('list_summary_total_words').innerText = `Total Words: ${totalWords}`;
             document.getElementById('list_summary_completed_words').innerText = `Completed Words: ${completedWords}`;
             document.getElementById('list_summary_lang_field').innerText = "Language: " + AppState.currentListLanguage || 'N/A';
@@ -2550,8 +2555,9 @@ e!DOCTYPE html>
                 clearInputFields(); // Call to clear the input fields
 
                 // Refresh the word list display
-                AppState.isTableVisible = false; // Reset the state
-                toggleWordList(); // Show the updated table
+                if (AppState.isTableVisible) {
+                    turn_on_word_list(); // Show the updated table
+                }
 
                 // Show the next word in the flashcard
                 showNextWord(); // Call to refresh the flashcard with the new word
@@ -2638,8 +2644,7 @@ e!DOCTYPE html>
 
                 // Refresh table if visible
                 if (AppState.isTableVisible) {
-                    AppState.isTableVisible = false; // Reset the state
-                    toggleWordList(); // Show the updated table
+                    turn_on_word_list(); // Show the updated table
                 }
 
                 showNextWord();
@@ -3000,15 +3005,14 @@ e!DOCTYPE html>
             app_setVocabLists(AppState.currentListName, AppState.words);
             saveLists();
 
-            // Refresh table while preserving visibility
-            AppState.isTableVisible = false;
-            toggleWordList();
+            if (AppState.isTableVisible) {
+                turn_on_word_list();
+            }
         }
 
         function refreshTable() {
             if (AppState.isTableVisible) {
-                AppState.isTableVisible = false;
-                toggleWordList();
+                turn_on_word_list();
             }
         }
 
