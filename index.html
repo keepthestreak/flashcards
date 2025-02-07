@@ -1705,6 +1705,9 @@
                 <span id="word">Loading...</span>
                 <span id="word_play_button" class="play_button">🔊️</span>
             </div>
+            <div id="transliteration_div" class="flashcard_text_div" style="visibility: hidden;">
+                <div id="transliteration"></div>
+            </div>
             <div id="full_screen_button" style="position: absolute; top: 0; right: 0;" class="tooltip"
                 onclick="toggleFullScreen()">
                 <button id="fullScreenButton">🖥️</button>
@@ -2335,6 +2338,7 @@
             if (AppState.currentWord) {
                 document.getElementById('word').innerHTML = generateSearchLink(AppState.currentWord.word);
                 document.getElementById('feedback').innerText = '';
+
                 const exampleDiv = document.getElementById('exampleDiv');
                 if (AppState.currentWord.example) {
                     exampleDiv.style.visibility = 'visible';
@@ -2342,6 +2346,14 @@
                     example.innerText = AppState.currentWord.example;
                 } else {
                     exampleDiv.style.visibility = 'hidden';
+                }
+                const tranliterationDiv = document.getElementById('transliteration_div');
+                if (AppState.currentWord.transliteration) {
+                    tranliterationDiv.style.visibility = 'visible';
+                    const transliteration = document.getElementById('transliteration');
+                    transliteration.innerText = AppState.currentWord.transliteration;
+                } else {
+                    tranliterationDiv.style.visibility = 'hidden';
                 }
                 document.getElementById('example').innerText = AppState.currentWord?.example || "";
                 document.getElementById('userTranslation').value = '';
@@ -2363,6 +2375,7 @@
         }
         function clear_flashcard() {
             document.getElementById('word').innerText = '';
+            document.getElementById('transliteration').innerText = '';
             document.getElementById('example').innerText = '';
             document.getElementById('userTranslation').value = '';
             document.getElementById('counter').innerText = `Streak: N/A`;
@@ -3281,7 +3294,8 @@
                     return {
                         word: entry.word.trim(),
                         translation: entry.translation.trim(),
-                        example: entry.example ? entry.example.trim() : null
+                        example: entry.example ? entry.example.trim() : null,
+                        transliteration: entry.transliteration ? entry.transliteration.trim() : null
                     };
                 });
 
