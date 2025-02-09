@@ -1323,9 +1323,76 @@
             overflow-x: auto;
             align-items: center;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid #c8e6c9;
             margin: 5px 0;
             border-radius: 4px;
+            background-color: #e6f4ea;
+            /* Light green background color */
+        }
+
+        .lmc_list_row:hover {
+            background-color: #d4edda;
+            /* Slightly darker light green on hover */
+            transition: background-color 0.3s ease;
+            /* Smooth transition */
+        }
+
+        .dark-mode .lmc_list_row {
+            background-color: #2d3a2d;
+            /* Dark green background */
+            border-color: #444;
+            /* Darker border color */
+            color: #e0e0e0;
+            /* Light text color for dark mode */
+        }
+
+        /* Optional: Hover effect for dark mode */
+        .dark-mode .lmc_list_row:hover {
+            background-color: #3a4a3a;
+            /* Slightly lighter dark green on hover */
+        }
+
+        /* Active state for light mode */
+        .lmc_list_row.active {
+            background-color: #b2dfdb;
+            /* Distinct light teal green */
+            border-color: #80cbc4;
+            /* Matching border color */
+            border-width: 2px;
+            /* Thicker border */
+            box-shadow: 0 0 8px rgba(0, 128, 128, 0.3);
+            /* Soft shadow for emphasis */
+            font-weight: bold;
+            /* Bold text */
+            color: #00695c;
+            /* Darker text color for contrast */
+        }
+
+        /* Active state for dark mode */
+        .dark-mode .lmc_list_row.active {
+            background-color: #37474f;
+            /* Distinct dark slate blue */
+            border-color: #546e7a;
+            /* Matching border color */
+            border-width: 2px;
+            /* Thicker border */
+            box-shadow: 0 0 8px rgba(96, 125, 139, 0.5);
+            /* Soft shadow for emphasis */
+            font-weight: bold;
+            /* Bold text */
+            color: #cfd8dc;
+            /* Light text color for contrast */
+        }
+
+        /* Optional: Hover effect for active state */
+        .lmc_list_row.active:hover {
+            background-color: #80cbc4;
+            /* Brighter teal green for hover in light mode */
+        }
+
+        .dark-mode .lmc_list_row.active:hover {
+            background-color: #455a64;
+            /* Brighter dark slate blue for hover in dark mode */
         }
 
         .lmc-status-badge {
@@ -1969,8 +2036,22 @@
             AppState.vocabLists[newListName] = newVocabLists;
             localStorage.setItem(storageKey, JSON.stringify(AppState.vocabLists));
         }
+        function app_deleteList(listName) {
+            delete AppState.vocabLists[listName];
+            localStorage.setItem(storageKey, JSON.stringify(AppState.vocabLists));
+
+            app_update_recent_lists(listName);
+
+            delete AppState.streaks[listName];
+        }
 
         // getter for streaks:
+        function app_isListCompleted(listName) {
+            const words = AppState.vocabLists[listName];
+            const isCompleted = words && words.length > 0 &&
+                words.every(word => app_isWordCompleted(word))
+            return isCompleted;
+        }
         function app_isWordCompleted(word) {
             return app_getStreak(word) === AppState.MAX_STREAK_LENGTH;
         }
@@ -2036,14 +2117,15 @@
             if (isInRecent) {
                 const index = AppState.recentLists.indexOf(list_name);
                 AppState.recentLists.splice(index, 1);
+            } else {
+                // add to top
+                if (addToTop) {
+                    AppState.recentLists.unshift(list_name);
+                } else {
+                    AppState.recentLists.push(list_name);
+                }
             }
 
-            // add to top
-            if (addToTop) {
-                AppState.recentLists.unshift(list_name);
-            } else {
-                AppState.recentLists.push(list_name);
-            }
 
             // remove last item if exceeding max size
             if (AppState.recentLists.length > MAX_RECENT_LISTS) {
@@ -2166,6 +2248,9 @@
 
         function app_init_recent_lists() {
             // Ensure recentLists is an array. If not, initialize it.
+            if (AppState.vocabLists === null || Object.keys(AppState.vocabLists).length === 0) {
+                app_setRecentLists([]);
+            }
             if (!Array.isArray(AppState.recentLists)) {
                 AppState.recentLists = [];
             }
@@ -2305,6 +2390,7 @@
             if (AppState.isTableVisible) {
                 turn_on_word_list();
             }
+            renderLists();
 
             // Return focus to the translation input box.
             document.getElementById('userTranslation').focus();
@@ -2876,21 +2962,23 @@
                 return;
             }
 
+
             showNextWord();
             updateSelectAllState();
             refreshTable();
+            renderLists();
 
         }
         function create_list() {
             const listName = prompt("Enter a name for the new list:").trim();
             if (listName && !AppState.vocabLists[listName]) {
                 app_setVocabLists(listName, []);
-                app_setCurrentListName(listName);
-                app_update_recent_lists(listName);
+                app_switchList(listName);
                 lsl_update_list_selector();
                 renderLists();
                 updateSelectAllState();
                 updateListAndUI(listName);
+                renderLists();
             } else {
                 alert("List name already exists or is invalid.");
             }
@@ -3105,8 +3193,7 @@
         }
 
         function updateListAndUI(newListName) {
-            app_setCurrentListName(newListName);
-            AppState.words = AppState.vocabLists[AppState.currentListName];
+            app_switchList(newListName);
             saveLists();
             lsl_update_list_selector();
             refreshTable();
@@ -3537,8 +3624,7 @@
             container.innerHTML = '';
 
             Object.entries(AppState.vocabLists).forEach(([listName, words]) => {
-                const isCompleted = words.length > 0 &&
-                    words.every(word => app_isWordCompleted(word));
+                const isCompleted = app_isListCompleted(listName);
                 const isEmpty = words.length === 0;
 
                 const listElement = document.createElement('div');
@@ -3575,11 +3661,21 @@
                 }
                 listElement.appendChild(statusBadge);
 
+                // add active style
+                if (listName === AppState.currentListName) {
+                    listElement.classList.add('active');
+                }
+
+                // add event listener to load the list when clicked
+                listElement.addEventListener('click', () => {
+                    updateListAndUI(listName);
+                });
                 container.appendChild(listElement);
             });
         }
 
-        function updateSelectAllState() {
+        function updateSelectAllState(event) {
+            if (event) { event.stopPropagation(); }
             const selectAllCheckbox = document.getElementById('lmc-select-all');
             const allCheckboxes = Object.keys(AppState.vocabLists).map(listName =>
                 document.getElementById(`checkbox-${listName}`)
@@ -3631,17 +3727,21 @@
         function deleteSelected() {
             const selected = getSelectedLists();
             selected.forEach(listName => {
-                delete AppState.vocabLists[listName];
-                let index = AppState.recentLists.indexOf(listName);
-                if (index !== -1) {
-                    AppState.recentLists.splice(index, 1);
+                console.log("deleting:", listName);
+                app_deleteList(listName);
+                if (listName === AppState.currentListName) {
+                    AppState.currentWord = null;
                 }
+                if (AppState.recentLists.length > 0) {
+                    app_switchList(AppState.recentLists[0]);
+                    console.log("vocab:", AppState.vocabLists);
+                } else {
+                    app_switchList(null);
+                }
+                renderLists();
+                updateSelectAllState();
+                lsl_update_list_selector();
             });
-            renderLists();
-            updateSelectAllState();
-            updateListAndUI(app_get_most_recent_list_name());
-            const selector = document.getElementById('listSelector');
-            selector.value = AppState.currentListName;
         }
         const dropdownTrigger = document.getElementById('dropdownTrigger');
         const dropdownContent = document.getElementById('dropdownContent');
