@@ -2011,6 +2011,7 @@
             AppState.recentLists = [];
             AppState.MAX_STREAK_LENGTH = 20;
             AppState.invert = false;
+            AppState.isMultiple = false;
         }
         function app_init_from_local_storage() {
             AppState.vocabLists = JSON.parse(localStorage.getItem(storageKey)) || { "default": [] };
@@ -2089,6 +2090,7 @@
             AppState.currentListLanguage = AppState.listLanguages[newList] || null;
 
             app_update_recent_lists(newList);
+            AppState.isMultipleSelected = false;
         }
 
         // Setter for listLanguages:
@@ -2948,26 +2950,47 @@
                 listName = selected[0];
                 if (app_list_exist(listName)) {
                     app_switchList(listName);
-                    app_update_recent_lists(listName);
                     lsl_update_list_selector();
                 }
+                renderLists();
             } else if (selected.length > 1) {
+                AppState.isMultipleSelected = true;
                 app_setWords([]);
                 selected.forEach(listName => {
                     if (app_list_exist(listName)) {
                         app_setWords(AppState.vocabLists[listName], 'append');
                     }
                 });
+
+                // add active style
+                const manageLoadedLists = document.getElementById('manage_loaded_lists');
+                const lmcListRows = manageLoadedLists.getElementsByClassName('lmc_list_row');
+                Array.from(lmcListRows).forEach(row => row.classList.remove('active'));
+                Array.from(lmcListRows).forEach(row => {
+                    selected.forEach(listName => {
+                        const lmcListName = row.querySelector('.lmc-list-name');
+
+                        // Check if the lmc-list-name element exists and compare its innerText to listName
+                        if (lmcListName && lmcListName.innerText.trim() === listName) {
+                            row.classList.add('active');
+                        }
+                    });
+                });
+                const selector = document.getElementById('listSelector');
+                const optionExists = Array.from(selector.options).some(option => {
+                    return option.value === "multiple";
+                });
+                if (!optionExists) {
+                    selector.prepend(createOption("multiple", "multiple"));
+                    selector.value = "multiple";
+                }
             } else {
                 return;
             }
 
-
             showNextWord();
             updateSelectAllState();
             refreshTable();
-            renderLists();
-
         }
         function create_list() {
             const listName = prompt("Enter a name for the new list:").trim();
