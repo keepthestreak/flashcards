@@ -112,12 +112,14 @@
             transform: translateX(-50%);
         }
 
-        option[value="manage"] {
+        option[value="more"],
+        option[value="all"] {
             font-weight: bold;
             color: #3b82f6;
         }
 
-        .dark-mode option[value="manage"] {
+        .dark-mode option[value="more"] ,
+        .dark-mode option[value="all"] {
             color: #60a5fa;
         }
 
@@ -1898,7 +1900,7 @@
         const statsKey = 'wordStats';
         const currentListKey = 'currentList';
         const MAX_STREAK_LENGTH_KEY = 'maxStreakLength';
-        const MAX_RECENT_LISTS = 5;
+        const MAX_RECENT_LISTS = 15;
 
         // AppState 
         const AppState = {};
@@ -2005,8 +2007,7 @@
             AppState.recentLists = AppState.recentLists.slice(0, MAX_RECENT_LISTS);
             localStorage.setItem(recentListsKey, JSON.stringify(newRecentLists));
         }
-        function app_update_recent_lists(list_name) {
-            const isInVocab = AppState.vocabLists.hasOwnProperty(list_name);
+        function app_update_recent_lists(list_name, addToTop = true) {
             const isInRecent = AppState.recentLists.includes(list_name);
 
             // remove from recent
@@ -2015,15 +2016,12 @@
                 AppState.recentLists.splice(index, 1);
             }
 
-            if (!isInVocab) {
-                console.error("List not found in vocabLists:", list_name);
-                console.error("cleaning up recent lists from local storage");
-                app_setRecentLists([]);
-                return;
-            }
-
             // add to top
-            AppState.recentLists.unshift(list_name);
+            if (addToTop) {
+                AppState.recentLists.unshift(list_name);
+            } else {
+                AppState.recentLists.push(list_name);
+            }
 
             // remove last item if exceeding max size
             if (AppState.recentLists.length > MAX_RECENT_LISTS) {
@@ -2125,7 +2123,8 @@
             const listSelector = document.getElementById('listSelector');
 
             for (let option of listSelector.options) {
-                if (option.value === 'manage') { continue; }
+                if (option.value === 'more') { continue; }
+                if (option.value === 'all') { continue; }
                 const listName = option.value;
                 const words = AppState.vocabLists[listName];
 
@@ -2148,8 +2147,22 @@
             if (!Array.isArray(AppState.recentLists)) {
                 AppState.recentLists = [];
             }
+            if (AppState.recentLists.length > 0 && AppState.recentLists[0] != AppState.currentListName) {
+                console.log("recent lists is out of sync with vocabLists, resetting recentLists");
+                console.log("currentListName: ", AppState.currentListName);
+                AppState.recentLists = [AppState.currentListName];
+            }
 
-            // Iterate over each list name (key) in vocabLists.
+            // remove lists that are not in vocabLists
+            allListNames = Object.keys(AppState.vocabLists);
+            for (let listName in AppState.recentLists) {
+                // If the list no longer exists in vocabLists, remove it from recent lists.
+                if (!allListNames.hasOwnProperty(listName)) {
+                    app_update_recent_lists(listName);
+                }
+            }
+
+            // fill up recentLists with lists that are in vocabLists
             for (let listName in AppState.vocabLists) {
                 // If we've reached the maximum number of recent lists, exit the loop.
                 if (AppState.recentLists.length >= MAX_RECENT_LISTS) {
@@ -2157,84 +2170,124 @@
                 }
                 // Only add the listName if it isn't already in recentLists.
                 if (!AppState.recentLists.includes(listName)) {
-                    AppState.recentLists.push(listName);
+                    app_update_recent_lists(listName, false);
                 }
             }
 
-            // Optionally, update the localStorage with the new recentLists array.
+            // update the localStorage with the new recentLists array.
             localStorage.setItem(recentListsKey, JSON.stringify(AppState.recentLists));
         }
 
-        /**
-         * Updates the list selector dropdown with recent lists and manages selection changes.
-         * Integrates with recent lists management system.
-         */
-        function lsl_update_list_selector() {
-            app_init_recent_lists();
+        // Helper: Create an <option> element with a given value and text.
+        function createOption(value, text) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = text;
+            return option;
+        }
 
-            const selector = document.getElementById('listSelector');
-            selector.innerHTML = ''; // Clear existing options
+        // Helper: Populate the select element with recent lists up to the visible count.
+        function addRecentListOptions(selector, visibleCount) {
+            // Only show the first visibleCount items.
+            AppState.recentLists.slice(0, visibleCount).forEach(list => {
+                selector.appendChild(createOption(list, list));
+            });
+        }
 
-            // Add recent lists if they exist
-            if (AppState.recentLists.length > 0) {
-                AppState.recentLists.forEach(list => {
-                    // Skip if the list no longer exists in vocabLists
-                    if (!AppState.vocabLists.hasOwnProperty(list)) {
-                        app_update_recent_lists(list); // This will remove it from recent lists
-                        return;
-                    }
-                    const option = document.createElement('option');
-                    option.value = list;
-                    option.textContent = list;
-                    selector.appendChild(option);
-                });
-            }
-
-            // Set the current selection if it exists
+        // Helper: Set the currently selected option if valid.
+        function setCurrentSelection(selector) {
             if (AppState.currentListName && AppState.vocabLists.hasOwnProperty(AppState.currentListName)) {
                 selector.value = AppState.currentListName;
-                selector.text = AppState.currentListName;
             }
+        }
 
-            // Always add the "Manage Lists" option
-            const manageOption = document.createElement('option');
-            manageOption.value = "manage";
-            manageOption.textContent = "📋More ...";
-            selector.appendChild(manageOption);
+        // Helper: Add the extra option to the dropdown.
+        // - If there are more recent lists than visible, add a "More" option.
+        // - Otherwise, add an "All" option (which performs the management action).
+        function addExtraOption(selector) {
+            const totalRecent = selector.options.length;
+            const totalLists = Object.keys(AppState.vocabLists).length;
+            if (totalRecent >= MAX_RECENT_LISTS ||
+                totalRecent >= totalLists) {
+                selector.appendChild(createOption("all", "📋All …"));
+            } else {
+                selector.appendChild(createOption("more", "More …"));
+            }
+        }
 
-            // Remove existing event listeners by cloning and replacing the select element
+        // Helper: Replace the selector with a clone to remove previously attached event listeners.
+        function replaceSelectorWithClone(selector) {
             const newSelector = selector.cloneNode(true);
             selector.parentNode.replaceChild(newSelector, selector);
+            return newSelector;
+        }
 
-            // Add event listener for dropdown change
-            newSelector.addEventListener('change', (event) => {
+        // Helper: Attach the change event listener to the select element.
+        function attachListSelectorChangeListener(selector, visibleCount) {
+            selector.addEventListener('change', (event) => {
                 const selectedValue = event.target.value;
-                if (selectedValue === "manage") {
+                if (selectedValue === "more") {
+                    lsl_update_list_selector(true);
+                    console.log("showing more lists");
+                } else if (selectedValue === "all") {
+                    // "All" triggers the management action.
                     frow_1();
-                    // Reset the dropdown to the previous selection
-                    newSelector.value = AppState.currentListName || "";
+                    // Reset the dropdown selection to the current list.
+                    selector.value = AppState.currentListName || "";
                 } else if (selectedValue !== AppState.recentLists[0]) {
-                    // Only update recents if the selection isn't already at the top
+                    // For a normal list selection (if it's not already at the top),
+                    // update the recents, switch the list, refresh the selector, and show the next word.
                     app_update_recent_lists(selectedValue);
                     app_switchList(selectedValue);
                     lsl_update_list_selector();
                     showNextWord();
                 }
             });
+        }
 
+        // Main function to update the list selector.
+        function lsl_update_list_selector(shouldDouble = false) {
+            app_init_recent_lists();
+
+            const selector = document.getElementById('listSelector');
+            let visibleCount = 5;
+            if (visibleCount < selector.options.length - 1) {
+                visibleCount = selector.options.length - 1;
+            }
+            if (shouldDouble) {
+                visibleCount = visibleCount + 5;
+            }
+
+            selector.innerHTML = ''; // Clear existing options.
+
+            // Add recent list options (only the first visibleCount items).
+            if (AppState.recentLists.length > 0) {
+                addRecentListOptions(selector, visibleCount);
+            }
+
+            // Set the currently selected option.
+            setCurrentSelection(selector);
+
+            // Depending on how many recent lists exist versus the visible count,
+            // add either the "More" or "All" extra option.
+            addExtraOption(selector, shouldDouble);
+
+            // Remove any existing event listeners by replacing the element with a clone.
+            const newSelector = replaceSelectorWithClone(selector);
+            attachListSelectorChangeListener(newSelector, visibleCount);
+
+            // Update any additional UI status for the dropdown.
             app_update_recent_lists_status_in_dropdown();
 
-
-            // re-render UI for new current list
+            // If the table is visible, re-render the word list UI.
             if (AppState.isTableVisible) {
                 turn_on_word_list();
             }
 
-
-            // Set focus back to the translation input box
+            // Return focus to the translation input box.
             document.getElementById('userTranslation').focus();
-
         }
+
         document.addEventListener('DOMContentLoaded', () => {
             console.log("starting ...");
             app_init();
