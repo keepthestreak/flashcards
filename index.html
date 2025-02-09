@@ -118,7 +118,7 @@
             color: #3b82f6;
         }
 
-        .dark-mode option[value="more"] ,
+        .dark-mode option[value="more"],
         .dark-mode option[value="all"] {
             color: #60a5fa;
         }
@@ -1020,130 +1020,152 @@
         }
 
         /* Specific Button Styles */
-        /* Upload List From Local */
-        .lmc1-button-upload {
-            background-color: #2196F3;
-            /* Blue */
-            color: #fff;
-        }
-
-        .lmc1-button-upload:hover {
-            background-color: #1976d2;
-        }
-
         /* Import List From Github */
         .lmc1-button-import {
-            background-color: #24292e;
-            /* GitHub-like dark tone */
+            background-color: #1B5E20;
+            /* Very dark green */
             color: #fff;
         }
 
         .lmc1-button-import:hover {
-            background-color: #444c56;
+            background-color: #2E7D32;
+            /* Slightly lighter green */
+        }
+
+        /* Upload List From Local */
+        .lmc1-button-upload {
+            background-color: #2E7D32;
+            /* Dark green */
+            color: #fff;
+        }
+
+        .lmc1-button-upload:hover {
+            background-color: #388E3C;
+            /* Slightly lighter green */
         }
 
         /* Create New List */
         .lmc1-button-create {
-            background-color: #4CAF50;
-            /* Green */
+            background-color: #1B5E20;
+            /* Very dark green */
             color: #fff;
         }
 
         .lmc1-button-create:hover {
-            background-color: #388E3C;
+            background-color: #2E7D32;
+            /* Slightly lighter green */
         }
 
         /* Load Selected */
         .lmc1-button-load {
-            background-color: #ff9800;
-            /* Orange */
+            background-color: #81C784;
+            /* Light green */
             color: #fff;
         }
 
         .lmc1-button-load:hover {
-            background-color: #f57c00;
+            background-color: #66BB6A;
+            /* Slightly darker green */
         }
 
-        /* Reset Selected - Outline/Ghost Button */
+        /* Reset Selected - Light Green */
         .lmc1-button-reset {
-            background-color: transparent;
-            border: 2px solid #777;
-            color: #777;
+            background-color: #81C784;
+            /* Light green, same as load */
+            color: #fff;
         }
 
         .lmc1-button-reset:hover {
-            background-color: #777;
-            color: #fff;
+            background-color: #66BB6A;
+            /* Slightly darker green */
         }
 
-        /* Delete Selected - Destructive Action */
+        /* Delete Selected - Outline/Ghost Button with Red Hover */
         .lmc1-button-delete {
-            background-color: #f44336;
-            /* Red */
-            color: #fff;
+            background-color: transparent;
+            border: 2px solid #4CAF50;
+            /* Green border */
+            color: #4CAF50;
+            /* Green text */
         }
 
         .lmc1-button-delete:hover {
-            background-color: #d32f2f;
+            background-color: #f44336;
+            /* Red background on hover */
+            border-color: #f44336;
+            /* Red border on hover */
+            color: #fff;
+            /* White text on hover */
         }
 
         /* Dark Mode Styles
-       To enable dark mode, add the "dark-mode" class to the <body> tag.
-       For example: <body class="dark-mode"> ... </body>
-    */
+   To enable dark mode, add the "dark-mode" class to the <body> tag.
+   For example: <body class="dark-mode"> ... </body>
+*/
         body.dark-mode .lmc1-button-upload {
-            background-color: #1e88e5;
-            /* Slightly adjusted blue */
+            background-color: #2E7D32;
+            /* Dark green */
         }
 
         body.dark-mode .lmc1-button-upload:hover {
-            background-color: #1565c0;
+            background-color: #388E3C;
+            /* Slightly lighter green */
         }
 
         body.dark-mode .lmc1-button-import {
-            background-color: #2d333b;
-            /* Lighter tone for dark backgrounds */
+            background-color: #1B5E20;
+            /* Very dark green */
         }
 
         body.dark-mode .lmc1-button-import:hover {
-            background-color: #3e454e;
+            background-color: #2E7D32;
+            /* Slightly lighter green */
         }
 
         body.dark-mode .lmc1-button-create {
-            background-color: #43a047;
-            /* Adjusted green */
+            background-color: #1B5E20;
+            /* Very dark green */
         }
 
         body.dark-mode .lmc1-button-create:hover {
-            background-color: #2e7d32;
+            background-color: #2E7D32;
+            /* Slightly lighter green */
         }
 
         body.dark-mode .lmc1-button-load {
-            background-color: #fb8c00;
-            /* Adjusted orange */
+            background-color: #81C784;
+            /* Light green */
         }
 
         body.dark-mode .lmc1-button-load:hover {
-            background-color: #ef6c00;
+            background-color: #66BB6A;
+            /* Slightly darker green */
         }
 
         body.dark-mode .lmc1-button-reset {
-            border: 2px solid #ccc;
-            color: #ccc;
+            background-color: #81C784;
+            /* Light green */
         }
 
         body.dark-mode .lmc1-button-reset:hover {
-            background-color: #ccc;
-            color: #121212;
+            background-color: #66BB6A;
+            /* Slightly darker green */
         }
 
         body.dark-mode .lmc1-button-delete {
-            background-color: #e53935;
-            /* Adjusted red */
+            border: 2px solid #4CAF50;
+            /* Green border */
+            color: #4CAF50;
+            /* Green text */
         }
 
         body.dark-mode .lmc1-button-delete:hover {
-            background-color: #c62828;
+            background-color: #e53935;
+            /* Red background on hover */
+            border-color: #e53935;
+            /* Red border on hover */
+            color: #fff;
+            /* White text on hover */
         }
 
         /* Responsive Layout for Larger Screens */
@@ -1641,10 +1663,10 @@
 
             <div id="lists_management_container" class="lists_management_container">
                 <div class="lmc1-button-container">
-                    <button class="lmc1-button lmc1-button-upload" onclick="frow_3()">Upload List
-                        From Local</button>
                     <button class="lmc1-button lmc1-button-import" onclick="frow_2()">Import List
                         From Github</button>
+                    <button class="lmc1-button lmc1-button-upload" onclick="frow_3()">Upload List
+                        From Local</button>
                     <button class="lmc1-button lmc1-button-create" onclick="create_list()">Create New
                         List</button>
                     <button class="lmc1-button lmc1-button-load" onclick="load_selected()">Load
