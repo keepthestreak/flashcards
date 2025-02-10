@@ -2054,7 +2054,7 @@
             return isCompleted;
         }
         function app_isWordCompleted(word) {
-            return app_getStreak(word) === AppState.MAX_STREAK_LENGTH;
+            return app_getStreak(word.word) === AppState.MAX_STREAK_LENGTH;
         }
         function app_getStreak(word) {
             return AppState.streaks[word] || 0;
@@ -2364,7 +2364,7 @@
                 visibleCount = selector.options.length - 1;
             }
             if (shouldDouble) {
-                visibleCount = visibleCount + 5;
+                visibleCount = MAX_RECENT_LISTS;
             }
 
             selector.innerHTML = ''; // Clear existing options.
@@ -3750,14 +3750,12 @@
         function deleteSelected() {
             const selected = getSelectedLists();
             selected.forEach(listName => {
-                console.log("deleting:", listName);
                 app_deleteList(listName);
                 if (listName === AppState.currentListName) {
                     AppState.currentWord = null;
                 }
                 if (AppState.recentLists.length > 0) {
                     app_switchList(AppState.recentLists[0]);
-                    console.log("vocab:", AppState.vocabLists);
                 } else {
                     app_switchList(null);
                 }
