@@ -3775,14 +3775,34 @@
             dropdownContent.classList.toggle('lmc_show');
         }
 
-        // Show dropdown on hover
+        // Show dropdown on hover (mouseenter)
         dropdownTrigger.addEventListener('mouseenter', () => {
             dropdownContent.classList.add('lmc_show');
         });
 
-        dropdownContent.addEventListener('mouseleave', () => {
-            dropdownContent.classList.toggle('lmc_show');
+        dropdownContent.addEventListener('mouseenter', () => {
+            dropdownContent.classList.add('lmc_show');
         });
+
+        // Hide dropdown when mouse leaves both the trigger and the content (mouseleave)
+        dropdownTrigger.addEventListener('mouseleave', () => {
+            // Timeout added to ensure mouse actually left the trigger and reached content
+            setTimeout(() => {
+                if (!dropdownContent.matches(':hover')) {  // Only hide if not hovering over content
+                    dropdownContent.classList.remove('lmc_show');
+                }
+            }, 200);  // Allowing time to hover over the content
+        });
+
+        dropdownContent.addEventListener('mouseleave', () => {
+            // Timeout to prevent disappearing when hovering over content
+            setTimeout(() => {
+                if (!dropdownTrigger.matches(':hover')) {  // Only hide if not hovering over trigger
+                    dropdownContent.classList.remove('lmc_show');
+                }
+            }, 200);  // Allowing time to hover over the trigger
+        });
+
 
         function turnOffRows() {
             const row_1 = document.getElementById('lmc_row_1');
