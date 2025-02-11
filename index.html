@@ -1707,13 +1707,20 @@
         .awf_add_word_container {
             margin-top: 15px;
             /* Light mode color palette */
-            --primary-color: #6200ee; /* Purple */
-            --primary-hover-color: #3700b3; /* Darker purple */
-            --background-color: #ffffff; /* White */
-            --input-border-color: #e0e0e0; /* Light gray border */
-            --input-focus-border-color: #6200ee; /* Purple border on focus */
-            --text-color: #333; /* Dark gray text */
-            --placeholder-color: #9e9e9e; /* Light gray placeholder */
+            --primary-color: #6200ee;
+            /* Purple */
+            --primary-hover-color: #3700b3;
+            /* Darker purple */
+            --background-color: #ffffff;
+            /* White */
+            --input-border-color: #e0e0e0;
+            /* Light gray border */
+            --input-focus-border-color: #6200ee;
+            /* Purple border on focus */
+            --text-color: #333;
+            /* Dark gray text */
+            --placeholder-color: #9e9e9e;
+            /* Light gray placeholder */
 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--background-color);
@@ -1721,7 +1728,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             max-width: 600px;
-            width: 100%;
+            width: calc(100% - 20px);
             margin: auto;
             color: var(--text-color);
         }
@@ -1729,13 +1736,22 @@
         /* Dark mode styles */
         .dark-mode .awf_add_word_container {
             margin-top: 15px;
-            --primary-color: #bb86fc; /* Light purple */
-            --primary-hover-color: #9a67ea; /* Darker light purple */
-            --background-color: #1e1e1e; /* Dark gray */
-            --input-border-color: #333; /* Dark gray border */
-            --input-focus-border-color: #bb86fc; /* Light purple border on focus */
-            --text-color: #e0e0e0; /* Light gray text */
-            --placeholder-color: #757575; /* Medium gray placeholder */
+            --primary-color: #bb86fc;
+            /* Light purple */
+            --primary-hover-color: #9a67ea;
+            /* Darker light purple */
+            --background-color: #1e1e1e;
+            /* Dark gray */
+            --input-border-color: #333;
+            /* Dark gray border */
+            --input-focus-border-color: #bb86fc;
+            /* Light purple border on focus */
+            --text-color: #e0e0e0;
+            /* Light gray text */
+            --placeholder-color: #757575;
+            /* Medium gray placeholder */
+
+            width: calc(100% - 20px);
         }
 
         .awf_add_word_container input {
@@ -1795,9 +1811,11 @@
                 grid-template-columns: repeat(2, 1fr);
                 gap: 15px;
             }
+
             .awf_add_word_container input {
                 margin-bottom: 0;
             }
+
             .awf_add_word_container .awf_button_container {
                 grid-column: span 2;
             }
@@ -1807,12 +1825,11 @@
             .awf_add_word_container {
                 grid-template-columns: repeat(4, 1fr);
             }
+
             .awf_add_word_container .awf_button_container {
                 grid-column: span 4;
             }
-        }        
-
-
+        }
     </style>
 </head>
 
@@ -2326,8 +2343,6 @@
 
         function saveLists() {
             try {
-                localStorage.setItem(storageKey, JSON.stringify(AppState.vocabLists));
-                localStorage.setItem(recentListsKey, JSON.stringify(AppState.recentLists));
                 localStorage.setItem(lastShownKey, JSON.stringify(AppState.lastShownTimes));
                 localStorage.setItem(statsKey, JSON.stringify(wordStats));
             } catch (error) {
@@ -2808,21 +2823,21 @@
             const awf_literation = document.getElementById('awf_transliteration').value.trim();
 
             if (validateNewWord(awf_new_word, awf_new_translation)) {
-                // Check for duplicates
-                if (isDuplicateWord(awf_new_word)) {
-                    alert(`The word "${awf_new_word}" already exists.`);
-                    document.getElementById('awf_new_word').focus(); // Set focus back to new word input
-                    return;
-                }
 
                 // Update the word list
-                AppState.words.push({ word: awf_new_word, translation: awf_new_translation });
+                AppState.words.push(
+                    {
+                        word: awf_new_word,
+                        translation: awf_new_translation,
+                        example: awf_example,
+                        transliteration: awf_literation
+                    });
                 app_resetStreak(awf_new_word); // Initialize streak to 0
-                AppState.lastShownTimes[awf_new_word] = 'Never'; // Initialize last shown time
-                wordStats[awf_new_word] = { correct: 0, total: 0 }; // Initialize stats
                 app_setVocabLists(AppState.currentListName, AppState.words);
 
                 // Save to localStorage
+                AppState.lastShownTimes[awf_new_word] = 'Never'; // Initialize last shown time
+                wordStats[awf_new_word] = { correct: 0, total: 0 }; // Initialize stats
                 saveLists();
 
                 // Update the dropdown and refresh the table
@@ -2840,12 +2855,9 @@
                 // Show the next word in the flashcard
                 showNextWord(); // Call to refresh the flashcard with the new word
 
-                // Set focus back to the new word input box
-                document.getElementById('awf_new_word').focus(); // Focus on the new word input
-            } else {
-                // If validation fails, set focus back to the new word input
-                document.getElementById('awf_new_word').focus(); // Set focus back to new word input
             }
+            // Set focus back to new word input
+            document.getElementById('awf_new_word').focus();
         }
 
         function isDuplicateWord(word) {
