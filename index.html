@@ -90,11 +90,11 @@
 
         .controls {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             width: 100%;
             position: relative;
-            flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
         }
@@ -1259,6 +1259,7 @@
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: space-around;
+                margin-bottom: 20px;
             }
         }
 
@@ -1727,7 +1728,6 @@
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
             width: calc(100% - 20px);
             margin: auto;
             color: var(--text-color);
@@ -1830,6 +1830,114 @@
                 grid-column: span 4;
             }
         }
+
+        /* ls: list summary (part list card) */
+        .ls_summary_container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            font-family: system-ui, -apple-system, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dark-mode .ls_summary_container {
+            background-color: #1a1a1a;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .ls_summary_field {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+
+        .ls_summary_label {
+            color: #666;
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .dark-mode .ls_summary_label {
+            color: #999;
+        }
+
+        .ls_summary_value {
+            font-size: 16px;
+            color: #333;
+            padding: 8px;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+
+        .dark-mode .ls_summary_value {
+            color: #e0e0e0;
+        }
+
+        .ls_editable {
+            border: 1px solid #e0e0e0;
+            transition: border-color 0.2s;
+            cursor: text;
+        }
+
+        .dark-mode .ls_editable {
+            border-color: #333;
+            background-color: #2d2d2d;
+        }
+
+        .ls_editable:hover {
+            border-color: #999;
+        }
+
+        .dark-mode .ls_editable:hover {
+            border-color: #666;
+        }
+
+        .ls_editable:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+        }
+
+        .dark-mode .ls_editable:focus {
+            border-color: #64b5f6;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+
+        .ls_readonly {
+            background-color: #f5f5f5;
+            border: 1px solid transparent;
+        }
+
+        .dark-mode .ls_readonly {
+            background-color: #333;
+            color: #e0e0e0;
+        }
+
+        .ls_progress_container {
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            height: 4px;
+            margin-top: 4px;
+        }
+
+        .dark-mode .ls_progress_container {
+            background-color: #333;
+        }
+
+        .ls_progress_bar {
+            background-color: #4caf50;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .dark-mode .ls_progress_bar {
+            background-color: #66bb6a;
+        }
     </style>
 </head>
 
@@ -1869,7 +1977,7 @@
                         Selected</button>
                     <button class="lmc1-button lmc1-button-reset" onclick="reset_selected()">Reset
                         Selected</button>
-                    <button class="lmc1-button lmc1-button-delete" onclick="deleteSelected()">Delete
+                    <button class="lmc1-button lmc1-button-delete" onclick="deleteSelectedLists()">Delete
                         Selected</button>
                 </div>
                 <div class="lmc_select_all_wrapper">
@@ -1975,21 +2083,44 @@
 
         <div class="controls">
             <button id="toggleListButton">Show/Hide All Words</button>
+            <div class="feedback-message" id="feedbackMessage1"></div>
         </div>
 
+
+
+
+
+
         <div id="wordList">
-            <div id="list_summary" style="margin-bottom: 15px;">
-                <p id="list_summary_list_name"></p>
-                <p id="list_summary_total_words"></p>
-                <p id="list_summary_completed_words"></p>
-                <p id="list_summary_lang_field"></p>
-                <div id="list_summary_lang" style="display: none;">
-                    <p>Select a Language</p>
-                    <input list="voiceList" id="languageInput" placeholder="Type to search for a language">
-                    <datalist id="voiceList">
-                        <!-- Options will be populated dynamically -->
-                    </datalist>
-                    <button id="setButton">Set</button>
+            <div class="ls_summary_container">
+                <div class="ls_summary_field">
+                    <span class="ls_summary_label">List Name</span>
+                    <div id="ls_list_name" class="ls_summary_value ls_editable" contenteditable="true">N/A
+                    </div>
+                </div>
+
+                <div class="ls_summary_field">
+                    <span class="ls_summary_label">Total Words</span>
+                    <div id="ls_total_words" class="ls_summary_value ls_readonly">-</div>
+                </div>
+
+                <div class="ls_summary_field">
+                    <span class="ls_summary_label">Completed</span>
+                    <div id="ls_completed_words" class="ls_summary_value ls_readonly">-</div>
+                </div>
+
+                <div class="ls_summary_field">
+                    <span class="ls_summary_label">Source Language</span>
+                    <div id="ls_source_lang" class="ls_summary_value ls_editable" contenteditable="true">N/A</div>
+                </div>
+
+                <div class="ls_summary_field">
+                    <span class="ls_summary_label">Target Language</span>
+                    <div id="ls_target_lang" class="ls_summary_value ls_editable" contenteditable="true">N/A</div>
+                </div>
+
+                <div class="ls_progress_container">
+                    <div class="ls_progress_bar" style="width: 45%"></div>
                 </div>
             </div>
             <div class="lmc1-button-container">
@@ -2000,10 +2131,7 @@
                     Words</button>
                 <button class="lmc1-button lmc1-button-reset-words" onclick="resetSelectedWords()">Reset Selected
                     Words</button>
-                <button class="lmc1-button lmc1-button-edit" onclick="editList()">Edit List</button>
-                <button class="lmc1-button lmc1-button-export" onclick="exportToJson()">Export to JSON</button>
-                <button class="lmc1-button lmc1-button-set-language" onclick="set_list_language()">Set List
-                    Language</button>
+                <button class="lmc1-button lmc1-button-export" onclick="exportToJson()">Download List</button>
             </div>
             <div id='table_container' style="overflow-x: scroll;">
             </div>
@@ -2110,6 +2238,8 @@
     <button id="tour_button">Start Tour</button>
 
     <script>
+        function noop() { }
+
         const storageKey = 'vocabLists';
         const recentListsKey = 'recentLists';
         const streakKey = 'wordStreaks';
@@ -2134,27 +2264,62 @@
             AppState.isTableVisible = false;
             AppState.sortColumn = 'streak';
             AppState.sortDirection = -1;
-            AppState.listLanguages = {};
-            AppState.currentListLanguage = null; // Language for the current list
+            AppState.meta = {};
             AppState.recentLists = [];
             AppState.MAX_STREAK_LENGTH = 20;
             AppState.invert = false;
             AppState.isMultiple = false;
+            AppState.meta = {};
         }
         function app_init_from_local_storage() {
             AppState.vocabLists = JSON.parse(localStorage.getItem(storageKey)) || { "default": [] };
             AppState.streaks = JSON.parse(localStorage.getItem(streakKey)) || {};
             AppState.lastShownTimes = JSON.parse(localStorage.getItem(lastShownKey)) || {};
             AppState.currentListName = localStorage.getItem(currentListKey) || "default";
-            AppState.listLanguages = JSON.parse(localStorage.getItem('listLanguages')) || {};
+            AppState.targetLanguages = JSON.parse(localStorage.getItem('targetLanguages')) || {};
             AppState.recentLists = JSON.parse(localStorage.getItem(recentListsKey)) || [];
             AppState.MAX_STREAK_LENGTH = JSON.parse(localStorage.getItem(MAX_STREAK_LENGTH_KEY)) || 20;
+            AppState.meta = JSON.parse(localStorage.getItem("meta")) || {};
 
             AppState.words = AppState.vocabLists[AppState.currentListName] || [];
         }
         function app_init() {
             app_init_default_state();
             app_init_from_local_storage();
+        }
+        function app_get_meta_data(list = AppState.currentListName) {
+            if (AppState.meta[list]) { return AppState.meta[list]; }
+
+            return { "source_language": null, "target_language": null };
+        }
+        function app_set_meta_data(listName, data) {
+            data ? noop() : (data = {});
+            data.source_language ? noop() : (data.source_language = null);
+            data.target_language ? noop() : (data.target_language = null);
+            AppState.meta[listName] = data;
+            localStorage.setItem("meta", JSON.stringify(AppState.meta));
+        }
+        function app_delete_meta_data(listName) {
+            if (AppState.meta.hasOwnProperty(listName)) {
+                delete AppState.meta[listName];
+                localStorage.setItem("meta", JSON.stringify(AppState.meta));
+            }
+        }
+        function app_rename_meta_data(oldName, newName) {
+            if (AppState.meta.hasOwnProperty(oldName)) {
+                app_set_meta_data(newName, AppState.meta[oldName]);
+                app_delete_meta_data(oldName);
+            }
+        }
+        function app_update_source_lang(listName, lang) {
+            AppState.meta[listName] ? noop() : AppState.meta[listName] = {};
+            AppState.meta[listName].source_language = lang;
+            localStorage.setItem("meta", JSON.stringify(AppState.meta));
+        }
+        function app_update_target_lang(listName, lang) {
+            AppState.meta[listName] ? noop() : AppState.meta[listName] = {};
+            AppState.meta[listName].target_language = lang;
+            localStorage.setItem("meta", JSON.stringify(AppState.meta));
         }
         // Getter for vocabLists:
         function app_list_exist(listName) {
@@ -2169,7 +2334,11 @@
             delete AppState.vocabLists[listName];
             localStorage.setItem(storageKey, JSON.stringify(AppState.vocabLists));
 
-            app_update_recent_lists(listName);
+            if (listName === AppState.currentListName) {
+                AppState.currentWord = null;
+                app_setCurrentListName(null);
+            }
+            app_delete_meta_data(listName);
 
             delete AppState.streaks[listName];
         }
@@ -2215,23 +2384,28 @@
         function app_switchList(newList) {
             app_setCurrentListName(newList);
             AppState.words = AppState.vocabLists[newList];
-            AppState.currentListLanguage = AppState.listLanguages[newList] || null;
-
             app_update_recent_lists(newList);
+
+            if (!newList) {
+                AppState.isTableVisible = false;
+            }
             AppState.isMultipleSelected = false;
         }
+        function app_rename_list(oldName, newName) {
+            if (AppState.vocabLists.hasOwnProperty(newName)) {
+                alert("List with this name already exists");
+                return;
+            }
 
-        // Setter for listLanguages:
-        function app_setListLanguages(newListLanguages) {
-            AppState.listLanguages = newListLanguages;
-            localStorage.setItem('listLanguages', JSON.stringify(newListLanguages));
-        }
-
-        // Setter for currentListLanguage (persisted if needed):
-        function app_setCurrentListLanguage(newLanguage) {
-            AppState.currentListLanguage = newLanguage;
-            // Optionally persist it:
-            localStorage.setItem('currentListLanguage', newLanguage);
+            if (!AppState.vocabLists.hasOwnProperty(oldName)) {
+                alert("something is wrong: couldn't find ", oldName);
+                return;
+            }
+            app_rename_meta_data(oldName, newName);
+            app_setVocabLists(newName, AppState.vocabLists[oldName]);
+            app_deleteList(oldName);
+            app_setCurrentListName(newName);
+            app_recentLists_rename(oldName, newName);
         }
 
         // Setter for recentLists:
@@ -2239,6 +2413,13 @@
             AppState.recentLists = newRecentLists;
             AppState.recentLists = AppState.recentLists.slice(0, MAX_RECENT_LISTS);
             localStorage.setItem(recentListsKey, JSON.stringify(newRecentLists));
+        }
+        function app_recentLists_rename(old_name, new_name) {
+            const index = AppState.recentLists.indexOf(old_name);
+            if (index !== -1) {
+                AppState.recentLists[index] = new_name;
+                localStorage.setItem(recentListsKey, JSON.stringify(AppState.recentLists));
+            }
         }
         function app_update_recent_lists(list_name, addToTop = true) {
             const isInRecent = AppState.recentLists.includes(list_name);
@@ -2310,14 +2491,6 @@
         function app_setSortDirection(direction) {
             AppState.sortDirection = direction;
             // Not persisted to localStorage
-        }
-
-
-        function set_list_summary_lang_field(lang) {
-            AppState.currentListLanguage = lang;
-            AppState.listLanguages[AppState.currentListName] = lang;
-            localStorage.setItem('listLanguages', JSON.stringify(AppState.listLanguages));
-            document.getElementById("list_summary_lang_field").innerText = "Language: " + AppState.currentListLanguage || 'N/A';
         }
 
         let wordStats = JSON.parse(localStorage.getItem(statsKey)) || {};
@@ -2463,7 +2636,6 @@
                 const selectedValue = event.target.value;
                 if (selectedValue === "more") {
                     lsl_update_list_selector(true);
-                    console.log("showing more lists");
                 } else if (selectedValue === "all") {
                     // "All" triggers the management action.
                     frow_1();
@@ -2527,6 +2699,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log("starting ...");
             app_init();
+            ls_initialize_editable_fields();
             turnOffListManagementCard();
             turn_off_word_list();
             lsl_update_list_selector();
@@ -2534,7 +2707,7 @@
             selector.value = AppState.currentListName;
 
             renderLists();
-            createSummaryHTML();
+            //createSummaryHTML();
             showNextWord(); // Show the next word in the new list
 
             const importDiv = document.getElementById('importDiv');
@@ -2544,9 +2717,6 @@
 
             document.getElementById('userTranslation').focus();
 
-            set_lang_button_func(); // Add the listener for the "Set" button
-            AppState.currentListLanguage = AppState.listLanguages[AppState.currentListName] || null;
-            set_list_summary_lang_field(AppState.currentListLanguage);
 
             if (!AppState.currentListName || !AppState.vocabLists[AppState.currentListName]) {
                 app_setCurrentListName(Object.keys(AppState.vocabLists)[0]);
@@ -2713,7 +2883,12 @@
         }
 
         function toggleWordList() {
-            if (!AppState.isTableVisible) {
+            if (!AppState.currentListName) {
+                turn_off_word_list();
+                showFeedback('There is no active list - import or create a list',
+                    'error',
+                    "feedbackMessage1");
+            } else if (!AppState.isTableVisible) {
                 turn_on_word_list();
             } else {
                 turn_off_word_list();
@@ -2742,15 +2917,7 @@
         }
 
         function createSummaryHTML() {
-            if (!AppState.words) {
-                return;
-            }
-            const totalWords = AppState.words.length;
-            const completedWords = AppState.words.filter(word => app_isWordCompleted(word));
-            document.getElementById('list_summary_list_name').innerText = `List Name: ${AppState.currentListName}`;
-            document.getElementById('list_summary_total_words').innerText = `Total Words: ${totalWords}`;
-            document.getElementById('list_summary_completed_words').innerText = `Completed Words: ${completedWords}`;
-            document.getElementById('list_summary_lang_field').innerText = "Language: " + AppState.currentListLanguage || 'N/A';
+            ls_initialize();
         }
 
         function createTableHTML() {
@@ -3122,15 +3289,16 @@
         }
         function exportToJson() {
             const words = AppState.words;
+            const meta = AppState.meta[AppState.currentListName];
 
-            // Create meta section with optional language
-            const meta = {
-                language: AppState.listLanguages[AppState.currentListName] || undefined // Get language for the current list
-            };
+            const empty_meta = {};
+            empty_meta["description"] = "this is a flashcard vocab list";
+            empty_meta["source_lang"] = "en-US";
+            empty_meta["target_lang"] = "en-US";
 
             // Create JSON structure
             const jsonData = {
-                meta: removeUndefinedFields(meta), // Clean undefined fields
+                meta: meta ? meta : empty_meta,
                 words: words
             };
 
@@ -3151,12 +3319,6 @@
             return Object.fromEntries(
                 Object.entries(obj).filter(([_, v]) => v !== undefined)
             );
-        }
-        function set_list_language() {
-            const language = prompt("Enter the language for the current list:");
-            if (language) {
-                set_list_summary_lang_field(language);
-            }
         }
         function invertFlashcard() {
             const invertButton = document.getElementById('invert_button');
@@ -3592,7 +3754,7 @@
 
                     return {
                         word: entry.word.trim(),
-                        translation: entry.translation.trim(),
+                        translation: entry.translation ? entry.translation.trim() : null,
                         example: entry.example ? entry.example.trim() : null,
                         transliteration: entry.transliteration ? entry.transliteration.trim() : null
                     };
@@ -3614,15 +3776,13 @@
                 }
 
                 // Add the new list
+                app_set_meta_data(listName, jsonData.meta);
                 app_setVocabLists(listName, words);
                 app_switchList(listName);
                 saveLists();
                 updateListAndUI(listName);
                 renderLists();
-                // Extract meta data (if it exists)
-                if (jsonData.meta && jsonData.meta.language) {
-                    set_list_summary_lang_field(jsonData.meta.language);
-                }
+
 
 
                 showFeedback('File successfully uploaded!', 'success');
@@ -3861,21 +4021,24 @@
             }
             return AppState.recentLists[0];
         }
-        function deleteSelected() {
+        function deleteSelectedLists() {
             const selected = getSelectedLists();
             selected.forEach(listName => {
                 app_deleteList(listName);
-                if (listName === AppState.currentListName) {
-                    AppState.currentWord = null;
-                }
                 if (AppState.recentLists.length > 0) {
                     app_switchList(AppState.recentLists[0]);
+                } else if (AppState.vocabLists.length > 0) {
+                    const firstList = AppState.vocabLists.keys().next().value;
+                    app_switchList(firstList);
                 } else {
                     app_switchList(null);
+                    turn_off_word_list();
                 }
+
                 renderLists();
                 updateSelectAllState();
                 lsl_update_list_selector();
+                showNextWord();
             });
         }
         const dropdownTrigger = document.getElementById('dropdownTrigger');
@@ -3972,8 +4135,8 @@
             return document.body.classList.contains('dark-mode');
         }
 
-        function showFeedback(message, type) {
-            const feedbackMessage = document.getElementById('feedbackMessage');
+        function showFeedback(message, type, mid = "feedbackMessage") {
+            const feedbackMessage = document.getElementById(mid);
             const uploadZone = document.getElementById('uploadZone');
 
             // Reset element state
@@ -4224,51 +4387,83 @@
         document.getElementById('word_play_button').addEventListener('click', () => {
             play_text(word.innerText, AppState.currentListLanguage);
         });
-        function populateVoiceList() {
-            // Wait for the voices to be loaded
-            window.speechSynthesis.onvoiceschanged = function () {
-                const voices = window.speechSynthesis.getVoices();
-                const datalist = document.getElementById('voiceList');
 
-                // Clear existing options
-                datalist.innerHTML = '';
 
-                // Populate the datalist with available voices
-                voices.forEach(voice => {
-                    const option = document.createElement('option');
-                    option.value = `${voice.name} (${voice.lang})`; // Display name and language
-                    option.setAttribute('data-lang', voice.lang); // Store the language code
-                    datalist.appendChild(option);
+        /* ls_: list summary functions */
+        // Function to handle editable field updates
+        function ls_initialize_editable_fields() {
+            const editable_fields = document.querySelectorAll('.ls_editable');
+
+            editable_fields.forEach(field => {
+                field.addEventListener('focus', function () {
+                    field.dataset.original = field.textContent;
                 });
-            };
 
-            // Manually trigger voices loading in some browsers
-            if (window.speechSynthesis.getVoices().length > 0) {
-                window.speechSynthesis.onvoiceschanged();
+                field.addEventListener('blur', function () {
+                    const new_value = field.textContent.trim();
+                    const old_value = field.dataset.original;
+
+                    if (new_value === '') {
+                        field.textContent = old_value;
+                        return;
+                    }
+
+                    // Only process if the value has actually changed
+                    if (new_value !== old_value) {
+                        switch (field.id) {
+                            case 'ls_list_name':
+                                ls_rename_list(old_value, new_value);
+                                break;
+                            case 'ls_source_lang':
+                                app_update_source_lang(AppState.currentListName, new_value);
+                                break;
+                            case 'ls_target_lang':
+                                app_update_target_lang(AppState.currentListName, new_value);
+                                break;
+                            default:
+                                console.warn('Unhandled editable field:', field.id);
+                        }
+                    }
+                });
+
+                field.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        field.blur();
+                    }
+                });
+            });
+        }
+
+        function ls_rename_list(old_name, new_name) {
+            if (old_name !== new_name) {
+                app_rename_list(old_name, new_name);
+                lsl_update_list_selector();
             }
         }
 
-        // Call the function to populate the voice list
-        populateVoiceList();
-        // Function to handle the "Set" button click
-        function set_lang_button_func() {
-            document.getElementById('setButton').addEventListener('click', () => {
-                const input = document.getElementById('languageInput').value;
-                if (!input) {
-                    alert('Please type and select a language.');
-                    return;
-                }
+        // Function to update progress bar
+        function ls_update_progress(completed, total) {
+            const percentage = (completed / total) * 100;
+            document.querySelector('.ls_progress_bar').style.width = `${percentage}%`;
+        }
 
-                const selectedOption = Array.from(document.getElementById('voiceList').options)
-                    .find(option => option.value === input);
+        // Initialize the component
+        function ls_initialize() {
 
-                if (selectedOption) {
-                    const selectedLang = selectedOption.getAttribute('data-lang');
-                    set_list_summary_lang_field(selectedLang); // Call the function with the selected language
-                } else {
-                    alert('Invalid selection. Please choose a language from the list.');
-                }
-            });
+            const current = AppState.currentListName;
+            if (current) {
+                const total_words = AppState.vocabLists[current].length;
+                const completed_words = AppState.words.filter(word => app_isWordCompleted(word)).length;
+
+                document.getElementById('ls_list_name').textContent = current;
+                document.getElementById('ls_total_words').textContent = total_words;
+                document.getElementById('ls_completed_words').textContent = completed_words;
+                document.getElementById('ls_source_lang').textContent = app_get_meta_data(current).source_language;
+                document.getElementById('ls_target_lang').textContent = app_get_meta_data().target_language;
+
+                ls_update_progress(completed_words, total_words);
+            }
         }
 
     </script>
