@@ -536,14 +536,6 @@
             opacity: 1;
         }
 
-        .import-icon {
-            position: absolute;
-            right: 0;
-            top: 0;
-            font-size: 1.2em;
-            color: #4CAF50;
-        }
-
         /* Dark mode styles */
         body.dark-mode {
             background: linear-gradient(to right, #1e3c72, #2a5298);
@@ -973,13 +965,6 @@
             border-radius: 4px;
             position: relative;
             display: none;
-        }
-
-        #lists_management_card_button {
-            position: absolute;
-            top: 0;
-            right: 0;
-            cursor: pointer;
         }
 
         .lists_management_container {
@@ -1951,20 +1936,11 @@
         <div id="controls" class="controls">
             <select id="listSelector"></select>
             <div class="lmc_dropdown_container">
-                <div id="dropdownTrigger"></div>
-                <div id="dropdownContent" class="lmc_dropdown_content">
-                    <div id='lmc_row_1' class="lmc_dropdown_row" onclick="frow_1()">Your lists</div>
-                    <div id='lmc_row_2' class="lmc_dropdown_row" onclick="frow_2()">Import from github</div>
-                    <div id='lmc_row_3' class="lmc_dropdown_row" onclick="frow_3()">Upload from local</div>
-                </div>
+                <div id="dropdownTrigger" onclick="frow_1()"></div>
             </div>
         </div>
 
         <div id="lists_management_card">
-            <div id="lists_management_card_button" onclick="turnOffListManagementCard()">
-                <span class="import-icon">📥</span>
-            </div>
-
             <div id="lists_management_container" class="lists_management_container">
                 <div class="lmc1-button-container">
                     <button class="lmc1-button lmc1-button-import" onclick="frow_2()">Import List
@@ -2190,9 +2166,6 @@
                     showbullet: true,
                 });
             tour.onstart(() => {
-                dropdownContent.removeEventListener('click', toggleDropdown);
-                window.removeEventListener('click', turnOffDropdown);
-                turnOffDropdown();
                 turnOffListManagementCard();
                 turn_off_word_list();
             });
@@ -2204,9 +2177,6 @@
                     const showTranslation = document.getElementById('showTranslation');
                     word.innerText = 'Bonjour';
                     showTranslation.innerText = 'Hello';
-                } else if (element && element.id === 'header') {
-                } else if (element && element.id === 'controls') {
-                    dropdownContent.classList.add('lmc_show');
                 }
             });
             tour.oncomplete(() => {
@@ -2219,9 +2189,6 @@
         }
 
         function clear_tour() {
-            turnOffDropdown();
-            dropdownContent.addEventListener('click', toggleDropdown);
-            window.addEventListener('click', turnOffDropdown);
             const word = document.getElementById('word');
             const showTranslation = document.getElementById('showTranslation');
             showNextWord();
@@ -3563,9 +3530,6 @@
             event.stopPropagation(); // Prevent the click event from bubbling up
         });
 
-        // Close dropdown if clicked outside
-        window.onclick = turnOffDropdown;
-
         // Set the initial value of the max streak length input field
         document.getElementById('maxStreakLength').value = AppState.MAX_STREAK_LENGTH;
 
@@ -3697,7 +3661,6 @@
             list_import.style.display = 'none';
             list_upload.style.display = 'none';
 
-            turnOffRows();
         }
 
         function toggleListManagementCard() {
@@ -4041,55 +4004,7 @@
                 showNextWord();
             });
         }
-        const dropdownTrigger = document.getElementById('dropdownTrigger');
-        const dropdownContent = document.getElementById('dropdownContent');
 
-        // Toggle dropdown on click
-        dropdownTrigger.addEventListener('click', toggleDropdown);
-
-        function toggleDropdown(e) {
-            e.stopPropagation();
-            dropdownContent.classList.toggle('lmc_show');
-        }
-
-        // Show dropdown on hover (mouseenter)
-        dropdownTrigger.addEventListener('mouseenter', () => {
-            dropdownContent.classList.add('lmc_show');
-        });
-
-        dropdownContent.addEventListener('mouseenter', () => {
-            dropdownContent.classList.add('lmc_show');
-        });
-
-        // Hide dropdown when mouse leaves both the trigger and the content (mouseleave)
-        dropdownTrigger.addEventListener('mouseleave', () => {
-            // Timeout added to ensure mouse actually left the trigger and reached content
-            setTimeout(() => {
-                if (!dropdownContent.matches(':hover')) {  // Only hide if not hovering over content
-                    dropdownContent.classList.remove('lmc_show');
-                }
-            }, 200);  // Allowing time to hover over the content
-        });
-
-        dropdownContent.addEventListener('mouseleave', () => {
-            // Timeout to prevent disappearing when hovering over content
-            setTimeout(() => {
-                if (!dropdownTrigger.matches(':hover')) {  // Only hide if not hovering over trigger
-                    dropdownContent.classList.remove('lmc_show');
-                }
-            }, 200);  // Allowing time to hover over the trigger
-        });
-
-
-        function turnOffRows() {
-            const row_1 = document.getElementById('lmc_row_1');
-            const row_2 = document.getElementById('lmc_row_2');
-            const row_3 = document.getElementById('lmc_row_3');
-            row_1.style.backgroundColor = '';
-            row_2.style.backgroundColor = '';
-            row_3.style.backgroundColor = '';
-
-        }
         // Row click functions
         function frow_1() {
             const list_manage = document.getElementById('lists_management_container');
@@ -4100,8 +4015,6 @@
                 toggleListManagementCard();
                 list_manage.style.display = 'block';
                 const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
-                const row_1 = document.getElementById('lmc_row_1');
-                row_1.style.backgroundColor = list_manage.style.display === 'none' ? '' : color;
             }
         }
         function frow_2() {
@@ -4258,16 +4171,6 @@
             } else {
                 menuContainer.classList.remove('clicked');
             }
-        }
-        // Toggle dropdown on click
-        dropdownTrigger.addEventListener('click', toggleDropdown);
-        window.addEventListener('click', turnOffDropdown);
-
-        function turnOffDropdown(event) {
-            if (event && dropdownContent.contains(event.target)) {
-                return;
-            }
-            dropdownContent.classList.remove('lmc_show');
         }
 
         /* start: text to speech */
