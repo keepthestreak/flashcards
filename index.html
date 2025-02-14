@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flashcard Vocabulary</title>
-    <script>
-        const savedTheme = localStorage.getItem('theme') || 'light'; 
-        if (savedTheme === "dark") {
+    <!-- script>
+        const savedTheme1 = localStorage.getItem('theme') || 'light';
+        if (savedTheme1 === "dark") {
             document.documentElement.classList.toggle('dark-mode');
         }
-    </script>
+    </script -->
     <style>
         table {
             width: 100%;
@@ -1025,13 +1025,13 @@
 
         /* Upload List From Local */
         .lmc1-button-upload {
-            background-color: #2E7D32;
+            background-color: #1B5E20;
             /* Dark green */
             color: #fff;
         }
 
         .lmc1-button-upload:hover {
-            background-color: #388E3C;
+            background-color: #2E7D32;
             /* Slightly lighter green */
         }
 
@@ -1094,12 +1094,12 @@
    For example: <body class="dark-mode"> ... </body>
 */
         body.dark-mode .lmc1-button-upload {
-            background-color: #2E7D32;
+            background-color: #1B5E20;
             /* Dark green */
         }
 
         body.dark-mode .lmc1-button-upload:hover {
-            background-color: #388E3C;
+            background-color: #2E7D32;
             /* Slightly lighter green */
         }
 
@@ -1949,10 +1949,8 @@
         <div id="lists_management_card">
             <div id="lists_management_container" class="lists_management_container">
                 <div class="lmc1-button-container">
-                    <button class="lmc1-button lmc1-button-import" onclick="frow_2()">Import List
-                        From Github</button>
-                    <button class="lmc1-button lmc1-button-upload" onclick="frow_3()">Upload List
-                        From Local</button>
+                    <button class="lmc1-button lmc1-button-import" onclick="frow_2()">Import From Github</button>
+                    <button class="lmc1-button lmc1-button-upload" onclick="frow_3()">Upload List</button>
                     <button class="lmc1-button lmc1-button-create" onclick="create_list()">Create New
                         List</button>
                     <button class="lmc1-button lmc1-button-load" onclick="load_selected()">Load
@@ -2076,7 +2074,7 @@
         <div id="wordList">
             <div class="ls_summary_container">
                 <div class="ls_summary_field">
-                    <span class="ls_summary_label">List Name</span>
+                    <span class="ls_summary_label" id="ls_name_label">List Name</span>
                     <div id="ls_list_name" class="ls_summary_value ls_editable" contenteditable="true">N/A
                     </div>
                 </div>
@@ -2312,6 +2310,7 @@
                 app_setCurrentListName(null);
             }
             app_delete_meta_data(listName);
+            app_delete_from_recent(listName);
 
             delete AppState.streaks[listName];
         }
@@ -2391,6 +2390,16 @@
             const index = AppState.recentLists.indexOf(old_name);
             if (index !== -1) {
                 AppState.recentLists[index] = new_name;
+                localStorage.setItem(recentListsKey, JSON.stringify(AppState.recentLists));
+            }
+        }
+        function app_delete_from_recent(list_name) {
+            const isInRecent = AppState.recentLists.includes(list_name);
+
+            // remove from recent
+            if (isInRecent) {
+                const index = AppState.recentLists.indexOf(list_name);
+                AppState.recentLists.splice(index, 1);
                 localStorage.setItem(recentListsKey, JSON.stringify(AppState.recentLists));
             }
         }
