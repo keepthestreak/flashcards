@@ -5,6 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flashcard Vocabulary</title>
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'light'; 
+        if (savedTheme === "dark") {
+            document.documentElement.classList.toggle('dark-mode');
+        }
+    </script>
     <style>
         table {
             width: 100%;
@@ -1929,7 +1935,7 @@
 <body>
     <h1 id="header">Flashcard Vocabulary</h1>
     <div id="dark-mode-button" class="tooltip">
-        <button id="theme-toggle">🌞</button>
+        <button id="theme-toggle"></button>
         <span class="tooltiptext">Toggle Dark Mode</span>
     </div>
     <div class="container">
