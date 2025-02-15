@@ -2235,7 +2235,6 @@
             AppState.isTableVisible = false;
             AppState.sortColumn = 'streak';
             AppState.sortDirection = -1;
-            AppState.meta = {};
             AppState.recentLists = [];
             AppState.MAX_STREAK_LENGTH = 20;
             AppState.invert = false;
@@ -2262,6 +2261,19 @@
             if (AppState.meta[list]) { return AppState.meta[list]; }
 
             return { "source_language": null, "target_language": null };
+        }
+        function app_get_source_lang(list = AppState.currentListName) {
+            if (AppState.meta[list] && AppState.meta[list].source_language) {
+                return AppState.meta[list].source_language;
+            }
+            return 'N/A';
+        }
+
+        function app_get_target_lang(list = AppState.currentListName) {
+            if (AppState.meta[list] && AppState.meta[list].target_language) {
+                return AppState.meta[list].target_language;
+            }
+            return 'N/A';
         }
         function app_set_meta_data(listName, data) {
             data ? noop() : (data = {});
@@ -4137,17 +4149,17 @@
             if (check_button.innerText === 'Next') {
                 handleNextEvent();
                 if (!AppState.invert) {
-                    play_text(AppState.currentWord.word, AppState.currentListLanguage);
+                    play_text(AppState.currentWord.word, app_get_source_lang());
                 } else {
-                    play_text(AppState.currentWord.translation, "en-US");
+                    play_text(AppState.currentWord.translation, app_get_target_lang());
                 }
             } else {
                 handleShowEvent();
                 setTimeout(function () {
                     if (!AppState.invert) {
-                        play_text(translation.innerText, "en-US");
+                        play_text(translation.innerText, app_get_target_lang());
                     } else {
-                        play_text(AppState.currentWord.word, AppState.currentListLanguage);
+                        play_text(AppState.currentWord.word, app_get_source_lang());
                     }
                 }, 500);
             }
@@ -4224,7 +4236,7 @@
             });
         }
 
-        async function play_text(text, language = 'fr') {
+        async function play_text(text, language) {
             try {
                 // Cancel any ongoing speech
                 speechSynthesis.cancel();
@@ -4285,25 +4297,29 @@
 
         document.getElementById('example_play_button').addEventListener('ontouchstart', () => {
             example = document.getElementById('example');
-            play_text((example.innerText), AppState.currentListLanguage);
+            play_text((example.innerText), app_get_source_lang());
         });
         document.getElementById('example_play_button').addEventListener('click', () => {
             example = document.getElementById('example');
-            play_text((example.innerText), AppState.currentListLanguage);
+            play_text((example.innerText), app_get_source_lang());
         });
         document.getElementById('translation_play_button').addEventListener('ontouchstart', () => {
             translation = document.getElementById('showTranslation');
-            play_text(translation.innerText, "en-US");
+            const lang = AppState.invert ? app_get_source_lang() : app_get_target_lang();
+            play_text(translation.innerText, lang);
         });
         document.getElementById('translation_play_button').addEventListener('click', () => {
             translation = document.getElementById('showTranslation');
-            play_text(translation.innerText, "en-US");
+            const lang = AppState.invert ? app_get_source_lang() : app_get_target_lang();
+            play_text(translation.innerText, lang);
         });
         document.getElementById('word_play_button').addEventListener('ontouchstart', () => {
-            play_text(word.innerText, AppState.currentListLanguage);
+            const lang = AppState.invert ? app_get_target_lang() : app_get_source_lang();
+            play_text(word.innerText, lang);
         });
         document.getElementById('word_play_button').addEventListener('click', () => {
-            play_text(word.innerText, AppState.currentListLanguage);
+            const lang = AppState.invert ? app_get_target_lang() : app_get_source_lang();
+            play_text(word.innerText, lang);
         });
 
 
