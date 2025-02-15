@@ -4038,37 +4038,24 @@
             if (list_manage.style.display === 'block') {
                 turnOffListManagementCard();
             } else {
-                turnOffListManagementCard();
-                toggleListManagementCard();
-                list_manage.style.display = 'block';
-                const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
+                lmc_open_utility_card(list_manage);
             }
         }
         function frow_2() {
             const list_import = document.getElementById('importDiv');
-            if (list_import.style.display === 'block') {
-                turnOffListManagementCard();
-            } else {
-                turnOffListManagementCard();
-                toggleListManagementCard();
-                list_import.style.display = 'block';
-                const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
-                const row_2 = document.getElementById('lmc_row_2');
-                row_2.style.backgroundColor = list_import.style.display === 'none' ? '' : color;
-            }
+            lmc_open_utility_card(list_import);
         }
         function frow_3() {
             const list_upload = document.getElementById('upload_container');
-            if (list_upload.style.display === 'block') {
-                turnOffListManagementCard();
-            } else {
-                turnOffListManagementCard();
-                toggleListManagementCard();
-                list_upload.style.display = 'block';
-                const color = iskDarkMode() ? '#2c1f81' : '#f1f1f1';
-                const row_3 = document.getElementById('lmc_row_3');
-                row_3.style.backgroundColor = list_upload.style.display === 'none' ? '' : color;
-            }
+            lmc_open_utility_card(list_upload);
+        }
+        function lmc_open_utility_card(utility) {
+            turnOffListManagementCard();
+
+            const card = document.getElementById('lists_management_card');
+            card.style.display = 'flex';
+
+            utility.style.display = 'block';
         }
 
         function iskDarkMode() {
