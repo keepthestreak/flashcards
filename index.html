@@ -2035,6 +2035,8 @@
 
             <div id="user_translation_div" class="flashcard_text_div">
                 <input type="text" id="userTranslation" placeholder="Type the translation">
+                <button id="stt_start_button">🎙️</button>
+            <div id="stt_status" style="display: none;">Click start to begin recording</div>
             </div>
             <div id="translation_div" class="flashcard_text_div" style="visibility: hidden;">
                 <div id="showTranslation"></div>
@@ -2693,6 +2695,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log("starting ...");
             app_init();
+            // Initialize the speech recognition
+            const speech_recognition = stt_init_speech_recognition();
+            speech_recognition.stt_init();
             ls_initialize_editable_fields();
             turnOffListManagementCard();
             turn_off_word_list();
@@ -2834,9 +2839,24 @@
             document.getElementById('counter').innerText = `Streak: N/A`;
             document.getElementById('feedback').innerText = '';
         }
+        function normalizeString(str) {
+            // Convert to lowercase
+            console.log("normalizing: ", str);
+            str = str.toLowerCase();
+            // Remove spaces and punctuation using a regular expression
+            return str.replace(/[^\w]/g, ''); // Removes everything except alphanumeric characters
+        }
 
+        function compare_strings(str1, str2) {
+            // Normalize both strings
+            const normalizedStr1 = normalizeString(str1);
+            const normalizedStr2 = normalizeString(str2);
+            // Compare the normalized strings
+            return normalizedStr1 === normalizedStr2;
+        }
         function checkTranslation() {
             const userInput = document.getElementById('userTranslation').value.trim();
+            console.log("user input: ", userInput);
 
             const feedback = document.getElementById('feedback');
 
@@ -2853,7 +2873,7 @@
             if (AppState.invert) {
                 translation = AppState.currentWord.word;
             }
-            if (userInput === translation) {
+            if (compare_strings(userInput, translation)) {
                 wordStats[AppState.currentWord.word].correct++;
                 app_increaseStreak(AppState.currentWord.word);
                 updateFeedback(true, 'Correct!');
@@ -3126,7 +3146,7 @@
             const checkButton = document.getElementById('checkButton');
             const translationDiv = document.getElementById('translation_div');
             const showTranslation = document.getElementById('showTranslation');
-            const userTranslation = document.getElementById('userTranslation');
+            const userTranslation = document.getElementById('user_translation_div');
             const counter = document.getElementById('counterDiv');
 
             userTranslation.style.visibility = 'hidden';
@@ -3152,7 +3172,7 @@
         function handleNextEvent() {
             const checkButton = document.getElementById('checkButton');
             const translationDiv = document.getElementById('translation_div');
-            const userTranslation = document.getElementById('userTranslation');
+            const userTranslation = document.getElementById('user_translation_div');
             const counter = document.getElementById('counterDiv');
 
             userTranslation.style.visibility = 'hidden';
@@ -3193,7 +3213,7 @@
         document.getElementById('switch_mode_button').addEventListener('click', () => {
             const mode_button = document.getElementById('switch_mode_button');
             const checkButton = document.getElementById('checkButton');
-            const userTranslation = document.getElementById('userTranslation');
+            const userTranslation = document.getElementById('user_translation_div');
             const translationDiv = document.getElementById('translation_div');
             const counter = document.getElementById('counterDiv');
 
@@ -4385,6 +4405,118 @@
 
                 ls_update_progress(completed_words, total_words);
             }
+        }
+
+        /* stt_: speech to text */
+        function stt_init_speech_recognition() {
+            const speech_config = {
+                recording_timeout_ms: 5000,
+                button_start_text: '🎙️',
+                button_stop_text: 'Stop Recording',
+                status_initial: 'Click start to begin recording',
+                status_listening: 'Listening...',
+                status_not_supported: 'Speech recognition is not supported in this browser.'
+            };
+
+            function stt_get_elements() {
+                return {
+                    start_button: document.getElementById('stt_start_button'),
+                    status: document.getElementById('stt_status'),
+                    result: document.getElementById('userTranslation'),
+                };
+            }
+
+            function stt_create_recognition() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                return recognition;
+            }
+
+            function stt_handle_recording_timeout(recognition, elements, recording_state) {
+                setTimeout(() => {
+                    if (recording_state.is_recording) {
+                        stt_stop_recording(recognition, elements, recording_state);
+                    }
+                }, speech_config.recording_timeout_ms);
+            }
+
+            function stt_start_recording(recognition, elements, recording_state) {
+                recognition.start();
+                elements.start_button.textContent = speech_config.button_stop_text;
+                elements.status.textContent = speech_config.status_listening;
+                recording_state.is_recording = true;
+                stt_handle_recording_timeout(recognition, elements, recording_state);
+            }
+
+            function stt_stop_recording(recognition, elements, recording_state) {
+                recognition.stop();
+                elements.start_button.textContent = speech_config.button_start_text;
+                elements.status.textContent = speech_config.status_initial;
+                recording_state.is_recording = false;
+            }
+
+            function stt_removePeriodFromEnd(text) {
+                // Check if the last character is a period
+                if (text.endsWith('.')) {
+                    // Remove the last character (the period)
+                    return text.slice(0, -1);
+                }
+                // If there's no period at the end, return the original text
+                return text;
+            }
+            function stt_update_result(elements, final_transcript, interim_transcript) {
+                elements.result.value = stt_removePeriodFromEnd(final_transcript.trim());
+            }
+
+            function stt_init() {
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    const elements = stt_get_elements();
+                    elements.status.textContent = speech_config.status_not_supported;
+                    elements.start_button.disabled = true;
+                    return;
+                }
+
+                const elements = stt_get_elements();
+                const recognition = stt_create_recognition();
+                const recording_state = {
+                    is_recording: false
+                };
+
+                elements.start_button.addEventListener('click', () => {
+                    recognition.lang = app_get_target_lang();
+                    if (!recording_state.is_recording) {
+                        stt_start_recording(recognition, elements, recording_state);
+                    } else {
+                        stt_stop_recording(recognition, elements, recording_state);
+                    }
+                });
+
+                recognition.onresult = (event) => {
+                    let final_transcript = '';
+                    let interim_transcript = '';
+
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            final_transcript += transcript;
+                        } else {
+                            interim_transcript += transcript;
+                        }
+                    }
+
+                    stt_update_result(elements, final_transcript, interim_transcript);
+                };
+
+                recognition.onerror = (event) => {
+                    elements.status.textContent = 'Error occurred: ' + event.error;
+                    elements.start_button.textContent = speech_config.button_start_text;
+                    recording_state.is_recording = false;
+                };
+            }
+
+            return { stt_init };
         }
 
     </script>
