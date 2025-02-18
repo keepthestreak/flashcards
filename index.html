@@ -2036,7 +2036,7 @@
             <div id="user_translation_div" class="flashcard_text_div">
                 <input type="text" id="userTranslation" placeholder="Type the translation">
                 <button id="stt_start_button">🎙️</button>
-            <div id="stt_status" style="display: none;">Click start to begin recording</div>
+                <div id="stt_status" style="display: none;">Click start to begin recording</div>
             </div>
             <div id="translation_div" class="flashcard_text_div" style="visibility: hidden;">
                 <div id="showTranslation"></div>
@@ -3202,7 +3202,12 @@
         }
         document.getElementById('checkButton').addEventListener('click', () => {
             checkTranslation();
-            document.getElementById('userTranslation').focus();
+            if (AppState.voice) {
+                document.getElementById('stt_start_button').focus();
+            } else {
+                document.getElementById('userTranslation').focus();
+            }
+            AppState.voice = false;
         });
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -4448,6 +4453,7 @@
                 elements.status.textContent = speech_config.status_listening;
                 recording_state.is_recording = true;
                 stt_handle_recording_timeout(recognition, elements, recording_state);
+                AppState.voice = true;
             }
 
             function stt_stop_recording(recognition, elements, recording_state) {
