@@ -2692,12 +2692,13 @@
             document.getElementById('userTranslation').focus();
         }
 
+        let start_recording;
         document.addEventListener('DOMContentLoaded', () => {
             console.log("starting ...");
             app_init();
             // Initialize the speech recognition
             const speech_recognition = stt_init_speech_recognition();
-            speech_recognition.stt_init();
+            start_recording = speech_recognition.stt_init();
             ls_initialize_editable_fields();
             turnOffListManagementCard();
             turn_off_word_list();
@@ -2873,7 +2874,8 @@
             if (AppState.invert) {
                 translation = AppState.currentWord.word;
             }
-            if (compare_strings(userInput, translation)) {
+            if (compare_strings(userInput, translation) ||
+                compare_strings("next", userInput)) {
                 wordStats[AppState.currentWord.word].correct++;
                 app_increaseStreak(AppState.currentWord.word);
                 updateFeedback(true, 'Correct!');
@@ -3197,10 +3199,9 @@
         function isCheckMode(text) {
             return (checkButton.innerText.includes('Check'));
         }
+        document.getElementById('checkButton').addEventListener('click', handleCheckEvent);
+
         function handleCheckEvent() {
-            // Add functionality for "Check" event here
-        }
-        document.getElementById('checkButton').addEventListener('click', () => {
             checkTranslation();
             if (AppState.voice) {
                 document.getElementById('stt_start_button').focus();
@@ -3208,7 +3209,7 @@
                 document.getElementById('userTranslation').focus();
             }
             AppState.voice = false;
-        });
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const checkButton = document.getElementById('checkButton');
@@ -3225,6 +3226,7 @@
             if (isCheckMode(checkButton.innerText)) {
                 checkButton.removeEventListener('click', handleCheckEvent); // Remove previous listener
                 handleShowEvent();
+                play_list = play_list_presentation;
             } else {
                 checkButton.innerText = 'Check'; // Change text to 'Check'
                 checkButton.removeEventListener('click', handleShowEvent); // Remove previous listener
@@ -3234,6 +3236,7 @@
                 userTranslation.style.visibility = 'visible';
                 counter.style.visibility = 'visible';
                 userTranslation.focus();
+                play_list = play_list_participation;
             }
         });
 
@@ -4154,8 +4157,22 @@
             }
         });
 
+        function play_list_participation() {
+            const check_button = document.getElementById('checkButton');
+            const translation = document.getElementById('showTranslation');
+            if (check_button.innerText === 'Check') {
+                handleCheckEvent();
+                start_recording.stt_start_recording_bind();
+                if (!AppState.invert) {
+                    play_text(AppState.currentWord.word, app_get_source_lang());
+                } else {
+                    play_text(AppState.currentWord.translation, app_get_target_lang());
+                }
+            }
+        }
 
-        function play_list() {
+        let play_list = play_list_presentation;
+        function play_list_presentation() {
             const check_button = document.getElementById('checkButton');
             const translation = document.getElementById('showTranslation');
             if (check_button.innerText === 'Next') {
@@ -4184,7 +4201,7 @@
 
                 if (button.innerHTML === "▶") { // Play icon
                     button.innerHTML = "⏸"; // Pause icon
-                    intervalId = setInterval(play_list, 3000);
+                    intervalId = setInterval(play_list, 6000);
                     const checkButton = document.getElementById('checkButton');
                     checkButton.style.display = 'none';
                     isMenuOpen = true;
@@ -4490,14 +4507,15 @@
                     is_recording: false
                 };
 
-                elements.start_button.addEventListener('click', () => {
+                elements.start_button.addEventListener('click', stt_start_recording_bind);
+                function stt_start_recording_bind() {
                     recognition.lang = app_get_target_lang();
                     if (!recording_state.is_recording) {
                         stt_start_recording(recognition, elements, recording_state);
                     } else {
                         stt_stop_recording(recognition, elements, recording_state);
                     }
-                });
+                }
 
                 recognition.onresult = (event) => {
                     let final_transcript = '';
@@ -4520,9 +4538,11 @@
                     elements.start_button.textContent = speech_config.button_start_text;
                     recording_state.is_recording = false;
                 };
+
+                return { stt_start_recording_bind };
             }
 
-            return { stt_init };
+            return { stt_init }
         }
 
     </script>
