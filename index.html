@@ -157,6 +157,7 @@
             transform: scale(1.05);
         }
 
+        /* Library style for all cards in the app */
         .flashcard {
             display: flex;
             flex-direction: column;
@@ -169,6 +170,13 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             overflow: hidden;
+        }
+
+        .dark-mode .flashcard {
+            position: relative;
+            background: #444;
+            border: 1px solid #555;
+            color: #e0e0e0;
         }
 
         .flashcard:fullscreen {
@@ -464,41 +472,6 @@
             cursor: pointer;
         }
 
-        .dropdown {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            position: absolute;
-            display: inline-block;
-            top: 0;
-            /* Align to the top */
-            right: 0;
-            /* Align to the right */
-        }
-
-        .dropdown-content {
-            display: none;
-            position: relative;
-            /* Hidden by default */
-            background-color: #f9f9f9;
-            min-width: 200px;
-            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            padding: 10px;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-            /* Show the dropdown on hover */
-        }
-
-        .dropdown-content label,
-        .dropdown-content input,
-        .dropdown-content button {
-            display: block;
-            margin: 5px 0;
-        }
-
         #dark-mode-button {
             position: absolute;
             /* Position relative to the nearest positioned ancestor */
@@ -600,13 +573,6 @@
             background-color: #555;
         }
 
-        .dark-mode .flashcard {
-            position: relative;
-            background: #444;
-            border: 1px solid #555;
-            color: #e0e0e0;
-        }
-
         .dark-mode #word {
             color: #f0f0f0;
         }
@@ -644,11 +610,6 @@
 
         .dark-mode .button-export {
             background-color: #2980b9;
-        }
-
-        .dark-mode .dropdown-content {
-            background-color: #333;
-            color: #e0e0e0;
         }
 
         .dark-mode .tooltip .tooltiptext {
@@ -2051,82 +2012,472 @@
             <button id="checkButton" style="width: 100px; align-self: center;">Check</button>
             <div id="counterDiv" style="padding-top: 10px;">
                 <span id="counter">Streak: 0 /</span>
-                <span id="streakButton" class="streakButton">⚙️</span>
-                <div class="dropdown">
+            </div>
+            <span id="streakButton" class="streakButton"
+                style="margin: 5px; position: absolute; bottom: 0; left: 0;">⚙️</span>
+        </div>
 
-                    <div id="settingsDropdown" class="dropdown-content">
-                        <label for="maxStreakLength">Max Streak Length:</label>
-                        <input type="number" id="maxStreakLength" min="1" />
-                        <button id="setMaxStreakButton">Set</button>
+
+
+        <div id="settings_card" class="flashcard" style="display: none;">
+            <style>
+                /* Settings card specific styles */
+                #settings_card {
+                    font-family: Arial, sans-serif;
+                    width: 100%;
+                    /* Fit the width of the container */
+                    box-sizing: border-box;
+                    /* Include padding in width calculation */
+                }
+
+                #settings_card.dark-mode h2,
+                #settings_card.dark-mode h3,
+                #settings_card.dark-mode label {
+                    color: #e0e0e0;
+                    /* Light gray text */
+                }
+
+                #settings_card.dark-mode input[type="number"],
+                #settings_card.dark-mode input[type="range"] {
+                    color: #e0e0e0;
+                    /* Light gray text */
+                }
+
+                #settings_card.dark-mode .settings_slider {
+                    background-color: #555;
+                    /* Darker slider background */
+                }
+
+                #settings_card.dark-mode .settings_slider:before {
+                    background-color: #e0e0e0;
+                    /* Light gray slider handle */
+                }
+
+                #settings_card h2 {
+                    margin-top: 0;
+                    color: #333;
+                    font-size: 1.5rem;
+                    text-align: center;
+                    /* Center the heading */
+                }
+
+                #settings_card .settings_section {
+                    margin-bottom: 20px;
+                }
+
+                #settings_card .settings_section h3 {
+                    margin: 0 0 10px 0;
+                    color: #555;
+                    font-size: 1.1rem;
+                }
+
+                /* Grid layout for wider screens */
+                @media (min-width: 768px) {
+                    #settings_card .settings_section .settings_items {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        /* Two columns */
+                        gap: 20px;
+                        /* Space between items */
+                    }
+
+                    #settings_card .settings_section .settings_item {
+                        margin-bottom: 0;
+                        /* Remove margin between grid items */
+                    }
+                }
+
+                #settings_card .settings_item {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 15px;
+                }
+
+                #settings_card label {
+                    color: #555;
+                    margin-right: 10px;
+                    font-size: 0.9rem;
+                }
+
+                #settings_card input[type="number"] {
+                    width: 60px;
+                    padding: 6px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    font-size: 0.9rem;
+                }
+
+                #settings_card input[type="range"] {
+                    border: none;
+                    background-color: none;
+                    width: 50%;
+                    margin-right: 10px;
+                    box-shadow: none !important;
+                }
+
+                #settings_card .settings_switch {
+                    position: relative;
+                    display: inline-block;
+                    width: 40px;
+                    height: 20px;
+                }
+
+                #settings_card .settings_switch input {
+                    opacity: 0;
+                    width: 0;
+                    height: 0;
+                }
+
+                #settings_card .settings_slider {
+                    position: absolute;
+                    cursor: pointer;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: #ccc;
+                    transition: 0.4s;
+                    border-radius: 20px;
+                }
+
+                #settings_card .settings_slider:before {
+                    position: absolute;
+                    content: "";
+                    height: 16px;
+                    width: 16px;
+                    left: 2px;
+                    bottom: 2px;
+                    background-color: white;
+                    transition: 0.4s;
+                    border-radius: 50%;
+                }
+
+                #settings_card input:checked+.settings_slider {
+                    background-color: #2196f3;
+                }
+
+                #settings_card input:checked+.settings_slider:before {
+                    transform: translateX(20px);
+                }
+
+                #settings_card .settings_play_length_option {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                #settings_card .settings_play_length_option label {
+                    white-space: nowrap;
+                }
+
+                #settings_card .settings_mute_emoji {
+                    font-size: 1.2rem;
+                    cursor: pointer;
+                }
+            </style>
+
+            <h2>Settings</h2>
+            <!-- Display Section -->
+            <div class="settings_section">
+                <h3>Display</h3>
+                <div class="settings_items">
+                    <div class="settings_item">
+                        <label>Transliteration</label>
+                        <label class="settings_switch">
+                            <input type="checkbox" id="settings_transliteration_toggle">
+                            <span class="settings_slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings_item">
+                        <label>Example</label>
+                        <label class="settings_switch">
+                            <input type="checkbox" id="settings_example_toggle">
+                            <span class="settings_slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Auto Play Section -->
+            <div class="settings_section">
+                <h3>Auto Play</h3>
+                <div class="settings_items">
+                    <div class="settings_item">
+                        <label>Word Part (s):</label>
+                        <input type="range" id="settings_word_part_length" min="1" max="60">
+                        <span id="settings_word_part_value"></span>
+                        <span class="settings_mute_emoji" id="settings_word_part_mute_emoji">🔊</span>
+                    </div>
+                    <div class="settings_item">
+                        <label>Example Part (s):</label>
+                        <input type="range" id="settings_example_part_length" min="1" max="60">
+                        <span id="settings_example_part_value"></span>
+                        <span class="settings_mute_emoji" id="settings_example_part_mute_emoji">🔇</span>
+                    </div>
+                    <div class="settings_item">
+                        <label>Translation Part (s):</label>
+                        <input type="range" id="settings_translation_part_length" min="1" max="60">
+                        <span id="settings_translation_part_value"></span>
+                        <span class="settings_mute_emoji" id="settings_translation_part_mute_emoji">🔊</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Streak Length Section -->
+            <div class="settings_section">
+                <h3>Streak Length</h3>
+                <div class="settings_items">
+                    <div class="settings_item">
+                        <label>Streak Goal</label>
+                        <input type="number" id="settings_streak_length">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invert Section -->
+            <div class="settings_section">
+                <h3>Invert</h3>
+                <div class="settings_items">
+                    <div class="settings_item">
+                        <label>Invert Order</label>
+                        <label class="settings_switch">
+                            <input type="checkbox" id="settings_invert_order_toggle">
+                            <span class="settings_slider"></span>
+                        </label>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="controls">
-            <button id="toggleListButton">Show/Hide All Words</button>
-            <div class="feedback-message" id="feedbackMessage1"></div>
+
+        <script>
+            // AppSettings module (data layer)
+            const AppSettings = (() => {
+                const settings_map = new Map();
+
+                // Default values
+                const default_settings = {
+                    transliteration: true,
+                    example: true,
+                    word_part_length: 10,
+                    example_part_length: 20,
+                    translation_part_length: 30,
+                    streak_length: 10,
+                    invert_order: false,
+                    word_part_mute: false,
+                    example_part_mute: true,
+                    translation_part_mute: false,
+                };
+
+                // Initialize settings from localStorage or defaults
+                const init = () => {
+                    for (const [key, value] of Object.entries(default_settings)) {
+                        const stored_value = localStorage.getItem(key);
+                        settings_map.set(key, stored_value !== null ? JSON.parse(stored_value) : value);
+                    }
+                };
+
+                // Get a setting value
+                const get = (key) => settings_map.get(key);
+
+                // Set a setting value and save to localStorage
+                const set = (key, value) => {
+                    settings_map.set(key, value);
+                    localStorage.setItem(key, JSON.stringify(value));
+                };
+
+                return { init, get, set };
+            })();
+
+            // Controller module (mediates between AppSettings and UI)
+            const SettingsController = (() => {
+                // Initialize UI with values from AppSettings
+                const init_ui = () => {
+                    document.getElementById('settings_transliteration_toggle').checked = AppSettings.get('transliteration');
+                    document.getElementById('settings_example_toggle').checked = AppSettings.get('example');
+                    document.getElementById('settings_word_part_length').value = AppSettings.get('word_part_length');
+                    document.getElementById('settings_word_part_value').textContent = AppSettings.get('word_part_length');
+                    document.getElementById('settings_example_part_length').value = AppSettings.get('example_part_length');
+                    document.getElementById('settings_example_part_value').textContent = AppSettings.get('example_part_length');
+                    document.getElementById('settings_translation_part_length').value = AppSettings.get('translation_part_length');
+                    document.getElementById('settings_translation_part_value').textContent = AppSettings.get('translation_part_length');
+                    document.getElementById('settings_streak_length').value = AppSettings.get('streak_length');
+                    document.getElementById('settings_invert_order_toggle').checked = AppSettings.get('invert_order');
+                    document.getElementById('settings_word_part_mute_emoji').textContent = AppSettings.get('word_part_mute') ? "🔇" : "🔊";
+                    document.getElementById('settings_example_part_mute_emoji').textContent = AppSettings.get('example_part_mute') ? "🔇" : "🔊";
+                    document.getElementById('settings_translation_part_mute_emoji').textContent = AppSettings.get('translation_part_mute') ? "🔇" : "🔊";
+                };
+
+                // Event listeners for UI changes
+                const setup_event_listeners = () => {
+                    document.getElementById('settings_transliteration_toggle').addEventListener('change', (e) => {
+                        AppSettings.set('transliteration', e.target.checked);
+                        document.getElementById('transliteration').style.visibility = e.target.checked ? 'visible' : 'hidden';
+                    });
+
+                    document.getElementById('settings_example_toggle').addEventListener('change', (e) => {
+                        AppSettings.set('example', e.target.checked);
+                        document.getElementById('exampleDiv').style.visibility = e.target.checked ? 'visible' : 'hidden';
+                    });
+
+                    document.getElementById('settings_word_part_length').addEventListener('input', (e) => {
+                        AppSettings.set('word_part_length', parseInt(e.target.value));
+                        document.getElementById('settings_word_part_value').textContent = e.target.value;
+                    });
+
+                    document.getElementById('settings_example_part_length').addEventListener('input', (e) => {
+                        AppSettings.set('example_part_length', parseInt(e.target.value));
+                        document.getElementById('settings_example_part_value').textContent = e.target.value;
+                    });
+
+                    document.getElementById('settings_translation_part_length').addEventListener('input', (e) => {
+                        AppSettings.set('translation_part_length', parseInt(e.target.value));
+                        document.getElementById('settings_translation_part_value').textContent = e.target.value;
+                    });
+
+                    document.getElementById('settings_streak_length').addEventListener('input', (e) => {
+                        AppSettings.set('streak_length', parseInt(e.target.value));
+                    });
+
+                    document.getElementById('settings_invert_order_toggle').addEventListener('change', (e) => {
+                        invertFlashcard();
+                    });
+
+                    document.getElementById('settings_word_part_mute_emoji').addEventListener('click', () => {
+                        const is_muted = AppSettings.get('word_part_mute');
+                        AppSettings.set('word_part_mute', !is_muted);
+                        document.getElementById('settings_word_part_mute_emoji').textContent = !is_muted ? "🔇" : "🔊";
+                    });
+
+                    document.getElementById('settings_example_part_mute_emoji').addEventListener('click', () => {
+                        const is_muted = AppSettings.get('example_part_mute');
+                        AppSettings.set('example_part_mute', !is_muted);
+                        document.getElementById('settings_example_part_mute_emoji').textContent = !is_muted ? "🔇" : "🔊";
+                    });
+
+                    document.getElementById('settings_translation_part_mute_emoji').addEventListener('click', () => {
+                        const is_muted = AppSettings.get('translation_part_mute');
+                        AppSettings.set('translation_part_mute', !is_muted);
+                        document.getElementById('settings_translation_part_mute_emoji').textContent = !is_muted ? "🔇" : "🔊";
+                    });
+                };
+
+                return { init_ui, setup_event_listeners };
+            })();
+
+            // Initialize AppSettings and UI
+            AppSettings.init();
+            SettingsController.init_ui();
+            SettingsController.setup_event_listeners();
+
+            // Dark mode toggle function
+            function toggle_dark_mode() {
+                const settings_card = document.getElementById('settings_card');
+                settings_card.classList.toggle('dark-mode');
+            }
+        </script>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="controls">
+        <button id="toggleListButton">Show/Hide All Words</button>
+        <div class="feedback-message" id="feedbackMessage1"></div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="wordList">
+        <div class="ls_summary_container">
+            <div class="ls_summary_field">
+                <span class="ls_summary_label" id="ls_name_label">List Name</span>
+                <div id="ls_list_name" class="ls_summary_value ls_editable" contenteditable="true">N/A
+                </div>
+            </div>
+
+            <div class="ls_summary_field">
+                <span class="ls_summary_label">Total Words</span>
+                <div id="ls_total_words" class="ls_summary_value ls_readonly">-</div>
+            </div>
+
+            <div class="ls_summary_field">
+                <span class="ls_summary_label">Completed</span>
+                <div id="ls_completed_words" class="ls_summary_value ls_readonly">-</div>
+            </div>
+
+            <div class="ls_summary_field">
+                <span class="ls_summary_label">Source Language</span>
+                <div id="ls_source_lang" class="ls_summary_value ls_editable" contenteditable="true">N/A</div>
+            </div>
+
+            <div class="ls_summary_field">
+                <span class="ls_summary_label">Target Language</span>
+                <div id="ls_target_lang" class="ls_summary_value ls_editable" contenteditable="true">N/A</div>
+            </div>
+
+            <div class="ls_progress_container">
+                <div class="ls_progress_bar" style="width: 45%"></div>
+            </div>
         </div>
+        <div class="lmc1-button-container">
+            <button class="lmc1-button lmc1-button-delete-words" onclick="deleteSelectedWords()">Delete Selected
+                Words</button>
 
-
-
-
-
-
-        <div id="wordList">
-            <div class="ls_summary_container">
-                <div class="ls_summary_field">
-                    <span class="ls_summary_label" id="ls_name_label">List Name</span>
-                    <div id="ls_list_name" class="ls_summary_value ls_editable" contenteditable="true">N/A
-                    </div>
-                </div>
-
-                <div class="ls_summary_field">
-                    <span class="ls_summary_label">Total Words</span>
-                    <div id="ls_total_words" class="ls_summary_value ls_readonly">-</div>
-                </div>
-
-                <div class="ls_summary_field">
-                    <span class="ls_summary_label">Completed</span>
-                    <div id="ls_completed_words" class="ls_summary_value ls_readonly">-</div>
-                </div>
-
-                <div class="ls_summary_field">
-                    <span class="ls_summary_label">Source Language</span>
-                    <div id="ls_source_lang" class="ls_summary_value ls_editable" contenteditable="true">N/A</div>
-                </div>
-
-                <div class="ls_summary_field">
-                    <span class="ls_summary_label">Target Language</span>
-                    <div id="ls_target_lang" class="ls_summary_value ls_editable" contenteditable="true">N/A</div>
-                </div>
-
-                <div class="ls_progress_container">
-                    <div class="ls_progress_bar" style="width: 45%"></div>
-                </div>
-            </div>
-            <div class="lmc1-button-container">
-                <button class="lmc1-button lmc1-button-delete-words" onclick="deleteSelectedWords()">Delete Selected
-                    Words</button>
-
-                <button class="lmc1-button lmc1-button-pause-words" onclick="pauseSelectedWords()">Pause Selected
-                    Words</button>
-                <button class="lmc1-button lmc1-button-reset-words" onclick="resetSelectedWords()">Reset Selected
-                    Words</button>
-                <button class="lmc1-button lmc1-button-export" onclick="exportToJson()">Download List</button>
-            </div>
-            <div id='table_container' style="overflow-x: scroll;">
-            </div>
-            <div class="awf_add_word_container">
-                <input type="text" id="awf_new_word" placeholder="New Word">
-                <input type="text" id="awf_new_translation" placeholder="Translation">
-                <input type="text" id="awf_example" placeholder="Example (Optional)">
-                <input type="text" id="awf_transliteration" placeholder="Transliteration (Optional)">
-                <div class="awf_button_container">
-                    <button onclick="awf_add_word_to_list()">Add Word</button>
-                </div>
+            <button class="lmc1-button lmc1-button-pause-words" onclick="pauseSelectedWords()">Pause Selected
+                Words</button>
+            <button class="lmc1-button lmc1-button-reset-words" onclick="resetSelectedWords()">Reset Selected
+                Words</button>
+            <button class="lmc1-button lmc1-button-export" onclick="exportToJson()">Download List</button>
+        </div>
+        <div id='table_container' style="overflow-x: scroll;">
+        </div>
+        <div class="awf_add_word_container">
+            <input type="text" id="awf_new_word" placeholder="New Word">
+            <input type="text" id="awf_new_translation" placeholder="Translation">
+            <input type="text" id="awf_example" placeholder="Example (Optional)">
+            <input type="text" id="awf_transliteration" placeholder="Transliteration (Optional)">
+            <div class="awf_button_container">
+                <button onclick="awf_add_word_to_list()">Add Word</button>
             </div>
         </div>
+    </div>
     </div>
 
     <div class="footer">
@@ -2692,10 +3043,17 @@
             document.getElementById('userTranslation').focus();
         }
 
+        function flashcard_init() {
+            document.getElementById('exampleDiv').style.visibility =
+                AppSettings.get("example") ? 'visible' : 'hidden';
+            document.getElementById('transliteration_div').style.visibility =
+                AppSettings.get("transliteration") ? 'visible' : 'hidden';
+        }
         let start_recording;
         document.addEventListener('DOMContentLoaded', () => {
             console.log("starting ...");
             app_init();
+            flashcard_init();
             // Initialize the speech recognition
             const speech_recognition = stt_init_speech_recognition();
             start_recording = speech_recognition.stt_init();
@@ -2799,7 +3157,7 @@
                 document.getElementById('feedback').innerText = '';
 
                 const exampleDiv = document.getElementById('exampleDiv');
-                if (AppState.currentWord.example) {
+                if (AppSettings.get("example") && AppState.currentWord.example) {
                     exampleDiv.style.visibility = 'visible';
                     const example = document.getElementById('example');
                     example.innerText = AppState.currentWord.example;
@@ -2807,7 +3165,7 @@
                     exampleDiv.style.visibility = 'hidden';
                 }
                 const tranliterationDiv = document.getElementById('transliteration_div');
-                if (AppState.currentWord.transliteration) {
+                if (AppSettings.get("transliteration") && AppState.currentWord.transliteration) {
                     tranliterationDiv.style.visibility = 'visible';
                     const transliteration = document.getElementById('transliteration');
                     transliteration.innerText = AppState.currentWord.transliteration;
@@ -3565,28 +3923,13 @@
             refreshTable();
         }
 
-        // Event listener for the set max streak length button
-        document.getElementById('setMaxStreakButton').addEventListener('click', () => {
-            const newLength = parseInt(document.getElementById('maxStreakLength').value);
-            if (!isNaN(newLength) && newLength > 0) {
-                setMaxStreakLength(newLength); // Update and save to local storage
-            } else {
-                alert("Please enter a valid positive number.");
-            }
-            const dropdown = document.getElementById('settingsDropdown');
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        });
-
-
         // Show/hide dropdown on settings button click
         document.getElementById('streakButton').addEventListener('click', (event) => {
-            const dropdown = document.getElementById('settingsDropdown');
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             event.stopPropagation(); // Prevent the click event from bubbling up
+            const settings = document.getElementById('settings_card');
+            console.log("settings: ", settings.display);
+            settings.style.display = settings.style.display === 'block' ? 'none' : 'block';
         });
-
-        // Set the initial value of the max streak length input field
-        document.getElementById('maxStreakLength').value = AppState.MAX_STREAK_LENGTH;
 
         const flashcard = document.getElementById('flashcard');
         let touchStartX = 0;
@@ -3617,6 +3960,9 @@
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
+            const settings_card = document.getElementById('settings_card');
+            settings_card.classList.toggle('dark-mode');
+
         }
         document.getElementById('theme-toggle').addEventListener('click', toggleDarkMode);
 
