@@ -1890,6 +1890,49 @@
         .dark-mode .ls_progress_bar {
             background-color: #66bb6a;
         }
+
+
+        /* Base styles for the button */
+        .flashcard_icon_button {
+            font-size: 1em;
+            /* Default font size */
+            cursor: pointer;
+            /* Pointer cursor */
+            background-color: transparent;
+            /* No background color */
+            padding: 3px;
+            margin: 0.4em;
+            /* Padding for better appearance */
+            border: none;
+            /* No border */
+            border-radius: 12px;
+            /* Rounded corners */
+            display: inline-block;
+            /* Ensure it behaves like a button */
+            transition: all 0.3s ease;
+            /* Smooth transition for hover effects */
+            text-align: center;
+            /* Center the icon/text */
+            width: 1.2em;
+            /* Fixed width */
+            height: 1.2em;
+            /* Fixed height */
+            line-height: 1.2em;
+            /* Vertically center the icon */
+            color: inherit;
+            /* Inherit text color from parent */
+        }
+
+        /* Hover effect */
+        .flashcard_icon_button:hover {
+            transform: scale(1.8);
+        }
+
+        /* Dark mode support */
+        .dark-mode .flashcard_icon_button {
+            color: #fff;
+            /* Light text color for dark mode */
+        }
     </style>
 </head>
 
@@ -2010,6 +2053,9 @@
             </div>
             <p id="feedback"></p>
             <button id="checkButton" style="width: 100px; align-self: center;">Check</button>
+            <div>
+                <div id="play_mode_button1" class="flashcard_icon_button">▶</div>
+            </div>
             <div id="counterDiv" style="padding-top: 10px;">
                 <span id="counter">Streak: 0 /</span>
             </div>
@@ -4540,29 +4586,35 @@
                 }, 500);
             }
         }
+
         let intervalId; // Variable to store the interval ID
+        function play_button_clicked() {
+            const button = document.getElementById("play_mode_button");
+            const button1 = document.getElementById("play_mode_button1");
+            if (button.innerHTML === "▶") { // Play icon
+                button.innerHTML = "⏸"; // Pause icon
+                button1.innerHTML = "⏸"; // Pause icon
+                intervalId = setInterval(play_list, 6000);
+                const checkButton = document.getElementById('checkButton');
+                checkButton.style.display = 'none';
+                isMenuOpen = true;
+                flashcard.requestFullscreen();
+                flashcard.addEventListener('click', listener_flashcardClickWhilePlaying);
+            } else {
+                button.innerHTML = "▶"; // Play icon
+                button1.innerHTML = "▶"; // Play icon
+                const checkButton = document.getElementById('checkButton');
+                checkButton.style.display = 'block';
+                flashcard.removeEventListener('click', listener_flashcardClickWhilePlaying);
+                // Stop the interval when paused
+                clearInterval(intervalId);
+            }
+        }
         document.addEventListener('DOMContentLoaded', () => {
             const button = document.getElementById("play_mode_button");
-            button.addEventListener('click', () => {
-                const button = document.getElementById("play_mode_button");
-
-                if (button.innerHTML === "▶") { // Play icon
-                    button.innerHTML = "⏸"; // Pause icon
-                    intervalId = setInterval(play_list, 6000);
-                    const checkButton = document.getElementById('checkButton');
-                    checkButton.style.display = 'none';
-                    isMenuOpen = true;
-                    flashcard.requestFullscreen();
-                    flashcard.addEventListener('click', listener_flashcardClickWhilePlaying);
-                } else {
-                    button.innerHTML = "▶"; // Play icon
-                    const checkButton = document.getElementById('checkButton');
-                    checkButton.style.display = 'block';
-                    flashcard.removeEventListener('click', listener_flashcardClickWhilePlaying);
-                    // Stop the interval when paused
-                    clearInterval(intervalId);
-                }
-            });
+            button.addEventListener('click', play_button_clicked);
+            const button1 = document.getElementById("play_mode_button1");
+            button1.addEventListener('click', play_button_clicked);
         });
         let isMenuOpen = false;
         function listener_flashcardClickWhilePlaying(e) {
